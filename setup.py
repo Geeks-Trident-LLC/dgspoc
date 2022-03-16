@@ -20,9 +20,12 @@ setup(
         'python-dateutil',
         'textfsm',
         'pyyaml',
+        'pytest',
+        'robotframework',
         'dlapp',
         'regexapp',
-        'templateapp'
+        'templateapp',
+        'gtunrealdevice'
     ],
     url='https://github.com/Geeks-Trident-LLC/dgspoc',
     packages=find_packages(
@@ -34,13 +37,15 @@ setup(
     test_suite='tests',
     entry_points={
         'console_scripts': [
-            'dgspoc = dgspoc.main:execute',
+            'dgs = dgspoc.main:execute',
         ]
     },
     classifiers=[
-        'Development Status :: 1 - Planning',
+        # development status
         'Development Status :: 2 - Pre-Alpha',
+        # natural language
         'Natural Language :: English',
+        # intended audience
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
         'Intended Audience :: End Users/Desktop',
@@ -48,16 +53,20 @@ setup(
         'Intended Audience :: Manufacturing',
         'Intended Audience :: Other Audience',
         'Intended Audience :: Science/Research',
+        # operating system
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
         'Operating System :: Microsoft :: Windows',
+        # license
         'License :: OSI Approved :: BSD License',
+        # programming language
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        # topic
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Code Generators',
         'Topic :: Software Development :: Quality Assurance',

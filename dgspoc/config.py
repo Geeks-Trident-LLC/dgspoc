@@ -7,6 +7,10 @@ import templateapp
 import regexapp
 import dlapp
 
+import pytest
+import robot
+# import gtunrealdevice
+
 __version__ = '0.0.1'
 version = __version__
 
@@ -19,7 +23,7 @@ __all__ = [
 class Data:
 
     # main app
-    main_app_text = 'DGSPOC {}'.format(version)
+    main_app_text = 'dgs v{}'.format(version)
 
     # company
     company = 'Geeks Trident LLC'
@@ -75,7 +79,19 @@ class Data:
             templateapp=dict(
                 package='templateapp v{}'.format(templateapp.version),
                 url='https://pypi.org/project/templateapp/'
-            )
+            ),
+            pytest=dict(
+                package='pytest v{}'.format(pytest.__version__),
+                url='https://pypi.org/project/pytest/'
+            ),
+            robotframework=dict(
+                package='robotframework v{}'.format(robot.__version__),
+                url='https://pypi.org/project/robotframework/'
+            ),
+            # gkunrealdevice=dict(
+            #     package='gtunrealdevice v{}'.format(gtunrealdevice.version),
+            #     url='https://pypi.org/project/gtunrealdevice/'
+            # )
         )
         obj.update(templateapp.config.Data.get_dependency())
         obj.update(regexapp.config.Data.get_dependency())
