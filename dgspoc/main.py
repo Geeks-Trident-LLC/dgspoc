@@ -33,8 +33,8 @@ class Cli:
     """describe-get-system proof of concept console CLI application."""
     prog = 'dgs'
     prog_fn = 'describe-get-system'
-    commands = ['build', 'check', 'config', 'create', 'execute',
-                'info', 'reset', 'upload', 'version']
+    commands = ['build', 'check', 'config', 'create', 'dependency',
+                'execute', 'info', 'reset', 'upload', 'version']
 
     def __init__(self):
         parser = argparse.ArgumentParser(
@@ -44,19 +44,14 @@ class Cli:
         )
 
         parser.add_argument(
-            '-d', '--dependency', action='store_true',
-            help='show {} dependent package(s)'.format(self.prog_fn)
-        )
-
-        parser.add_argument(
             '-v', '--version', action='version',
             version='%(prog)s v{}'.format(version)
         )
 
         parser.add_argument(
             'command', type=str,
-            help='command must be either version, info, create, reset, check,'
-                 'upload, config, or build'
+            help='command must be either build, check, config, create, '
+                 'dependency, execute, info, reset, upload, or version'
         )
         parser.add_argument(
             'operands', nargs='*', type=str,
@@ -85,7 +80,6 @@ class Cli:
 
     def run(self):
         """Take CLI arguments, parse it, and process."""
-        show_dependency(self.options)
         self.validate_command()
 
 
