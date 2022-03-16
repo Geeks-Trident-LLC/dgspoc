@@ -3,6 +3,8 @@
 import sys
 import argparse
 
+from dgspoc import version
+
 
 def show_dependency(options):
     if options.dependency:
@@ -28,40 +30,63 @@ def show_dependency(options):
 
 
 class Cli:
-    """templateapp console CLI application."""
+    """describe-get-system proof of concept console CLI application."""
+    prog = 'dgs'
+    prog_fn = 'describe-get-system'
+    commands = ['build', 'check', 'config', 'create', 'execute',
+                'info', 'reset', 'upload', 'version']
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            prog='dgspoc',
-            usage='%(prog)s [options]',
-            description='%(prog)s module',
+            prog=self.prog,
+            usage='%(prog)s [options] command operands',
+            description='{} proof of concept'.format(self.prog_fn),
         )
 
         parser.add_argument(
             '-d', '--dependency', action='store_true',
-            help='Show TemplateApp dependent package(s).'
+            help='show {} dependent package(s)'.format(self.prog_fn)
+        )
+
+        parser.add_argument(
+            '-v', '--version', action='version',
+            version='%(prog)s v{}'.format(version)
+        )
+
+        parser.add_argument(
+            'command', type=str,
+            help='command must be either version, info, create, reset, check,'
+                 'upload, config, or build'
+        )
+        parser.add_argument(
+            'operands', nargs='*', type=str,
+            help='operands can be mockdevice, template, unittest, '
+                 'pytest, robotframework, script, or data such command-line, '
+                 'config-lines, or filename'
         )
 
         self.parser = parser
         self.options = self.parser.parse_args()
         self.kwargs = dict()
 
-    def validate_cli_flags(self):
-        """Validate argparse `options`.
+    def validate_command(self):
+        """Validate argparse `options.command`.
 
         Returns
         -------
         bool: show ``self.parser.print_help()`` and call ``sys.exit(1)`` if
-        user_data flag is empty, otherwise, return True
+        command is not version, info, create, reset, check, upload, config,
+        or build, otherwise, return True
         """
-
+        if self.options.command.lower() in self.commands:
+            return True
         self.parser.print_help()
         sys.exit(1)
 
     def run(self):
         """Take CLI arguments, parse it, and process."""
         show_dependency(self.options)
-        self.validate_cli_flags()
+        self.validate_command()
 
 
 def execute():
