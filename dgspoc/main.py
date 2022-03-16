@@ -29,6 +29,12 @@ def show_dependency(options):
         sys.exit(0)
 
 
+def show_version(options):
+    if options.command == 'version':
+        print('{} {}'.format(Cli.prog, version))
+        sys.exit(0)
+
+
 class Cli:
     """describe-get-system proof of concept console CLI application."""
     prog = 'dgs'
@@ -73,7 +79,9 @@ class Cli:
         command is not version, info, create, reset, check, upload, config,
         or build, otherwise, return True
         """
-        if self.options.command.lower() in self.commands:
+        self.options.command = self.options.command.lower()
+
+        if self.options.command in self.commands:
             return True
         self.parser.print_help()
         sys.exit(1)
@@ -81,6 +89,7 @@ class Cli:
     def run(self):
         """Take CLI arguments, parse it, and process."""
         self.validate_command()
+        show_version(self.options)
 
 
 def execute():
