@@ -73,6 +73,17 @@ class Data:
     ).strip()
 
     @classmethod
+    def get_app_info(cls):
+        from platform import uname as u, python_version as v
+        lst = [cls.main_app_text,
+               'Project : {}'.format(cls.repo_url),
+               'License : {}'.format(cls.license_name),
+               'Platform: {0.system} {0.release} - Python {1}'.format(u(), v()),
+               ]
+        app_info = '\n'.join(lst)
+        return app_info
+
+    @classmethod
     def get_dependency(cls):
         obj = dict(
             templateapp=dict(

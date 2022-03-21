@@ -4,17 +4,14 @@ import sys
 import argparse
 
 from dgspoc import version
+from dgspoc.config import Data
+from dgspoc.utils import Printer
 
 
 def show_dependency(options):
-    if options.dependency:
-        from platform import uname, python_version
-        from dgspoc.config import Data
+    if options.command == 'dependency':
         lst = [
-            Data.main_app_text,
-            'Platform: {0.system} {0.release} - Python {1}'.format(
-                uname(), python_version()
-            ),
+            Data.get_app_info(),
             '--------------------',
             'Dependencies:'
         ]
@@ -23,9 +20,7 @@ def show_dependency(options):
             lst.append('  + Package: {0[package]}'.format(pkg))
             lst.append('             {0[url]}'.format(pkg))
 
-        width = max(len(item) for item in lst)
-        txt = '\n'.join('| {1:{0}} |'.format(width, item) for item in lst)
-        print('+-{0}-+\n{1}\n+-{0}-+'.format(width * '-', txt))
+        Printer.print(lst)
         sys.exit(0)
 
 
@@ -76,7 +71,7 @@ class Cli:
         Returns
         -------
         bool: show ``self.parser.print_help()`` and call ``sys.exit(1)`` if
-        command is not neither build, check, dependency, info, run,
+        command is neither build, check, dependency, info, run,
         test, nor version, otherwise, return True
         """
         self.options.command = self.options.command.lower()
@@ -90,6 +85,7 @@ class Cli:
         """Take CLI arguments, parse it, and process."""
         self.validate_command()
         show_version(self.options)
+        show_dependency(self.options)
 
 
 def execute():
