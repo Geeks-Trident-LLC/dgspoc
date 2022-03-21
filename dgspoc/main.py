@@ -39,8 +39,8 @@ class Cli:
     """describe-get-system proof of concept console CLI application."""
     prog = 'dgs'
     prog_fn = 'describe-get-system'
-    commands = ['build', 'check', 'config', 'create', 'dependency',
-                'execute', 'info', 'reset', 'upload', 'version']
+    commands = ['build', 'check', 'dependency',
+                'info', 'run', 'test', 'version']
 
     def __init__(self):
         parser = argparse.ArgumentParser(
@@ -56,12 +56,12 @@ class Cli:
 
         parser.add_argument(
             'command', type=str,
-            help='command must be either build, check, config, create, '
-                 'dependency, execute, info, reset, upload, or version'
+            help='command must be either build, check,'
+                 'dependency, info, run, test, or version'
         )
         parser.add_argument(
             'operands', nargs='*', type=str,
-            help='operands can be mockdevice, template, unittest, '
+            help='operands can be template, unittest, '
                  'pytest, robotframework, script, or data such command-line, '
                  'config-lines, or filename'
         )
@@ -76,8 +76,8 @@ class Cli:
         Returns
         -------
         bool: show ``self.parser.print_help()`` and call ``sys.exit(1)`` if
-        command is not version, info, create, reset, check, upload, config,
-        or build, otherwise, return True
+        command is not neither build, check, dependency, info, run,
+        test, nor version, otherwise, return True
         """
         self.options.command = self.options.command.lower()
 
