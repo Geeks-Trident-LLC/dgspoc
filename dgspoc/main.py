@@ -11,6 +11,24 @@ from dgspoc.utils import Printer
 def show_dependency(options):
     if options.command == 'dependency':
         lst = [
+            'Describe-Get-System Proof of Concept',
+            Data.get_app_info(),
+            '--------------------',
+            'Dependencies:'
+        ]
+
+        for pkg in Data.get_dependency().values():
+            lst.append('  + Package: {0[package]}'.format(pkg))
+            lst.append('             {0[url]}'.format(pkg))
+
+        Printer.print(lst)
+        sys.exit(0)
+
+
+def show_info(options):
+    if options.command == 'info':
+        lst = [
+            'Describe-Get-System Proof of Concept',
             Data.get_app_info(),
             '--------------------',
             'Dependencies:'
@@ -86,6 +104,7 @@ class Cli:
         self.validate_command()
         show_version(self.options)
         show_dependency(self.options)
+        show_info(self.options)
 
 
 def execute():
