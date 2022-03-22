@@ -115,17 +115,19 @@ class File:
         return file_obj.exists()
 
     @classmethod
-    def create(cls, filename):
+    def create(cls, filename, showed=True):
         """Check file existence
 
         Parameters
         ----------
         filename (str): a file name
+        showed (bool): showing the message of creating file
 
         Returns
         -------
         bool: True if created, otherwise False
         """
+        filename = cls.get_path(str(filename).strip())
         if cls.is_exist(filename):
             cls.message = 'File is already existed.'
             return True
@@ -136,7 +138,7 @@ class File:
                 file_obj.parent.mkdir(parents=True, exist_ok=True)
             file_obj.touch()
             fmt = '{:%Y-%m-%d %H:%M:%S.%f} - {} file is created.'
-            print(fmt.format(datetime.now(), filename))
+            showed and print(fmt.format(datetime.now(), filename))
             cls.message = '{} file is created.'.format(filename)
             return True
         except Exception as ex:
@@ -158,7 +160,8 @@ class File:
         """
         lst = [Path.home()] if is_home else []
         lst.extend(list(args))
-        return str(Path(PurePath(*lst)).expanduser())
+        file_path = str(Path(PurePath(*lst)).expanduser().absolute())
+        return file_path
 
     @classmethod
     def save(cls, filename, data):
@@ -178,8 +181,12 @@ class File:
                 content = '\n'.join(str(item) for item in data)
             else:
                 content = str(data)
+
+            filename = cls.get_path(filename)
+            if not cls.create(filename):
+                return False
+
             file_obj = Path(filename)
-            filename = str(file_obj.expanduser())
             file_obj.touch()
             file_obj.write_text(content)
             cls.message = 'Successfully saved data to "{}" file'.format(filename)

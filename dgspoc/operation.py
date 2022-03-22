@@ -6,6 +6,8 @@ import re
 from dgspoc.utils import File
 from dgspoc.utils import Printer
 
+from dgspoc.storage import TemplateStorage
+
 from dgspoc.config import Data
 
 from dgspoc.usage import validate_usage
@@ -35,26 +37,47 @@ def do_build_template(options):
                 user_data=user_data, author=options.author, email=options.email,
                 company=options.company
             )
-            print(factory.template)
 
-            # tmpl_id = options.templateid.strip()
-            # if tmpl_id:
-            #     pattern = r'(?i)^overwrite_'
-            #     is_overwritten = bool(re.match(pattern, tmpl_id))
-            #     tmpl_id = re.sub(pattern, '', tmpl_id)
-            #     with open(Data.template_storage_filename) as stream:
-            #
-            #     if is_overwritten:
-            #         pass
-            #     else:
-            #         pass
+            template_id = options.templateid.strip()
+            filename = options.filename.strip()
 
-            if options.filename:
-                is_saved = File.save(options.filename, factory.template)
-                print('\n{}\n'.format(Printer.get(File.message)))
-                if not is_saved:
-                    sys.exit(1)
-            sys.exit(0)
+            fmt1 = '+++ Successfully uploaded generated template to "{}" template ID.'
+            fmt2 = '+++ Successfully saved generated template to {}'
+            fmt3 = 'CANT save generated template to existing {} file.  Use replaced flag accordingly.'
+
+            if template_id or filename:
+                is_ok = True
+                lst = []
+                if template_id:
+                    is_uploaded = TemplateStorage.upload(
+                        template_id, factory.template, replaced=options.replaced
+                    )
+                    is_ok &= is_uploaded
+                    msg = fmt1.format(template_id) if is_uploaded else TemplateStorage.message
+                    lst.append(msg)
+                if filename:
+                    filename = File.get_path(filename)
+                    if File.is_exist(filename) and not options.replaced:
+                        msg = fmt3.format(filename)
+                        is_ok &= False
+                    else:
+                        is_saved = File.save(options.filename, factory.template)
+                        is_ok &= is_saved
+                        msg = fmt2.format(filename) if is_saved else File.message
+
+                    lst and lst.append('=' * 20)
+                    lst.append(msg)
+
+                lst and Printer.print(lst)
+                sys.exit(int(is_ok))
+            else:
+                print(factory.template)
+                sys.exit(0)
+
         except Exception as ex:
             print('*** {}: {}'.format(type(ex).__name__, ex))
             sys.exit(1)
+
+    elif command == 'build':
+        if feature != 'script':
+            validate_usage(command, operands)

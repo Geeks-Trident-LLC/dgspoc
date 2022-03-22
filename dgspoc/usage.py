@@ -3,14 +3,54 @@
 import sys
 
 from dgspoc.utils import Printer
+from dgspoc.utils import Misc
+
+
+class BuildUsage:
+    usage = '\n'.join([
+        'build command has two features: template or script',
+        'common optional arguments:',
+        "  -a AUTHOR, --author AUTHOR               author's name",
+        "  -e EMAIL, --email EMAIL                  author's email",
+        "  -c COMPANY, --company COMPANY            author's company",
+        "  -f FILENAME, --filename FILENAME         file name",
+        '',
+        'build template syntax:',
+        '----------------------',
+        'optional arguments for template:',
+        "  -i TEMPLATEID, --template-id TEMPLATEID  template ID",
+        "  --replaced                               overwrite template ID",
+        '----------------------',
+        'dgs build template "<single_line_snippet>" [options]',
+        'dgs build template <snippet_filename> [options]',
+        'dgs build template example {1, 2, 3, 4, or 5}',
+        '',
+        'build script syntax:',
+        '----------------------',
+        'optional arguments for script:',
+        "  -w FRAMEWORK, --framework FRAMEWORK      test framework",
+        "  -r RESOURCE --resource RESOURCE          test resource",
+        '----------------------',
+        'dgs build script <snippet_filename> [options]',
+        'dgs build script example {1, 2, or 3}'
+    ])
 
 
 class BuildTemplateUsage:
     usage = '\n'.join([
         'build template syntax:',
         '----------------------',
-        'dgs build template "<single_line_snippet>"',
-        'dgs build template <snippet_filename>',
+        'optional arguments for template:',
+        "  -a AUTHOR, --author AUTHOR               author's name",
+        "  -e EMAIL, --email EMAIL                  author's email",
+        "  -c COMPANY, --company COMPANY            author's company",
+        "  -f FILENAME, --filename FILENAME         file name",
+        "  -i TEMPLATEID, --template-id TEMPLATEID  template ID",
+        "  --replaced                               replace template ID",
+        '----------------------',
+        'dgs build template "<single_line_snippet>" [options]',
+        'dgs build template <snippet_filename> [options]',
+        'dgs build template example {1, 2, 3, 4, or 5}',
     ])
 
 
@@ -26,12 +66,13 @@ class InfoUsage:
 
 
 class Usage:
+    build = BuildUsage
     build_template = BuildTemplateUsage
     info = InfoUsage
 
 
 def validate_usage(name, operands):
-    result = ''.join(operands) if isinstance(operands, list) else str(operands)
+    result = ''.join(operands) if Misc.is_list_instance(operands) else str(operands)
     if result.strip().lower() == 'usage':
         show_usage(name)
 

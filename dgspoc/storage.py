@@ -17,7 +17,7 @@ class TemplateStorage:
         if cls.check(template_id):
             with open(cls.filename) as stream:
                 node = yaml.safe_load(stream)
-                template = '\n'.join(node.get(template_id).splitlines()[1:])
+                template = node.get(template_id)
                 return template
         else:
             return ''
@@ -30,7 +30,7 @@ class TemplateStorage:
                 if content:
                     node = yaml.safe_load(content)
                     if Misc.is_dict_instance(node):
-                        return node.get(template_id, False)
+                        return template_id in node
                     else:
                         fmt = '{} file has invalid template storage format.'
                         raise TemplateStorageError(fmt.format(cls.filename))
@@ -48,20 +48,21 @@ class TemplateStorage:
         try:
             if not File.is_exist(cls.filename):
                 File.create(cls.filename)
-
             if not cls.check(template_id):
                 node = {template_id: '\n{}'.format(template)}
-                File.save(yaml.safe_dump(node))
+                File.save(cls.filename, yaml.safe_dump(node))
                 return True
             else:
                 if replaced:
                     content = open(cls.filename).read()
                     node = yaml.safe_load(content)
-                    node[template_id] = '\n{}'.format(template)
-                    File.save(yaml.safe_dump(node))
+                    node[template_id] = template
+                    File.save(cls.filename, yaml.safe_dump(node))
                     return True
                 else:
-                    fmt = 'CANT upload template because of duplicate "{}" template ID.  Use replaced flag.'
+                    fmt = ('CANT upload generated template because of '
+                           'duplicate "{}" template ID.  Use replaced '
+                           'flag accordingly.')
                     cls.message = fmt.format(template_id)
                     return False
         except Exception as ex:
