@@ -81,17 +81,17 @@ class Cli:
 
         parser.add_argument(
             '-a', '--author', type=str, default='',
-            help="Author's name"
+            help="author's name"
         ),
 
         parser.add_argument(
             '-e', '--email', type=str, default='',
-            help="Author's email"
+            help="author's email"
         ),
 
         parser.add_argument(
             '-c', '--company', type=str, default='',
-            help="Author's company"
+            help="author's company"
         ),
 
         parser.add_argument(
@@ -108,6 +108,16 @@ class Cli:
             '-t', '--test-data', type=str, dest='testdata', default='',
             help="test data"
         ),
+
+        parser.add_argument(
+            '--adaptor', type=str, default='',
+            help="connector adaptor"
+        ),
+
+        parser.add_argument(
+            '--replaced', action='store_true',
+            help='overwrite template ID'
+        )
 
         parser.add_argument(
             'command', type=str,

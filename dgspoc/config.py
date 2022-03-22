@@ -12,6 +12,7 @@ import pytest
 import robot
 
 from dgspoc.utils import File
+from dgspoc.utils import Misc
 
 __version__ = '0.0.1'
 version = __version__
@@ -119,7 +120,7 @@ class Data:
             existed = 'Yes'
             with open(fn) as stream:
                 node = yaml.safe_load(stream)
-                total = len(node) if isinstance(node, dict) else 0
+                total = len(node) if Misc.is_dict_instance(node) else 0
         else:
             existed = 'No'
             total = 0
