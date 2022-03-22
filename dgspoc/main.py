@@ -4,17 +4,19 @@ import sys
 import argparse
 
 from dgspoc import version
+from dgspoc.config import Data
+from dgspoc.utils import Printer
+from dgspoc.usage import validate_usage
+from dgspoc.usage import show_usage
+
+from dgspoc.operation import do_build_template
 
 
 def show_dependency(options):
-    if options.dependency:
-        from platform import uname, python_version
-        from dgspoc.config import Data
+    if options.command == 'dependency':
         lst = [
-            Data.main_app_text,
-            'Platform: {0.system} {0.release} - Python {1}'.format(
-                uname(), python_version()
-            ),
+            'Describe-Get-System Proof of Concept',
+            Data.get_app_info(),
             '--------------------',
             'Dependencies:'
         ]
@@ -23,15 +25,39 @@ def show_dependency(options):
             lst.append('  + Package: {0[package]}'.format(pkg))
             lst.append('             {0[url]}'.format(pkg))
 
-        width = max(len(item) for item in lst)
-        txt = '\n'.join('| {1:{0}} |'.format(width, item) for item in lst)
-        print('+-{0}-+\n{1}\n+-{0}-+'.format(width * '-', txt))
+        Printer.print(lst)
+        sys.exit(0)
+
+
+def show_info(options):
+    command, operands = options.command, options.operands
+    if command == 'info':
+        validate_usage(command, operands)
+
+        if len(operands) > 1:
+            show_usage(command)
+
+        lst = ['Describe-Get-System Proof of Concept', Data.get_app_info()]
+
+        info_type = operands[0].lower() if operands else ''
+        if info_type and info_type in ['all', 'dependency']:
+            lst.append('--------------------')
+            lst.append('Dependencies:')
+            for pkg in Data.get_dependency().values():
+                lst.append('  + Package: {0[package]}'.format(pkg))
+                lst.append('             {0[url]}'.format(pkg))
+
+        if info_type and info_type in ['all', 'template']:
+            lst.append('--------------------',)
+            lst.append(Data.get_template_storage_info())
+
+        Printer.print(lst)
         sys.exit(0)
 
 
 def show_version(options):
     if options.command == 'version':
-        print('{} {}'.format(Cli.prog, version))
+        print('{} v{}'.format(Cli.prog, version))
         sys.exit(0)
 
 
@@ -39,8 +65,7 @@ class Cli:
     """describe-get-system proof of concept console CLI application."""
     prog = 'dgs'
     prog_fn = 'describe-get-system'
-    commands = ['build', 'check', 'config', 'create', 'dependency',
-                'execute', 'info', 'reset', 'upload', 'version']
+    commands = ['build', 'check', 'info', 'run', 'test', 'version']
 
     def __init__(self):
         parser = argparse.ArgumentParser(
@@ -55,13 +80,43 @@ class Cli:
         )
 
         parser.add_argument(
+            '-a', '--author', type=str, default='',
+            help="Author's name"
+        ),
+
+        parser.add_argument(
+            '-e', '--email', type=str, default='',
+            help="Author's email"
+        ),
+
+        parser.add_argument(
+            '-c', '--company', type=str, default='',
+            help="Author's company"
+        ),
+
+        parser.add_argument(
+            '-f', '--filename', type=str, default='',
+            help="file name"
+        ),
+
+        parser.add_argument(
+            '-i', '--template-id', type=str, dest='templateid', default='',
+            help="template ID"
+        ),
+
+        parser.add_argument(
+            '-t', '--test-data', type=str, dest='testdata', default='',
+            help="test data"
+        ),
+
+        parser.add_argument(
             'command', type=str,
-            help='command must be either build, check, config, create, '
-                 'dependency, execute, info, reset, upload, or version'
+            help='command must be either build, check,'
+                 ' info, run, test, or version'
         )
         parser.add_argument(
             'operands', nargs='*', type=str,
-            help='operands can be mockdevice, template, unittest, '
+            help='operands can be template, unittest, '
                  'pytest, robotframework, script, or data such command-line, '
                  'config-lines, or filename'
         )
@@ -76,8 +131,8 @@ class Cli:
         Returns
         -------
         bool: show ``self.parser.print_help()`` and call ``sys.exit(1)`` if
-        command is not version, info, create, reset, check, upload, config,
-        or build, otherwise, return True
+        command is neither build, check, info, run,
+        test, nor version, otherwise, return True
         """
         self.options.command = self.options.command.lower()
 
@@ -89,7 +144,13 @@ class Cli:
     def run(self):
         """Take CLI arguments, parse it, and process."""
         self.validate_command()
-        show_version(self.options)
+
+        options = self.options
+
+        show_version(options)
+        show_info(options)
+
+        do_build_template(options)
 
 
 def execute():

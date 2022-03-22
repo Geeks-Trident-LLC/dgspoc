@@ -2,6 +2,7 @@
 
 from os import path
 from textwrap import dedent
+import yaml
 
 import templateapp
 import regexapp
@@ -9,7 +10,8 @@ import dlapp
 
 import pytest
 import robot
-# import gtunrealdevice
+
+from dgspoc.utils import File
 
 __version__ = '0.0.1'
 version = __version__
@@ -21,6 +23,10 @@ __all__ = [
 
 
 class Data:
+
+    # app yaml files
+    app_directory = File.get_path('.geekstrident', 'dgspoc', is_home=True)
+    template_storage_filename = File.get_path(app_directory, 'template_storage.yaml')
 
     # main app
     main_app_text = 'dgs v{}'.format(version)
@@ -74,6 +80,17 @@ class Data:
     ).strip()
 
     @classmethod
+    def get_app_info(cls):
+        from platform import uname as u, python_version as v
+        lst = [cls.main_app_text,
+               'Project : {}'.format(cls.repo_url),
+               'License : {}'.format(cls.license_name),
+               'Platform: {0.system} {0.release} - Python {1}'.format(u(), v()),
+               ]
+        app_info = '\n'.join(lst)
+        return app_info
+
+    @classmethod
     def get_dependency(cls):
         obj = dict(
             templateapp=dict(
@@ -88,13 +105,28 @@ class Data:
                 package='robotframework v{}'.format(robot.__version__),
                 url='https://pypi.org/project/robotframework/'
             ),
-            # gkunrealdevice=dict(
-            #     package='gtunrealdevice v{}'.format(gtunrealdevice.version),
-            #     url='https://pypi.org/project/gtunrealdevice/'
-            # )
         )
         obj.update(templateapp.config.Data.get_dependency())
         obj.update(regexapp.config.Data.get_dependency())
         obj.update(dlapp.config.Data.get_dependency())
-        dependencies = dict(sorted(obj.items(), key=lambda x: str(x[0])))
+        dependencies = dict(sorted(obj.items(), key=lambda x: str(x[0])))   # noqa
         return dependencies
+
+    @classmethod
+    def get_template_storage_info(cls):
+        fn = cls.template_storage_filename
+        if File.is_exist(fn):
+            existed = 'Yes'
+            with open(fn) as stream:
+                node = yaml.safe_load(stream)
+                total = len(node) if isinstance(node, dict) else 0
+        else:
+            existed = 'No'
+            total = 0
+        lst = [
+            'Template Storage Info:',
+            '  - Location: {}'.format(fn),
+            '  - Existed: {}'.format(existed),
+            '  - Total Templates: {}'.format(total)
+        ]
+        return '\n'.join(lst)
