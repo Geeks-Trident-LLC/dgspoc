@@ -159,3 +159,31 @@ class File:
         lst = [Path.home()] if is_home else []
         lst.extend(list(args))
         return str(PurePath(*lst))
+
+    @classmethod
+    def save(cls, filename, data):
+        """Create a file path
+
+        Parameters
+        ----------
+        filename (str): filename
+        data (str): data.
+
+        Returns
+        -------
+        bool: True if successfully saved, otherwise, False
+        """
+        try:
+            if isinstance(data, list):
+                content = '\n'.join(str(item) for item in data)
+            else:
+                content = str(data)
+            file_obj = Path(filename)
+            filename = str(file_obj.expanduser())
+            file_obj.touch()
+            file_obj.write_text(content)
+            cls.message = 'Successfully saved data to "{}" file'.format(filename)
+            return True
+        except Exception as ex:
+            cls.message = '{}: {}'.format(type(ex).__name__, ex)
+            return False
