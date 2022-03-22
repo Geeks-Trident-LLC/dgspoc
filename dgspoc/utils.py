@@ -27,7 +27,7 @@ class Printer:
         """
         headers = str(header).splitlines()
         footers = str(footer).splitlines()
-        data = data if isinstance(data, (list, tuple)) else [data]
+        data = data if Misc.is_sequence_instance(data) else [data]
         lst = []
         result = []
 
@@ -158,7 +158,7 @@ class File:
         """
         lst = [Path.home()] if is_home else []
         lst.extend(list(args))
-        return str(PurePath(*lst))
+        return str(Path(PurePath(*lst)).expanduser())
 
     @classmethod
     def save(cls, filename, data):
@@ -174,7 +174,7 @@ class File:
         bool: True if successfully saved, otherwise, False
         """
         try:
-            if isinstance(data, list):
+            if Misc.is_list_instance(data):
                 content = '\n'.join(str(item) for item in data)
             else:
                 content = str(data)
@@ -187,3 +187,17 @@ class File:
         except Exception as ex:
             cls.message = '{}: {}'.format(type(ex).__name__, ex)
             return False
+
+
+class Misc:
+    @classmethod
+    def is_dict_instance(cls, obj):
+        return isinstance(obj, dict)
+
+    @classmethod
+    def is_list_instance(cls, obj):
+        return isinstance(obj, list)
+
+    @classmethod
+    def is_sequence_instance(cls, obj):
+        return isinstance(obj, (list, tuple, set))
