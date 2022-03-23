@@ -10,6 +10,7 @@ from dgspoc.usage import validate_usage
 from dgspoc.usage import show_usage
 
 from dgspoc.operation import do_build_template
+from dgspoc.operation import do_search_template
 
 
 def show_info(options):
@@ -18,7 +19,7 @@ def show_info(options):
         validate_usage(command, operands)
 
         if len(operands) > 1:
-            show_usage(command)
+            show_usage(command, exit_code=1)
 
         lst = ['Describe-Get-System Proof of Concept', Data.get_app_info()]
 
@@ -48,7 +49,7 @@ class Cli:
     """describe-get-system proof of concept console CLI application."""
     prog = 'dgs'
     prog_fn = 'describe-get-system'
-    commands = ['build', 'check', 'info', 'run', 'test', 'version']
+    commands = ['build', 'info', 'run', 'search', 'test', 'version']
 
     def __init__(self):
         parser = argparse.ArgumentParser(
@@ -103,9 +104,19 @@ class Cli:
         )
 
         parser.add_argument(
+            '--ignore-case', action='store_true', dest='ignore_case',
+            help='case insensitive matching'
+        )
+
+        parser.add_argument(
+            '--showed', action='store_true',
+            help='showing template'
+        )
+
+        parser.add_argument(
             'command', type=str,
-            help='command must be either build, check,'
-                 ' info, run, test, or version'
+            help='command must be either build, '
+                 'info, run, search, test, or version'
         )
         parser.add_argument(
             'operands', nargs='*', type=str,
@@ -124,7 +135,7 @@ class Cli:
         Returns
         -------
         bool: show ``self.parser.print_help()`` and call ``sys.exit(1)`` if
-        command is neither build, check, info, run,
+        command is neither build, info, run, search,
         test, nor version, otherwise, return True
         """
         self.options.command = self.options.command.lower()
@@ -144,6 +155,7 @@ class Cli:
         show_info(options)
 
         do_build_template(options)
+        do_search_template(options)
 
 
 def execute():
