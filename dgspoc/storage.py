@@ -49,7 +49,7 @@ class TemplateStorage:
             if not File.is_exist(cls.filename):
                 File.create(cls.filename)
             if not cls.check(template_id):
-                node = {template_id: '\n{}'.format(template)}
+                node = {template_id: template}
                 File.save(cls.filename, yaml.safe_dump(node))
                 return True
             else:
