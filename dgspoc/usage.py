@@ -107,7 +107,7 @@ class Usage:
 def validate_usage(name, operands):
     result = ''.join(operands) if Misc.is_list_instance(operands) else str(operands)
     if result.strip().lower() == 'usage':
-        show_usage(name)
+        show_usage(name, exit_code=0)
 
 
 def show_usage(name, *args, exit_code=None):
