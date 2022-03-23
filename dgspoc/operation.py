@@ -9,6 +9,7 @@ from dgspoc.utils import Printer
 from dgspoc.storage import TemplateStorage
 
 from dgspoc.example import TemplateExample
+from dgspoc.example import SearchTemplateExample
 
 from dgspoc.usage import validate_usage
 from dgspoc.usage import show_usage
@@ -27,7 +28,7 @@ def do_build_template(options):
         op_txt = ' '.join(operands).rstrip()
 
         if not op_txt:
-            show_usage('{}_{}'.format(command, feature))
+            show_usage('{}_{}'.format(command, feature), exit_code=1)
         elif op_txt.lower().startswith('example'):
             index = str(operands[-1]).strip()
             if op_count == 3 and re.match('[1-5]$', index):
@@ -35,7 +36,7 @@ def do_build_template(options):
                 print('\n\n{}\n'.format(result))
                 sys.exit(0)
             else:
-                show_usage('{}_{}'.format(command, feature), 'other')
+                show_usage('{}_{}'.format(command, feature), 'other', exit_code=1)
 
         if File.is_exist(op_txt):
             with open(op_txt) as stream:
@@ -89,12 +90,43 @@ def do_build_template(options):
             print('*** {}: {}'.format(type(ex).__name__, ex))
             sys.exit(1)
 
-    elif command == 'build':
+    elif command == 'build' and feature != 'template':
         if feature == 'script':
             return
-        elif feature == 'usage' or feature == '':
-            show_usage(command)
-            sys.exit(0)
         else:
-            show_usage(command)
-            sys.exit(1)
+            exit_code = 0 if feature == 'usage' else 1
+            show_usage(command, exit_code=exit_code)
+
+
+def do_search_template(options):
+    command, operands = options.command, list(options.operands)
+    op_count = len(operands)
+    feature = str(operands[0]).lower().strip() if op_count > 0 else ''
+    if command == 'search' and feature == 'template':
+        operands = operands[1:]
+        validate_usage('{}_{}'.format(command, feature), operands)
+
+        op_txt = ' '.join(operands).rstrip()
+
+        if not op_txt:
+            show_usage('{}_{}'.format(command, feature), exit_code=1)
+        elif op_txt.lower().startswith('example'):
+            index = str(operands[-1]).strip()
+            if op_count == 3 and re.match('[1-3]$', index):
+                result = SearchTemplateExample.get(index)
+                print('\n\n{}\n'.format(result))
+                sys.exit(0)
+            else:
+                show_usage('{}_{}'.format(command, feature), 'other', exit_code=1)
+
+        tmpl_id_pattern = operands[0]
+        is_found = TemplateStorage.search(tmpl_id_pattern,
+                                          ignore_case=options.ignore_case,
+                                          showed=options.showed)
+        print(TemplateStorage.message)
+        exit_code = 0 if is_found else 1
+        sys.exit(exit_code)
+
+    elif command == 'search' and feature != 'template':
+        exit_code = 0 if feature == 'usage' else 1
+        show_usage('{}_template'.format(command), exit_code=exit_code)
