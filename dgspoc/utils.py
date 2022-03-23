@@ -1,9 +1,10 @@
 """Module containing the logic for utilities."""
 
-import re
 from pathlib import Path
 from pathlib import PurePath
 from datetime import datetime
+
+from textwrap import wrap
 
 
 class Printer:
@@ -14,7 +15,8 @@ class Printer:
     Printer.print(data, header='', footer='', failure_msg='', print_func=None) -> None
     """
     @classmethod
-    def get(cls, data, header='', footer='', width=80, failure_msg=''):
+    def get(cls, data, header='', footer='',
+            width=80, width_limit=20, failure_msg=''):
         """Decorate data by organizing header, data, footer, and failure_msg
 
         Parameters
@@ -23,6 +25,7 @@ class Printer:
         header (str): a header text.  Default is empty.
         footer (str): a footer text.  Default is empty.
         width (int): width of displayed text.  Default is 80.
+        width_limit (int): minimum width of displayed text.  Default is 20.
         failure_msg (str): a failure message.  Default is empty.
         """
         headers = str(header).splitlines()
@@ -31,28 +34,19 @@ class Printer:
         lst = []
         result = []
 
-        left_limit = 20
-        left_bound, right_bound = left_limit - 4, width - 4
-
-        if width > left_limit:
-            pat = r'(.{%s,%s}\S) +' % (left_bound, right_bound)
-        else:
-            pat = ''
+        right_bound = width - 4
 
         for item in data:
-            if pat:
+            if width >= width_limit:
                 for line in str(item).splitlines():
-                    line = line.rstrip()
-                    if len(line) > right_bound:
-                        line = re.sub(pat, r'\1\n', line)
-                        lst.extend(line.splitlines())
-                    else:
-                        lst.append(line)
+                    lst.extend(wrap(line, width=right_bound))
             else:
                 lst.extend(line.rstrip() for line in str(item).splitlines())
         length = max(len(str(i)) for i in lst + headers + footers)
-        if width > left_limit:
+
+        if width >= width_limit:
             length = right_bound if right_bound > length else length
+
         result.append('+-{}-+'.format('-' * length))
         if header:
             for item in headers:
@@ -75,8 +69,8 @@ class Printer:
         return txt
 
     @classmethod
-    def print(cls, data, header='', footer='', width=80, failure_msg='',
-              print_func=None):
+    def print(cls, data, header='', footer='',
+              width=80, width_limit=20, failure_msg='', print_func=None):
         """Decorate data by organizing header, data, footer, and failure_msg
 
         Parameters
@@ -85,12 +79,14 @@ class Printer:
         header (str): a header text.  Default is empty.
         footer (str): a footer text.  Default is empty.
         width (int): width of displayed text.  Default is 80.
+        width_limit (int): minimum width of displayed text.  Default is 20.
         failure_msg (str): a failure message.  Default is empty.
         print_func (function): a print function.  Default is None.
         """
 
         txt = Printer.get(data, header=header, footer=footer,
-                          failure_msg=failure_msg, width=width)
+                          failure_msg=failure_msg, width=width,
+                          width_limit=width_limit)
 
         print_func = print_func if callable(print_func) else print
         print_func(txt)
