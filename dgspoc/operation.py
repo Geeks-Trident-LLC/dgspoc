@@ -8,7 +8,7 @@ from dgspoc.utils import Printer
 
 from dgspoc.storage import TemplateStorage
 
-from dgspoc.example import TemplateExample
+from dgspoc.example import BuildTemplateExample
 from dgspoc.example import SearchTemplateExample
 
 from dgspoc.usage import validate_usage
@@ -32,7 +32,7 @@ def do_build_template(options):
         elif op_txt.lower().startswith('example'):
             index = str(operands[-1]).strip()
             if op_count == 3 and re.match('[1-5]$', index):
-                result = TemplateExample.get(index)
+                result = BuildTemplateExample.get(index)
                 print('\n\n{}\n'.format(result))
                 sys.exit(0)
             else:
