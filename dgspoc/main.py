@@ -95,12 +95,12 @@ class Cli:
         ),
 
         parser.add_argument(
-            '-f', '--filename', type=str, default='',
-            help="file name"
+            '-s', '--save', type=str, dest='filename', default='',
+            help="saving to file"
         ),
 
         parser.add_argument(
-            '-i', '--template-id', type=str, dest='templateid', default='',
+            '-i', '--template-id', type=str, dest='tmplid', default='',
             help="template ID"
         ),
 
@@ -116,7 +116,7 @@ class Cli:
 
         parser.add_argument(
             '--replaced', action='store_true',
-            help='overwrite template ID'
+            help='overwrite template ID/file'
         )
 
         parser.add_argument(

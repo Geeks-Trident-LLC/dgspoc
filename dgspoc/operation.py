@@ -8,7 +8,7 @@ from dgspoc.utils import Printer
 
 from dgspoc.storage import TemplateStorage
 
-from dgspoc.config import Data
+from dgspoc.example import TemplateExample
 
 from dgspoc.usage import validate_usage
 from dgspoc.usage import show_usage
@@ -24,7 +24,18 @@ def do_build_template(options):
         operands = operands[1:]
         validate_usage('{}_{}'.format(command, feature), operands)
 
-        op_txt = ' '.join(operands)
+        op_txt = ' '.join(operands).rstrip()
+
+        if not op_txt:
+            show_usage('{}_{}'.format(command, feature))
+        elif op_txt.lower().startswith('example'):
+            index = str(operands[-1]).strip()
+            if op_count == 3 and re.match('[1-5]$', index):
+                result = TemplateExample.get(index)
+                print('\n\n{}\n'.format(result))
+                sys.exit(0)
+            else:
+                show_usage('{}_{}'.format(command, feature), 'other')
 
         if File.is_exist(op_txt):
             with open(op_txt) as stream:
@@ -38,7 +49,7 @@ def do_build_template(options):
                 company=options.company
             )
 
-            template_id = options.templateid.strip()
+            template_id = options.tmplid.strip()
             filename = options.filename.strip()
 
             fmt1 = '+++ Successfully uploaded generated template to "{}" template ID.'
@@ -79,5 +90,11 @@ def do_build_template(options):
             sys.exit(1)
 
     elif command == 'build':
-        if feature != 'script':
-            validate_usage(command, operands)
+        if feature == 'script':
+            return
+        elif feature == 'usage' or feature == '':
+            show_usage(command)
+            sys.exit(0)
+        else:
+            show_usage(command)
+            sys.exit(1)

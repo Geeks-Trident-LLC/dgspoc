@@ -208,3 +208,19 @@ class Misc:
     @classmethod
     def is_sequence_instance(cls, obj):
         return isinstance(obj, (list, tuple, set))
+
+    @classmethod
+    def is_integer(cls, obj):
+        return isinstance(obj, int)
+
+    @classmethod
+    def is_boolean(cls, obj):
+        return isinstance(obj, bool)
+
+    @classmethod
+    def is_float(cls, obj):
+        return isinstance(obj, float)
+
+    @classmethod
+    def is_string(cls, obj):
+        return isinstance(obj, str)

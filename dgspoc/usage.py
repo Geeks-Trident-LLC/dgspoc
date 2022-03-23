@@ -13,13 +13,13 @@ class BuildUsage:
         "  -a AUTHOR, --author AUTHOR               author's name",
         "  -e EMAIL, --email EMAIL                  author's email",
         "  -c COMPANY, --company COMPANY            author's company",
-        "  -f FILENAME, --filename FILENAME         file name",
+        "  -s FILENAME, --save FILENAME             save to file",
+        "  --replaced                               overwrite template ID/file",
         '',
         'build template syntax:',
         '----------------------',
         'optional arguments for template:',
-        "  -i TEMPLATEID, --template-id TEMPLATEID  template ID",
-        "  --replaced                               overwrite template ID",
+        "  -i TMPLID, --template-id TMPLID          template ID",
         '----------------------',
         'dgs build template "<single_line_snippet>" [options]',
         'dgs build template <snippet_filename> [options]',
@@ -44,13 +44,23 @@ class BuildTemplateUsage:
         "  -a AUTHOR, --author AUTHOR               author's name",
         "  -e EMAIL, --email EMAIL                  author's email",
         "  -c COMPANY, --company COMPANY            author's company",
-        "  -f FILENAME, --filename FILENAME         file name",
-        "  -i TEMPLATEID, --template-id TEMPLATEID  template ID",
-        "  --replaced                               replace template ID",
+        "  -s FILENAME, --save FILENAME             save to file",
+        "  -i TMPLID, --template-id TPLTEID         template ID",
+        "  --replaced                               overwrite template ID/file",
         '----------------------',
         'dgs build template "<single_line_snippet>" [options]',
         'dgs build template <snippet_filename> [options]',
         'dgs build template example {1, 2, 3, 4, or 5}',
+    ])
+
+    other_usage = '\n'.join([
+        'build template example syntax:',
+        '----------------------',
+        'dgs build template example 1',
+        'dgs build template example 2',
+        'dgs build template example 3',
+        'dgs build template example 4',
+        'dgs build template example 5',
     ])
 
 
