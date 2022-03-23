@@ -12,23 +12,6 @@ from dgspoc.usage import show_usage
 from dgspoc.operation import do_build_template
 
 
-def show_dependency(options):
-    if options.command == 'dependency':
-        lst = [
-            'Describe-Get-System Proof of Concept',
-            Data.get_app_info(),
-            '--------------------',
-            'Dependencies:'
-        ]
-
-        for pkg in Data.get_dependency().values():
-            lst.append('  + Package: {0[package]}'.format(pkg))
-            lst.append('             {0[url]}'.format(pkg))
-
-        Printer.print(lst)
-        sys.exit(0)
-
-
 def show_info(options):
     command, operands = options.command, options.operands
     if command == 'info':
