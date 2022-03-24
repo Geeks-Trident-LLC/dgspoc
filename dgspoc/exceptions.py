@@ -7,3 +7,7 @@ class DGSError(Exception):
 
 class TemplateStorageError(DGSError):
     """Use to capture error for TemplateStorage."""
+
+
+class AdaptorAuthenticationError(DGSError):
+    """Use to capture error for adaptor connection"""

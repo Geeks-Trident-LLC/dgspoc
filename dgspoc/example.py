@@ -21,9 +21,13 @@ class Example:
         return example_text
 
 
-class TemplateExample(Example):
+class BuildTemplateExample(Example):
     name = 'build_template'
 
 
 class SearchTemplateExample(Example):
     name = 'search_template'
+
+
+class TestTemplateExample(Example):
+    name = 'test_template'
