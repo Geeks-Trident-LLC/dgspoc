@@ -136,9 +136,13 @@ class Cli:
                  'config-lines, or filename'
         )
 
-        self.parser = parser
-        self.options = self.parser.parse_args()
         self.kwargs = dict()
+        self.parser = parser
+        try:
+            self.options = self.parser.parse_args()
+        except SystemExit as ex:     # noqa
+            self.parser.print_help()
+            sys.exit(1)
 
     def validate_command(self):
         """Validate argparse `options.command`.
