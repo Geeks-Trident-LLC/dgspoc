@@ -11,6 +11,7 @@ from dgspoc.usage import show_usage
 
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
+from dgspoc.operation import do_test_template
 
 
 def show_info(options):
@@ -64,38 +65,43 @@ class Cli:
         )
 
         parser.add_argument(
-            '-a', '--author', type=str, default='',
+            '--author', type=str, default='',
             help="author's name"
         ),
 
         parser.add_argument(
-            '-e', '--email', type=str, default='',
+            '--email', type=str, default='',
             help="author's email"
         ),
 
         parser.add_argument(
-            '-c', '--company', type=str, default='',
+            '--company', type=str, default='',
             help="author's company"
         ),
 
         parser.add_argument(
-            '-s', '--save', type=str, dest='filename', default='',
+            '--save', type=str, dest='filename', default='',
             help="saving to file"
         ),
 
         parser.add_argument(
-            '-i', '--template-id', type=str, dest='tmplid', default='',
+            '--template-id', type=str, dest='tmplid', default='',
             help="template ID"
         ),
 
         parser.add_argument(
-            '-t', '--test-data', type=str, dest='testdata', default='',
-            help="test data"
+            '--test-file', type=str, dest='testfile', default='',
+            help="test data file"
         ),
 
         parser.add_argument(
             '--adaptor', type=str, default='',
             help="connector adaptor"
+        ),
+
+        parser.add_argument(
+            '--execution', type=str, default='',
+            help="command line"
         ),
 
         parser.add_argument(
@@ -110,7 +116,12 @@ class Cli:
 
         parser.add_argument(
             '--showed', action='store_true',
-            help='showing template'
+            help='showing result'
+        )
+
+        parser.add_argument(
+            '--tabular', action='store_true',
+            help='showing result in tabular format'
         )
 
         parser.add_argument(
@@ -154,8 +165,10 @@ class Cli:
         show_version(options)
         show_info(options)
 
+        # operation
         do_build_template(options)
         do_search_template(options)
+        do_test_template(options)
 
 
 def execute():

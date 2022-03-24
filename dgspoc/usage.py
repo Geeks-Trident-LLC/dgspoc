@@ -10,16 +10,16 @@ class BuildUsage:
     usage = '\n'.join([
         'build command has two features: template or script',
         'common optional arguments:',
-        "  -a AUTHOR, --author AUTHOR               author's name",
-        "  -e EMAIL, --email EMAIL                  author's email",
-        "  -c COMPANY, --company COMPANY            author's company",
-        "  -s FILENAME, --save FILENAME             save to file",
+        "  --author AUTHOR                          author's name",
+        "  --email EMAIL                            author's email",
+        "  --company COMPANY                        author's company",
+        "  --save FILENAME                          save to file",
         "  --replaced                               overwrite template ID/file",
         '',
         'build template syntax:',
         '----------------------',
         'optional arguments:',
-        "  -i TMPLID, --template-id TMPLID          template ID",
+        "  --template-id TMPLID                     template ID",
         '----------------------',
         'dgs build template "<single_line_snippet>" [options]',
         'dgs build template <snippet_filename> [options]',
@@ -28,8 +28,8 @@ class BuildUsage:
         'build script syntax:',
         '----------------------',
         'optional arguments:',
-        "  -w FRAMEWORK, --framework FRAMEWORK      test framework",
-        "  -r RESOURCE --resource RESOURCE          test resource",
+        "  --framework FRAMEWORK                    test framework",
+        "  --resource RESOURCE                      test resource",
         '----------------------',
         'dgs build script <snippet_filename> [options]',
         'dgs build script example {1, 2, or 3}'
@@ -41,11 +41,11 @@ class BuildTemplateUsage:
         'build template syntax:',
         '----------------------',
         'optional arguments:',
-        "  -a AUTHOR, --author AUTHOR               author's name",
-        "  -e EMAIL, --email EMAIL                  author's email",
-        "  -c COMPANY, --company COMPANY            author's company",
-        "  -s FILENAME, --save FILENAME             save to file",
-        "  -i TMPLID, --template-id TMPLID          template ID",
+        "  --author AUTHOR                          author's name",
+        "  --email EMAIL                            author's email",
+        "  --company COMPANY                        author's company",
+        "  --save FILENAME                          save to file",
+        "  --template-id TMPLID                     template ID",
         "  --replaced                               overwrite template ID/file",
         '----------------------',
         'dgs build template "<single_line_snippet>" [options]',
@@ -82,7 +82,7 @@ class SearchTemplateUsage:
         '-----------------------',
         'optional arguments:',
         "  --ignore-case                            case insensitive matching",
-        "  --showed                                 showing template",
+        "  --showed                                 showing result",
         '----------------------',
         'dgs search template "<template-id-pattern>" [options]',
         'dgs search template example {1, 2, or 3}',
@@ -97,11 +97,36 @@ class SearchTemplateUsage:
     ])
 
 
+class TestTemplateUsage:
+    usage = '\n'.join([
+        'test template syntax:',
+        '-----------------------',
+        'optional arguments:',
+        "  --test-file TESTFILE                     test data file",
+        "  --adaptor ADAPTOR                        connection adaptor",
+        "  --execution CMDLINE                      command line",
+        "  --showed                                 showing result",
+        "  --tabular                                showing result in tabular format",
+        '----------------------',
+        'dgs test template <TemplateID or TemplateFilename> [options]',
+        'dgs test template example {1, 2, or 3}',
+    ])
+
+    other_usage = '\n'.join([
+        'test template example syntax:',
+        '----------------------',
+        'dgs test template example 1',
+        'dgs test template example 2',
+        'dgs test template example 3',
+    ])
+
+
 class Usage:
+    info = InfoUsage
     build = BuildUsage
     build_template = BuildTemplateUsage
-    info = InfoUsage
     search_template = SearchTemplateUsage
+    test_template = TestTemplateUsage
 
 
 def validate_usage(name, operands):

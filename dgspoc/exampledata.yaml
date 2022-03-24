@@ -224,3 +224,22 @@ search_template:
         ^${index} +${name} +${total} -> Record
 
       test@test_machine ~ %
+
+test_template:
+  example1:
+    header: |-
+      placeholder
+    body: |-
+      placeholder
+
+  example2:
+    header: |-
+      placeholder
+    body: |-
+      placeholder
+
+  example3:
+    header: |-
+      placeholder
+    body: |-
+      placeholder

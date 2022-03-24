@@ -27,3 +27,7 @@ class BuildTemplateExample(Example):
 
 class SearchTemplateExample(Example):
     name = 'search_template'
+
+
+class TestTemplateExample(Example):
+    name = 'test_template'
