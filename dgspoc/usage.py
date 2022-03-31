@@ -4,6 +4,7 @@ import sys
 
 from dgspoc.utils import Printer
 from dgspoc.utils import Misc
+from dgspoc.utils import ECODE
 
 
 class BuildUsage:
@@ -130,9 +131,9 @@ class Usage:
 
 
 def validate_usage(name, operands):
-    result = ''.join(operands) if Misc.is_list_instance(operands) else str(operands)
+    result = ''.join(operands) if Misc.is_list(operands) else str(operands)
     if result.strip().lower() == 'usage':
-        show_usage(name, exit_code=0)
+        show_usage(name, exit_code=ECODE.SUCCESS)
 
 
 def show_usage(name, *args, exit_code=None):
@@ -144,7 +145,7 @@ def show_usage(name, *args, exit_code=None):
     else:
         fmt = '*** ErrorUsage: "{}" has not defined or unavailable.'
         print(fmt.format(name))
-        sys.exit(1)
+        sys.exit(ECODE.BAD)
 
 
 def get_global_usage():

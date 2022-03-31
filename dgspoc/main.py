@@ -5,7 +5,10 @@ import argparse
 
 from dgspoc import version
 from dgspoc.config import Data
+
 from dgspoc.utils import Printer
+from dgspoc.utils import ECODE
+
 from dgspoc.usage import validate_usage
 from dgspoc.usage import show_usage
 
@@ -20,7 +23,7 @@ def show_info(options):
         validate_usage(command, operands)
 
         if len(operands) > 1:
-            show_usage(command, exit_code=1)
+            show_usage(command, exit_code=ECODE.BAD)
 
         lst = ['Describe-Get-System Proof of Concept', Data.get_app_info()]
 
@@ -37,13 +40,13 @@ def show_info(options):
             lst.append(Data.get_template_storage_info())
 
         Printer.print(lst)
-        sys.exit(0)
+        sys.exit(ECODE.SUCCESS)
 
 
 def show_version(options):
     if options.command == 'version':
         print('{} v{}'.format(Cli.prog, version))
-        sys.exit(0)
+        sys.exit(ECODE.SUCCESS)
 
 
 class Cli:
@@ -142,14 +145,14 @@ class Cli:
             self.options = self.parser.parse_args()
         except SystemExit as ex:     # noqa
             self.parser.print_help()
-            sys.exit(1)
+            sys.exit(ECODE.BAD)
 
     def validate_command(self):
         """Validate argparse `options.command`.
 
         Returns
         -------
-        bool: show ``self.parser.print_help()`` and call ``sys.exit(1)`` if
+        bool: show ``self.parser.print_help()`` and call ``sys.exit(ECODE.BAD)`` if
         command is neither build, info, run, search,
         test, nor version, otherwise, return True
         """
@@ -158,7 +161,7 @@ class Cli:
         if self.options.command in self.commands:
             return True
         self.parser.print_help()
-        sys.exit(1)
+        sys.exit(ECODE.BAD)
 
     def run(self):
         """Take CLI arguments, parse it, and process."""

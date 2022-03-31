@@ -120,7 +120,7 @@ class Data:
             existed = 'Yes'
             with open(fn) as stream:
                 node = yaml.safe_load(stream)
-                total = len(node) if Misc.is_dict_instance(node) else 0
+                total = len(node) if Misc.is_dict(node) else 0
         else:
             existed = 'No'
             total = 0

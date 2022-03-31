@@ -6,6 +6,7 @@ from dgspoc.config import Data
 from dgspoc.utils import File
 from dgspoc.utils import Misc
 from dgspoc.utils import Printer
+from dgspoc.utils import Text
 
 from dgspoc.exceptions import TemplateStorageError
 
@@ -36,7 +37,7 @@ class TemplateStorage:
                 content = stream.read().strip()
                 if content:
                     node = yaml.safe_load(content)
-                    if Misc.is_dict_instance(node):
+                    if Misc.is_dict(node):
                         return template_id in node
                     else:
                         raise TemplateStorageError(fmt3.format(cls.filename))
@@ -63,7 +64,7 @@ class TemplateStorage:
 
                 node = yaml.safe_load(content)
 
-                if not Misc.is_dict_instance(node):
+                if not Misc.is_dict(node):
                     raise TemplateStorageError(fmt3.format(cls.filename))
 
                 pattern = convert_wildcard_to_regex(template_id_pattern)
@@ -121,5 +122,5 @@ class TemplateStorage:
                     cls.message = fmt.format(template_id)
                     return False
         except Exception as ex:
-            cls.message = '{}: {}'.format(type(ex).__name__, ex)
+            cls.message = Text(ex)
             return False
