@@ -5,14 +5,14 @@ import re
 
 from dgspoc.utils import File
 from dgspoc.utils import Printer
+from dgspoc.utils import Text
+
+from dgspoc.utils import ECODE
 
 from dgspoc.storage import TemplateStorage
 
-from dgspoc.example import BuildTemplateExample
-from dgspoc.example import SearchTemplateExample
-from dgspoc.example import TestTemplateExample
-
 from dgspoc.usage import validate_usage
+from dgspoc.usage import validate_example_usage
 from dgspoc.usage import show_usage
 
 from dgspoc.adaptor import Adaptor
@@ -31,20 +31,14 @@ def do_build_template(options):
     feature = str(operands[0]).lower().strip() if op_count > 0 else ''
     if command == 'build' and feature == 'template':
         operands = operands[1:]
-        validate_usage('{}_{}'.format(command, feature), operands)
+        name = '{}_{}'.format(command, feature)
+        validate_usage(name, operands)
+        validate_example_usage(name, operands)
 
         op_txt = ' '.join(operands).rstrip()
 
         if not op_txt:
-            show_usage('{}_{}'.format(command, feature), exit_code=1)
-        elif op_txt.lower().startswith('example'):
-            index = str(operands[-1]).strip()
-            if op_count == 3 and re.match('[1-5]$', index):
-                result = BuildTemplateExample.get(index)
-                print('\n\n{}\n'.format(result))
-                sys.exit(0)
-            else:
-                show_usage('{}_{}'.format(command, feature), 'other', exit_code=1)
+            show_usage(name, exit_code=ECODE.BAD)
 
         if File.is_exist(op_txt):
             with open(op_txt) as stream:
@@ -89,20 +83,20 @@ def do_build_template(options):
                     lst.append(msg)
 
                 lst and Printer.print(lst)
-                sys.exit(int(is_ok))
+                sys.exit(ECODE.SUCCESS if is_ok else ECODE.BAD)
             else:
                 print(factory.template)
-                sys.exit(0)
+                sys.exit(ECODE.SUCCESS)
 
         except Exception as ex:
-            print('*** {}: {}'.format(type(ex).__name__, ex))
-            sys.exit(1)
+            print(Text(ex))
+            sys.exit(ECODE.BAD)
 
     elif command == 'build' and feature != 'template':
         if feature == 'script':
             return
         else:
-            exit_code = 0 if feature == 'usage' else 1
+            exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
             show_usage(command, exit_code=exit_code)
 
 
@@ -112,31 +106,24 @@ def do_search_template(options):
     feature = str(operands[0]).lower().strip() if op_count > 0 else ''
     if command == 'search' and feature == 'template':
         operands = operands[1:]
-        validate_usage('{}_{}'.format(command, feature), operands)
+        name = '{}_{}'.format(command, feature)
+        validate_usage(name, operands)
+        validate_example_usage(name, operands)
 
         op_txt = ' '.join(operands).rstrip()
 
         if not op_txt:
-            show_usage('{}_{}'.format(command, feature), exit_code=1)
-        elif op_txt.lower().startswith('example'):
-            index = str(operands[-1]).strip()
-            if op_count == 3 and re.match('[1-3]$', index):
-                result = SearchTemplateExample.get(index)
-                print('\n\n{}\n'.format(result))
-                sys.exit(0)
-            else:
-                show_usage('{}_{}'.format(command, feature), 'other', exit_code=1)
+            show_usage(name, exit_code=ECODE.BAD)
 
         tmpl_id_pattern = operands[0]
         is_found = TemplateStorage.search(tmpl_id_pattern,
                                           ignore_case=options.ignore_case,
                                           showed=options.showed)
         print(TemplateStorage.message)
-        exit_code = 0 if is_found else 1
-        sys.exit(exit_code)
+        sys.exit(ECODE.SUCCESS if is_found else ECODE.BAD)
 
     elif command == 'search' and feature != 'template':
-        exit_code = 0 if feature == 'usage' else 1
+        exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
         show_usage('{}_template'.format(command), exit_code=exit_code)
 
 
@@ -146,27 +133,21 @@ def do_test_template(options):
     feature = str(operands[0]).lower().strip() if op_count > 0 else ''
     if command == 'test' and feature == 'template':
         operands = operands[1:]
-        validate_usage('{}_{}'.format(command, feature), operands)
+        name = '{}_{}'.format(command, feature)
+        validate_usage(name, operands)
+        validate_example_usage(name, operands)
 
         op_txt = ' '.join(operands).rstrip()
 
         if not op_txt:
-            show_usage('{}_{}'.format(command, feature), exit_code=1)
-        elif op_txt.lower().startswith('example'):
-            index = str(operands[-1]).strip()
-            if op_count == 3 and re.match('[1-3]$', index):
-                result = TestTemplateExample.get(index)
-                print('\n\n{}\n'.format(result))
-                sys.exit(0)
-            else:
-                show_usage('{}_{}'.format(command, feature), 'other', exit_code=1)
+            show_usage(name, exit_code=ECODE.BAD)
         else:
             if options.testfile == '' and options.adaptor == '':
                 lst = ['CANT run template test WITHOUT test data.',
                        'Please use --test-file=<test-file-name> or',
                        '           --adaptor=<adaptor_name> --execution="<device cmdline>"']
                 Printer.print(lst)
-                show_usage('{}_{}'.format(command, feature), exit_code=1)
+                show_usage('{}_{}'.format(command, feature), exit_code=ECODE.BAD)
 
         test_data = ''
         if options.adaptor:
@@ -185,7 +166,7 @@ def do_test_template(options):
                         '--execution="host::<addr_or_name> testcase::<tc_name> <cmdline>"'
                     ]
                     Printer.print(lst)
-                    show_usage('{}_{}'.format(command, feature), exit_code=1)
+                    show_usage('{}_{}'.format(command, feature), exit_code=ECODE.BAD)
 
                 device = Adaptor(options.adaptor, host, testcase=testcase)
                 device.connect()
@@ -193,10 +174,9 @@ def do_test_template(options):
                 device.disconnect()
                 device.release()
             except Exception as ex:
-                fmt = 'AdaptorInquiryError - ({}: {})'
-                failure = fmt.format(type(ex).__name__, ex)
+                failure = 'AdaptorInquiryError - ({})'.format(Text(ex))
                 Printer.print(failure)
-                sys.exit(1)
+                sys.exit(ECODE.BAD)
         elif options.testfile:
             if File.is_exist(options.testfile):
                 test_data = open(options.testfile).read()
@@ -204,7 +184,7 @@ def do_test_template(options):
                 fmt = '*** "{}" test data file is NOT existed.'
                 failure = fmt.format(options.testfile)
                 Printer.print(failure)
-                sys.exit(1)
+                sys.exit(ECODE.BAD)
 
         tmpl_id = operands[0]
         fn = tmpl_id
@@ -220,7 +200,7 @@ def do_test_template(options):
                 'Please provide the valid template_id or template_file'
             ]
             Printer.print(lst)
-            sys.exit(1)
+            sys.exit(ECODE.BAD)
 
         try:
             stream = StringIO(template)
@@ -247,14 +227,14 @@ def do_test_template(options):
             Printer.print(lst)
             Tabular(rows).print() if options.tabular else pprint(rows)
 
-            sys.exit(0)
+            sys.exit(ECODE.SUCCESS)
         except Exception as ex:
-            failure = 'BAD-TEMPLATE ({}: {})'.format(type(ex).__name__, ex)
+            failure = 'BAD-TEMPLATE ({})'.format(Text(ex))
             Printer.print(failure)
-            sys.exit(1)
+            sys.exit(ECODE.BAD)
 
     elif command == 'test' and feature != 'template':
         if feature == 'execution':
             return
-        exit_code = 0 if feature == 'usage' else 1
+        exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
         show_usage('{}_template'.format(command), exit_code=exit_code)

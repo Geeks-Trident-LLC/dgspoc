@@ -39,6 +39,7 @@ setup(
     entry_points={
         'console_scripts': [
             'dgs = dgspoc.main:execute',
+            'dgspoc = dgspoc.main:execute',
         ]
     },
     classifiers=[

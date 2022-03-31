@@ -5,6 +5,8 @@ import re
 
 from dgspoc.exceptions import AdaptorAuthenticationError
 
+from dgspoc.utils import ECODE
+
 
 class Adaptor:
     def __init__(self, adaptor, *args, **kwargs):
@@ -56,11 +58,11 @@ class UnrealDeviceAdaptor:
         self.name = self.address
         self.testcase = str(testcase).strip()
         self.result = ''
-        self.exit_code = 0
+        self.exit_code = ECODE.SUCCESS
 
     @property
     def status(self):
-        return True if self.exit_code == 0 else False
+        return True if self.exit_code == ECODE.SUCCESS else False
 
     def process(self, statement):
         self.exit_code, self.result = getstatusoutput(statement.strip())
