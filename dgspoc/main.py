@@ -8,6 +8,7 @@ from dgspoc.config import Data
 
 from dgspoc.utils import Printer
 from dgspoc.utils import ECODE
+from dgspoc.utils import Text
 
 from dgspoc.usage import validate_usage
 from dgspoc.usage import show_usage
@@ -15,6 +16,39 @@ from dgspoc.usage import show_usage
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
 from dgspoc.operation import do_test_template
+
+
+class ArgumentParser(argparse.ArgumentParser):
+
+    def parse_args(self, *args, **kwargs):
+        try:
+            options = super().parse_args(*args, **kwargs)
+        except BaseException as ex:    # noqa
+            if isinstance(ex, SystemExit):
+                if ex.code == ECODE.SUCCESS:
+                    sys.exit(ECODE.SUCCESS)
+                else:
+                    self.print_help()
+                    sys.exit(ECODE.BAD)
+            else:
+                Printer.print_message('\n{}\n', Text(ex))
+                self.print_help()
+                sys.exit(ECODE.BAD)
+
+        if options.help:
+            if not options.command:
+                self.print_help()
+                sys.exit(ECODE.SUCCESS)
+            else:
+                if options.command in Cli.commands:
+                    command = options.command
+                    feature = options.operands[0].lower() if options.operands else ''
+                    name = '{}_{}'.format(command, feature) if feature else command
+                    validate_usage(name, ['usage'])
+                else:
+                    self.print_help()
+                    sys.exit(ECODE.BAD)
+        return options
 
 
 def show_info(options):
@@ -56,10 +90,17 @@ class Cli:
     commands = ['build', 'info', 'run', 'search', 'test', 'version']
 
     def __init__(self):
-        parser = argparse.ArgumentParser(
+        # parser = argparse.ArgumentParser(
+        parser = ArgumentParser(
             prog=self.prog,
             usage='%(prog)s [options] command operands',
-            description='{} proof of concept'.format(self.prog_fn),
+            description='{} Proof of Concept'.format(self.prog_fn.title()),
+            add_help=False
+        )
+
+        parser.add_argument(
+            '-h', '--help', action='store_true',
+            help='show this help message and exit'
         )
 
         parser.add_argument(
@@ -128,7 +169,7 @@ class Cli:
         )
 
         parser.add_argument(
-            'command', type=str,
+            'command', nargs='?', type=str, default='',
             help='command must be either build, '
                  'info, run, search, test, or version'
         )
@@ -141,11 +182,7 @@ class Cli:
 
         self.kwargs = dict()
         self.parser = parser
-        try:
-            self.options = self.parser.parse_args()
-        except SystemExit as ex:     # noqa
-            self.parser.print_help()
-            sys.exit(ECODE.BAD)
+        self.options = self.parser.parse_args()
 
     def validate_command(self):
         """Validate argparse `options.command`.
@@ -158,24 +195,25 @@ class Cli:
         """
         self.options.command = self.options.command.lower()
 
-        if self.options.command in self.commands:
-            return True
-        self.parser.print_help()
-        sys.exit(ECODE.BAD)
+        if self.options.command:
+            if self.options.command in self.commands:
+                return True
+            else:
+                self.parser.print_help()
+                sys.exit(ECODE.BAD)
+        return True
 
     def run(self):
         """Take CLI arguments, parse it, and process."""
         self.validate_command()
 
-        options = self.options
-
-        show_version(options)
-        show_info(options)
+        show_version(self.options)
+        show_info(self.options)
 
         # operation
-        do_build_template(options)
-        do_search_template(options)
-        do_test_template(options)
+        do_build_template(self.options)
+        do_search_template(self.options)
+        do_test_template(self.options)
 
 
 def execute():
