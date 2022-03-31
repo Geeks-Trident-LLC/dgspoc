@@ -10,8 +10,10 @@ from dgspoc.utils import Printer
 from dgspoc.utils import ECODE
 from dgspoc.utils import Text
 
+from dgspoc.usage import get_global_usage
 from dgspoc.usage import validate_usage
 from dgspoc.usage import show_usage
+from dgspoc.usage import validate_example_usage
 
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
@@ -54,7 +56,9 @@ class ArgumentParser(argparse.ArgumentParser):
 def show_info(options):
     command, operands = options.command, options.operands
     if command == 'info':
+        name = command
         validate_usage(command, operands)
+        validate_example_usage(name, operands)
 
         if len(operands) > 1:
             show_usage(command, exit_code=ECODE.BAD)
@@ -83,11 +87,17 @@ def show_version(options):
         sys.exit(ECODE.SUCCESS)
 
 
+def show_global_usage(options):
+    if options.command == 'usage':
+        print(get_global_usage())
+        sys.exit(ECODE.SUCCESS)
+
+
 class Cli:
     """describe-get-system proof of concept console CLI application."""
     prog = 'dgs'
     prog_fn = 'describe-get-system'
-    commands = ['build', 'info', 'run', 'search', 'test', 'version']
+    commands = ['build', 'info', 'run', 'search', 'test', 'version', 'usage']
 
     def __init__(self):
         # parser = argparse.ArgumentParser(
@@ -124,7 +134,7 @@ class Cli:
         ),
 
         parser.add_argument(
-            '--save', type=str, dest='filename', default='',
+            '--save-to', type=str, dest='filename', default='',
             help="saving to file"
         ),
 
@@ -169,9 +179,24 @@ class Cli:
         )
 
         parser.add_argument(
+            '--all', action='store_true',
+            help='showing all information'
+        )
+
+        parser.add_argument(
+            '--dependency', action='store_true',
+            help='showing package dependency'
+        )
+
+        parser.add_argument(
+            '--template-storage', action='store_true',
+            help='showing template storage information'
+        )
+
+        parser.add_argument(
             'command', nargs='?', type=str, default='',
             help='command must be either build, '
-                 'info, run, search, test, or version'
+                 'info, run, search, test, version, or usage'
         )
         parser.add_argument(
             'operands', nargs='*', type=str,
@@ -191,7 +216,7 @@ class Cli:
         -------
         bool: show ``self.parser.print_help()`` and call ``sys.exit(ECODE.BAD)`` if
         command is neither build, info, run, search,
-        test, nor version, otherwise, return True
+        test, version, nor usage otherwise, return True
         """
         self.options.command = self.options.command.lower()
 
@@ -208,6 +233,7 @@ class Cli:
         self.validate_command()
 
         show_version(self.options)
+        show_global_usage(self.options)
         show_info(self.options)
 
         # operation

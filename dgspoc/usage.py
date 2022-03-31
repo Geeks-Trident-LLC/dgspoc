@@ -1,125 +1,194 @@
 """Module containing the logic for console command line usage"""
 
 import sys
+import re
+from enum import IntFlag
 
 from dgspoc.utils import Printer
 from dgspoc.utils import Misc
 from dgspoc.utils import ECODE
 
+from dgspoc import example
+from dgspoc.example import get_number_of_example
 
-class BuildUsage:
-    usage = '\n'.join([
-        'build command has two features: template or script',
-        'common optional arguments:',
-        "  --author AUTHOR                          author's name",
-        "  --email EMAIL                            author's email",
-        "  --company COMPANY                        author's company",
-        "  --save FILENAME                          save to file",
-        "  --replaced                               overwrite template ID/file",
-        '',
-        'build template syntax:',
-        '----------------------',
-        'optional arguments:',
-        "  --template-id TMPLID                     template ID",
-        '----------------------',
-        'dgs build template "<single_line_snippet>" [options]',
-        'dgs build template <snippet_filename> [options]',
-        'dgs build template example {1, 2, 3, 4, or 5}',
-        '',
-        'build script syntax:',
-        '----------------------',
-        'optional arguments:',
-        "  --framework FRAMEWORK                    test framework",
-        "  --resource RESOURCE                      test resource",
-        '----------------------',
-        'dgs build script <snippet_filename> [options]',
-        'dgs build script example {1, 2, or 3}'
-    ])
+tool = 'dgs'
+
+
+class FLAG(IntFlag):
+    AUTHOR = 1
+    EMAIL = 2
+    COMPANY = 4
+    SAVE_TO = 8
+    TEMPLATE_ID = 16
+    TEST_FILE = 32
+    ADAPTOR = 64
+    EXECUTION = 128
+    REPLACED = 256
+    IGNORE_CASE = 512
+    SHOWED = 1024
+    TABULAR = 2048
+    ALL = 4096
+    DEPENDENCY = 8192
+    TEMPLATE_STORAGE = 16384
+    HELP = 32768
+    # HELP = 8192
+
+    BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
+    SEARCH_TEMPLATE = IGNORE_CASE | SHOWED | HELP
+    TEST_TEMPLATE = TEST_FILE | ADAPTOR | EXECUTION | SHOWED | TABULAR | HELP
+    INFO_USAGE = ALL | DEPENDENCY | TEMPLATE_STORAGE | HELP
+
+
+class UData:
+    def __init__(self, *args, is_header=False):
+        self.args = args
+        lst = []
+        if self.args:
+            for arg in self.args:
+                if Misc.is_list(arg):
+                    lst.extend([str(item) for item in arg])
+                else:
+                    lst.append(str(arg))
+            self.data = '\n'.join(lst)
+            if is_header:
+                self.data = '{0}\n{1}\n{0}'.format('+' * 80, self.data)
+        else:
+            self.data = ''
+
+        if not self.data.strip():
+            self.data = self.data.strip()
+
+        self.data_len = len(self.data)
+
+        self._count = len(lst)
+
+    def __len__(self):
+        return self.data_len
+
+    def __repr__(self):
+        return self.data
+
+    def __str__(self):
+        return self.data
+
+    @property
+    def count(self):
+        return self._count
+
+
+class UsageData(UData):
+    def __init__(self, header_data, body_data):
+        super().__init__(header_data, '{}\n'.format(body_data), is_header=False)
+        self._count = body_data.count
+
+
+class UHeaderData(UData):
+    def __init__(self, *args):
+        if len(args) > 1:
+            item0 = args[0]
+            lst = [item0, '-' * len(str(item0)), *args[1:]]
+        else:
+            lst = args
+        super().__init__(*lst, is_header=True)
+
+
+class UBodyData(UData):
+    def __init__(self, *args):
+        super().__init__(*args, is_header=False)
+
+
+def get_usage_header(name, flags=0):
+    name = str(name).lower()
+    lst = ['{} {} usage'.format(tool, name.replace('_', ' '))]
+    args = [
+        "  --author AUTHOR         author's name",
+        "  --email EMAIL           author's email",
+        "  --company COMPANY       author's company",
+        '  --save-to FILENAME      saving to file',
+        '  --template-id TMPLID    template ID',
+        '  --test-file TESTFILE    test data file',
+        '  --adaptor ADAPTOR       connector adaptor',
+        '  --execution EXECUTION   command line',
+        '  --replaced              overwrite template ID/file',
+        '  --ignore-case           case insensitive matching',
+        '  --showed                showing result',
+        '  --tabular               showing result in tabular format',
+        '  --all                   showing all information',
+        '  --dependency            showing package dependencies',
+        '  --template-storage      showing template storage information',
+        '  -h, --help              show this help message and exit',
+    ]
+    if flags:
+        bits = list(map(int, list(bin(int(flags))[2:][::-1])))
+        lst.append('optional arguments:')
+        lst.append('-------------------')
+        for index, bit in enumerate(bits):
+            bit and lst.append(args[index])
+
+    header_usage = UHeaderData(lst)
+    return header_usage
+
+
+def get_usage(name, flags=0):
+    count = get_number_of_example(name)
+    name = str(name).lower()
+    header_usage = get_usage_header(name, flags=flags)
+
+    lst = ['{} {} operands [options]'.format(tool, name.replace('_', ' '))]
+    if count > 0:
+        lst1 = list(map(str, range(1, count + 1)))
+        s = lst1[0] if len(lst1) == 1 else '{%s}' % (','.join(lst1))
+        lst.append('%s %s example %s' % (tool, name.replace('_', ' '), s))
+
+    body_usage = UBodyData(*lst)
+
+    usage = UsageData(header_usage, body_usage)
+    return usage
+
+
+def get_example_usage(name):
+    count = get_number_of_example(name)
+    name = str(name).lower()
+    fmt = '{} {} example {}'
+
+    example_usage = UsageData(
+        UHeaderData('{} {} example syntax:'.format(tool, name.replace('_', ' '))),
+        UBodyData(*[fmt.format(tool, name, i + 1) for i in range(count)])
+    )
+    return example_usage
 
 
 class BuildTemplateUsage:
-    usage = '\n'.join([
-        'build template syntax:',
-        '----------------------',
-        'optional arguments:',
-        "  --author AUTHOR                          author's name",
-        "  --email EMAIL                            author's email",
-        "  --company COMPANY                        author's company",
-        "  --save FILENAME                          save to file",
-        "  --template-id TMPLID                     template ID",
-        "  --replaced                               overwrite template ID/file",
-        '----------------------',
-        'dgs build template "<single_line_snippet>" [options]',
-        'dgs build template <snippet_filename> [options]',
-        'dgs build template example {1, 2, 3, 4, or 5}',
-    ])
+    usage = get_usage('build_template', flags=FLAG.BUILD_TEMPLATE)
+    other_usage = get_usage('build_template', flags=FLAG.BUILD_TEMPLATE)
+    example_usage = get_example_usage('build_template')
 
-    other_usage = '\n'.join([
-        'build template example syntax:',
-        '----------------------',
-        'dgs build template example 1',
-        'dgs build template example 2',
-        'dgs build template example 3',
-        'dgs build template example 4',
-        'dgs build template example 5',
+
+class BuildUsage:
+    usage = '\n'.join([
+        Printer.get('build command has two features: template or script'),
+        str(BuildTemplateUsage.usage),
+        '',
+        # BuildScriptUsage.usage,
     ])
 
 
 class InfoUsage:
-    usage = '\n'.join([
-        'info syntax:',
-        '------------',
-        'dgs info',
-        'dgs info all',
-        'dgs info dependency',
-        'dgs info template'
-    ])
+    usage = get_usage('info', flags=FLAG.INFO_USAGE)
+    other_usage = get_usage('info', flags=FLAG.INFO_USAGE)
+    example_usage = get_example_usage('info')
 
 
 class SearchTemplateUsage:
-    usage = '\n'.join([
-        'search template syntax:',
-        'Note: template-id pattern should allow wildcard matching',
-        '-----------------------',
-        'optional arguments:',
-        "  --ignore-case                            case insensitive matching",
-        "  --showed                                 showing result",
-        '----------------------',
-        'dgs search template "<template-id-pattern>" [options]',
-        'dgs search template example {1, 2, or 3}',
-    ])
-
-    other_usage = '\n'.join([
-        'search template example syntax:',
-        '----------------------',
-        'dgs search template example 1',
-        'dgs search template example 2',
-        'dgs search template example 3',
-    ])
+    usage = get_usage('search_template', flags=FLAG.SEARCH_TEMPLATE)
+    other_usage = get_usage('search_template', flags=FLAG.SEARCH_TEMPLATE)
+    example_usage = get_example_usage('search_template')
 
 
 class TestTemplateUsage:
-    usage = '\n'.join([
-        'test template syntax:',
-        '-----------------------',
-        'optional arguments:',
-        "  --test-file TESTFILE                     test data file",
-        "  --adaptor ADAPTOR                        connection adaptor",
-        "  --execution CMDLINE                      command line",
-        "  --showed                                 showing result",
-        "  --tabular                                showing result in tabular format",
-        '----------------------',
-        'dgs test template <TemplateID or TemplateFilename> [options]',
-        'dgs test template example {1, 2, or 3}',
-    ])
-
-    other_usage = '\n'.join([
-        'test template example syntax:',
-        '----------------------',
-        'dgs test template example 1',
-        'dgs test template example 2',
-        'dgs test template example 3',
-    ])
+    usage = get_usage('test_template', flags=FLAG.TEST_TEMPLATE)
+    other_usage = get_usage('test_template', flags=FLAG.TEST_TEMPLATE)
+    example_usage = get_example_usage('test_template')
 
 
 class Usage:
@@ -140,7 +209,7 @@ def show_usage(name, *args, exit_code=None):
     obj = getattr(Usage, name, None)
     if getattr(obj, 'usage', None):
         attr = '_'.join(list(args) + ['usage'])
-        Printer.print(getattr(obj, attr))
+        print(getattr(obj, attr))
         Misc.is_integer(exit_code) and sys.exit(exit_code)
     else:
         fmt = '*** ErrorUsage: "{}" has not defined or unavailable.'
@@ -148,8 +217,37 @@ def show_usage(name, *args, exit_code=None):
         sys.exit(ECODE.BAD)
 
 
+def validate_example_usage(name, operands):
+    max_count = get_number_of_example(name)
+    pattern = r'example *(?P<index>[0-9]+)$'
+    txt = ' '.join(operands).strip().lower()
+    m = re.match(pattern, txt)
+    if m:
+        index = m.group('index')
+        if 1 <= int(index) <= max_count:
+            cls_name = '{}Example'.format(name.title().replace('_', ''))
+            cls = getattr(example, cls_name)
+            result = cls.get(str(index))
+            print('\n\n{}\n'.format(result))
+            sys.exit(ECODE.SUCCESS)
+        else:
+            show_usage(name, 'example', exit_code=ECODE.BAD)
+    else:
+        if re.match('example', txt):
+            show_usage(name, 'example', exit_code=ECODE.BAD)
+
+
 def get_global_usage():
     lst = [
+        UHeaderData('{} other usages'.format(tool)),
+        UBodyData(
+            '{} version'.format(tool),
+        ),
+        '',
+        InfoUsage.usage,
+        BuildTemplateUsage.usage,
+        SearchTemplateUsage.usage,
+        TestTemplateUsage.usage,
     ]
 
-    return '\n'.join(lst)
+    return '\n'.join(str(item) for item in lst)

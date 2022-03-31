@@ -11,11 +11,8 @@ from dgspoc.utils import ECODE
 
 from dgspoc.storage import TemplateStorage
 
-from dgspoc.example import BuildTemplateExample
-from dgspoc.example import SearchTemplateExample
-from dgspoc.example import TestTemplateExample
-
 from dgspoc.usage import validate_usage
+from dgspoc.usage import validate_example_usage
 from dgspoc.usage import show_usage
 
 from dgspoc.adaptor import Adaptor
@@ -34,20 +31,14 @@ def do_build_template(options):
     feature = str(operands[0]).lower().strip() if op_count > 0 else ''
     if command == 'build' and feature == 'template':
         operands = operands[1:]
-        validate_usage('{}_{}'.format(command, feature), operands)
+        name = '{}_{}'.format(command, feature)
+        validate_usage(name, operands)
+        validate_example_usage(name, operands)
 
         op_txt = ' '.join(operands).rstrip()
 
         if not op_txt:
-            show_usage('{}_{}'.format(command, feature), exit_code=ECODE.BAD)
-        elif op_txt.lower().startswith('example'):
-            index = str(operands[-1]).strip()
-            if op_count == 3 and re.match('[1-5]$', index):
-                result = BuildTemplateExample.get(index)
-                Printer.print_message('\n\n{}\n', result)
-                sys.exit(ECODE.SUCCESS)
-            else:
-                show_usage('{}_{}'.format(command, feature), 'other', exit_code=ECODE.BAD)
+            show_usage(name, exit_code=ECODE.BAD)
 
         if File.is_exist(op_txt):
             with open(op_txt) as stream:
@@ -115,20 +106,14 @@ def do_search_template(options):
     feature = str(operands[0]).lower().strip() if op_count > 0 else ''
     if command == 'search' and feature == 'template':
         operands = operands[1:]
-        validate_usage('{}_{}'.format(command, feature), operands)
+        name = '{}_{}'.format(command, feature)
+        validate_usage(name, operands)
+        validate_example_usage(name, operands)
 
         op_txt = ' '.join(operands).rstrip()
 
         if not op_txt:
-            show_usage('{}_{}'.format(command, feature), exit_code=ECODE.BAD)
-        elif op_txt.lower().startswith('example'):
-            index = str(operands[-1]).strip()
-            if op_count == 3 and re.match('[1-3]$', index):
-                result = SearchTemplateExample.get(index)
-                Printer.print_message('\n\n{}\n', result)
-                sys.exit(ECODE.SUCCESS)
-            else:
-                show_usage('{}_{}'.format(command, feature), 'other', exit_code=ECODE.BAD)
+            show_usage(name, exit_code=ECODE.BAD)
 
         tmpl_id_pattern = operands[0]
         is_found = TemplateStorage.search(tmpl_id_pattern,
@@ -148,20 +133,14 @@ def do_test_template(options):
     feature = str(operands[0]).lower().strip() if op_count > 0 else ''
     if command == 'test' and feature == 'template':
         operands = operands[1:]
-        validate_usage('{}_{}'.format(command, feature), operands)
+        name = '{}_{}'.format(command, feature)
+        validate_usage(name, operands)
+        validate_example_usage(name, operands)
 
         op_txt = ' '.join(operands).rstrip()
 
         if not op_txt:
-            show_usage('{}_{}'.format(command, feature), exit_code=ECODE.BAD)
-        elif op_txt.lower().startswith('example'):
-            index = str(operands[-1]).strip()
-            if op_count == 3 and re.match('[1-3]$', index):
-                result = TestTemplateExample.get(index)
-                Printer.print_message('\n\n{}\n', result)
-                sys.exit(ECODE.SUCCESS)
-            else:
-                show_usage('{}_{}'.format(command, feature), 'other', exit_code=ECODE.BAD)
+            show_usage(name, exit_code=ECODE.BAD)
         else:
             if options.testfile == '' and options.adaptor == '':
                 lst = ['CANT run template test WITHOUT test data.',
