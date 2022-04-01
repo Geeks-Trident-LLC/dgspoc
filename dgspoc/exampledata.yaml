@@ -1,6 +1,30 @@
 build_template:
   example1:
     header: |-
+      Example: How to use dgs build template command line?
+    body: |-
+      test@test_machine ~ %
+      test@test_machine ~ % dgs build template --help
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      dgs build template usage
+      optional arguments:
+      -------------------
+        --author AUTHOR         author's name
+        --email EMAIL           author's email
+        --company COMPANY       author's company
+        --save-to FILENAME      saving to file
+        --template-id TMPLID    template ID
+        --replaced              overwrite template ID/file
+        -h, --help              show this help message and exit
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      dgs build template operands [options]
+      dgs build template example {1,2,3,4,5,6}
+      
+      test@test_machine ~ %
+      test@test_machine ~ %
+
+  example2:
+    header: |-
       Example: Use dgs tool to generate template to parse digits, words, and
       digits as index, name, and total columns
     body: |-
@@ -18,7 +42,7 @@ build_template:
         ^${index} +${name} +${total} -> Record
       test@test_machine ~ %
 
-  example2:
+  example3:
     header: |-
       Example: Use dgs tool to generate template to parse digits, words, and 
       digits as index, name, and total columns.  Note: user snippet is stored 
@@ -43,7 +67,7 @@ build_template:
       test@test_machine ~ % 
       test@test_machine ~ %
 
-  example3:
+  example4:
     header: |-
       Example: Use dgs tool to generate template to parse digits, words, and 
       digits as index, name, and total columns.  End-user wants to include 
@@ -75,7 +99,7 @@ build_template:
       test@test_machine ~ % 
       test@test_machine ~ %
 
-  example4:
+  example5:
     header: |-
       Example: Use dgs tool to generate template to parse digits, words, and 
       digits as index, name, and total columns.  End-user wants to include 
@@ -118,7 +142,7 @@ build_template:
         ^${index} +${name} +${total} -> Record
       test@test_machine ~ %
 
-  example5:
+  example6:
     header: |-
       Example: Use dgs tool to generate template to parse digits, words, and 
       digits as index, name, and total columns.  End-user wants to include 
@@ -171,6 +195,26 @@ build_template:
 search_template:
   example1:
     header: |-
+      Example: How to use dgs search template command line?
+    body: |-
+      test@test_machine ~ %
+      test@test_machine ~ % dgs search template --help
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      dgs search template usage
+      optional arguments:
+      -------------------
+        --ignore-case           case insensitive matching
+        --showed                showing result
+        -h, --help              show this help message and exit
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      dgs search template operands [options]
+      dgs search template example {1,2,3,4}
+      
+      test@test_machine ~ %
+      test@test_machine ~ %
+
+  example2:
+    header: |-
       Example: Use dgs tool to search all templates in template storage
     body: |-
       test@test_machine ~ %
@@ -181,7 +225,7 @@ search_template:
       +------------------------------------------------------------------------------+
       test@test_machine ~ %
 
-  example2:
+  example3:
     header: |-
       Example: Use dgs tool to search any template matching "[Tt]emplate[0-9]" 
       template id pattern in template storage
@@ -194,7 +238,7 @@ search_template:
       +------------------------------------------------------------------------------+
       test@test_machine ~ %
 
-  example3:
+  example4:
     header: |-
       Example: Use dgs tool to search any template matching "[Tt]emplate[0-9]"
       template id pattern in template storage and show the template content
@@ -228,9 +272,26 @@ search_template:
 test_template:
   example1:
     header: |-
-      placeholder
+      Example: How to use dgs build template command line?
     body: |-
-      placeholder
+      test@test_machine ~ %
+      test@test_machine ~ % dgs test template --help
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      dgs test template usage
+      optional arguments:
+      -------------------
+        --test-file TESTFILE    test data file
+        --adaptor ADAPTOR       connector adaptor
+        --execution EXECUTION   command line
+        --showed                showing result
+        --tabular               showing result in tabular format
+        -h, --help              show this help message and exit
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      dgs test template operands [options]
+      dgs test template example {1,2,3,4}
+      
+      test@test_machine ~ %
+      test@test_machine ~ %
 
   example2:
     header: |-
@@ -239,6 +300,12 @@ test_template:
       placeholder
 
   example3:
+    header: |-
+      placeholder
+    body: |-
+      placeholder
+
+  example4:
     header: |-
       placeholder
     body: |-
