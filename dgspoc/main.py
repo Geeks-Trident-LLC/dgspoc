@@ -1,6 +1,7 @@
 """Module containing the logic for describe-get-system proof of conception entry-points."""
 
 import sys
+import re
 import argparse
 
 from dgspoc import version
@@ -12,7 +13,7 @@ from dgspoc.utils import Text
 
 from dgspoc.usage import get_global_usage
 from dgspoc.usage import validate_usage
-from dgspoc.usage import show_usage
+# from dgspoc.usage import show_usage
 from dgspoc.usage import validate_example_usage
 
 from dgspoc.operation import do_build_template
@@ -60,24 +61,32 @@ def show_info(options):
         validate_usage(command, operands)
         validate_example_usage(name, operands)
 
-        if len(operands) > 1:
-            show_usage(command, exit_code=ECODE.BAD)
+        op_txt = ' '.join(operands).lower()
 
-        lst = ['Describe-Get-System Proof of Concept', Data.get_app_info()]
+        lst = []
+        default_lst = [
+            'Describe-Get-System Proof of Concept',
+            Data.get_app_info()
+        ]
 
-        info_type = operands[0].lower() if operands else ''
-        if info_type and info_type in ['all', 'dependency']:
-            lst.append('--------------------')
-            lst.append('Dependencies:')
+        is_showed_all = options.all or re.search('all', op_txt)
+        is_showed_dependency = options.dependency or re.search('depend', op_txt)
+        is_showed_storage = options.template_storage or re.search('template|storage', op_txt)
+
+        if is_showed_all:
+            lst.extend(default_lst)
+
+        if is_showed_all or is_showed_dependency:
+            lst and lst.append('--------------------')
             for pkg in Data.get_dependency().values():
                 lst.append('  + Package: {0[package]}'.format(pkg))
                 lst.append('             {0[url]}'.format(pkg))
 
-        if info_type and info_type in ['all', 'template']:
-            lst.append('--------------------',)
+        if is_showed_all or is_showed_storage:
+            lst and lst.append('--------------------', )
             lst.append(Data.get_template_storage_info())
 
-        Printer.print(lst)
+        Printer.print(lst) if lst else Printer.print(default_lst)
         sys.exit(ECODE.SUCCESS)
 
 
