@@ -105,7 +105,8 @@ class TemplateStorage:
             if not File.is_exist(cls.filename):
                 File.create(cls.filename)
             if not cls.check(template_id):
-                node = {template_id: template}
+                node = File.get_result_from_yaml_file(cls.filename, default=dict())
+                node[template_id] = template
                 File.save(cls.filename, yaml.safe_dump(node))
                 return True
             else:
