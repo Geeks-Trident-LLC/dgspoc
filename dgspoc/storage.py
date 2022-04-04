@@ -50,22 +50,22 @@ class TemplateStorage:
 
     @classmethod
     def search(cls, template_id_pattern, ignore_case=False, showed=False):
-        fmt1 = '*** CANT find template ID because template storage file is empty.'
-        fmt2 = '*** CANT find template ID because template storage file is not created.'
-        fmt3 = '{} file has invalid template storage format.'
-        fmt4 = '*** There is no template ID matching "{}" pattern.'
-        fmt5 = 'Found {} template ID(s) matching "{}" pattern:'
+        msg1 = '*** CANT find template ID because template storage file is empty.'
+        msg2 = '*** CANT find template ID because template storage file is not created.'
+        fmt1 = '{} file has invalid template storage format.'
+        fmt2 = '*** There is no template ID matching "{}" pattern.'
+        fmt3 = 'Found {} template ID(s) matching "{}" pattern:'
         if File.is_exist(cls.filename):
             with open(cls.filename) as stream:
                 content = stream.read().strip()
                 if not content:
-                    cls.message = Printer.get(fmt1)
+                    cls.message = Printer.get(msg1)
                     return False
 
                 node = yaml.safe_load(content)
 
                 if not Misc.is_dict(node):
-                    raise TemplateStorageError(fmt3.format(cls.filename))
+                    raise TemplateStorageError(fmt1.format(cls.filename))
 
                 pattern = convert_wildcard_to_regex(template_id_pattern)
                 flags = re.I if ignore_case else 0
@@ -78,10 +78,10 @@ class TemplateStorage:
                 total = len(ids)
 
                 if total == 0:
-                    cls.message = Printer.get(fmt4.format(template_id_pattern))
+                    cls.message = Printer.get(fmt2.format(template_id_pattern))
                     return False
 
-                lst = [fmt5.format(total, template_id_pattern)]
+                lst = [fmt3.format(total, template_id_pattern)]
                 for tmpl_id in ids:
                     lst.append('  - {}'.format(tmpl_id))
 
@@ -96,7 +96,7 @@ class TemplateStorage:
                 cls.message = '\n'.join(lst)
                 return True
         else:
-            cls.message = Printer.get(fmt2)
+            cls.message = Printer.get(msg2)
             return False
 
     @classmethod
@@ -105,7 +105,8 @@ class TemplateStorage:
             if not File.is_exist(cls.filename):
                 File.create(cls.filename)
             if not cls.check(template_id):
-                node = {template_id: template}
+                node = File.get_result_from_yaml_file(cls.filename, default=dict())
+                node[template_id] = template
                 File.save(cls.filename, yaml.safe_dump(node))
                 return True
             else:

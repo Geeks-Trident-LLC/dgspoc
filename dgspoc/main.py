@@ -19,6 +19,7 @@ from dgspoc.usage import validate_example_usage
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
 from dgspoc.operation import do_test_template
+from dgspoc.operation import do_test_verification
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -168,6 +169,11 @@ class Cli:
         ),
 
         parser.add_argument(
+            '--select-statement', type=str, default='', dest='stmt',
+            help='the select statement of verification'
+        )
+
+        parser.add_argument(
             '--replaced', action='store_true',
             help='overwrite template ID/file'
         )
@@ -249,6 +255,8 @@ class Cli:
         do_build_template(self.options)
         do_search_template(self.options)
         do_test_template(self.options)
+
+        do_test_verification(self.options)
 
 
 def execute():

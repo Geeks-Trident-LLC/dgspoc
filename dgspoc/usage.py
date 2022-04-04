@@ -15,27 +15,28 @@ tool = 'dgs'
 
 
 class FLAG(IntFlag):
-    AUTHOR = 1
-    EMAIL = 2
-    COMPANY = 4
-    SAVE_TO = 8
-    TEMPLATE_ID = 16
-    TEST_FILE = 32
-    ADAPTOR = 64
-    EXECUTION = 128
-    REPLACED = 256
-    IGNORE_CASE = 512
-    SHOWED = 1024
-    TABULAR = 2048
-    ALL = 4096
-    DEPENDENCY = 8192
-    TEMPLATE_STORAGE = 16384
-    HELP = 32768
-    # HELP = 8192
+    AUTHOR = pow(2, 0)
+    EMAIL = pow(2, 1)
+    COMPANY = pow(2, 2)
+    SAVE_TO = pow(2, 3)
+    TEMPLATE_ID = pow(2, 4)
+    TEST_FILE = pow(2, 5)
+    ADAPTOR = pow(2, 6)
+    EXECUTION = pow(2, 7)
+    SELECT_STATEMENT = pow(2, 8)
+    REPLACED = pow(2, 9)
+    IGNORE_CASE = pow(2, 10)
+    SHOWED = pow(2, 11)
+    TABULAR = pow(2, 12)
+    ALL = pow(2, 13)
+    DEPENDENCY = pow(2, 14)
+    TEMPLATE_STORAGE = pow(2, 15)
+    HELP = pow(2, 16)
 
     BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
     SEARCH_TEMPLATE = IGNORE_CASE | SHOWED | HELP
     TEST_TEMPLATE = TEST_FILE | ADAPTOR | EXECUTION | SHOWED | TABULAR | HELP
+    TEST_VERIFICATION = TEST_TEMPLATE | TEMPLATE_ID | SELECT_STATEMENT
     INFO_USAGE = ALL | DEPENDENCY | TEMPLATE_STORAGE | HELP
 
 
@@ -109,6 +110,7 @@ def get_usage_header(name, flags=0):
         '  --test-file TESTFILE    test data file',
         '  --adaptor ADAPTOR       connector adaptor',
         '  --execution EXECUTION   command line',
+        '  --select-statement STMT the select statement for verification',
         '  --replaced              overwrite template ID/file',
         '  --ignore-case           case insensitive matching',
         '  --showed                showing result',
@@ -191,12 +193,19 @@ class TestTemplateUsage:
     example_usage = get_example_usage('test_template')
 
 
+class TestVerificationUsage:
+    usage = get_usage('test_verification', flags=FLAG.TEST_VERIFICATION)
+    other_usage = get_usage('test_verification', flags=FLAG.TEST_VERIFICATION)
+    example_usage = get_example_usage('test_verification')
+
+
 class Usage:
     info = InfoUsage
     build = BuildUsage
     build_template = BuildTemplateUsage
     search_template = SearchTemplateUsage
     test_template = TestTemplateUsage
+    test_verification = TestVerificationUsage
 
 
 def validate_usage(name, operands):
