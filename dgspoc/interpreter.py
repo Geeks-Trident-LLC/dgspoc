@@ -4,6 +4,13 @@ user describing problem"""
 
 import re
 
+# from dgspoc.utils import DictObject
+# from dgspoc.utils import Misc
+
+from dgspoc.constant import FWTYPE
+
+# from dgspoc.exceptions import NotImplementFrameworkError
+
 
 class Statement:
     def __init__(self, data, parent=None):
@@ -60,6 +67,22 @@ class Statement:
                 if line.strip():
                     self._stmt_data = line
                     self._remaining_data = '\n'.join(lst[index:])
+
+    @classmethod
+    def get_display_statement(cls, framework='', message='', is_logger=False):
+        func_name = 'self.logger.info' if is_logger else 'print'
+        if framework == FWTYPE.UNITTEST:
+            stmt = '{}({!r})'.format(func_name, message)
+            return stmt
+        elif framework == FWTYPE.PYTEST:
+            stmt = '{}({!r})'.format(func_name, message)
+            return stmt
+        elif framework == FWTYPE.ROBOTFRAMEWORK:
+            stmt = 'log   {}'.format(message)
+            return stmt
+        else:
+            stmt = '{}({!r})'.format('print', message)
+            return stmt
 
 
 class DummyStatement(Statement):
