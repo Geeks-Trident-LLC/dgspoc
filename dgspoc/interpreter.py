@@ -13,16 +13,18 @@ from dgspoc.exceptions import NotImplementedFrameworkError
 
 
 class Statement:
-    def __init__(self, data, parent=None):
+    def __init__(self, data, parent=None, framework=''):
         self.data = data
         self.prev = None
         self.next = None
         self.parent = parent
+        self.framework = str(framework).strip()
         self._children = []
         self._name = ''
         self._is_parsed = False
         self._stmt_data = ''
         self._remaining_data = ''
+        self.validate_framework()
         self.prepare()
 
     def __len__(self):
@@ -68,69 +70,75 @@ class Statement:
                     self._stmt_data = line
                     self._remaining_data = '\n'.join(lst[index:])
 
-    @classmethod
-    def get_display_statement(cls, framework='', message='', is_logger=False):
+    def validate_framework(self):
+
+        if self.framework.strip() == '':
+            failure = 'framework MUST be "unittest", "pytest", or "robotframework"'
+            raise NotImplementedFrameworkError(failure)
+
+        is_valid_framework = self.framework == FWTYPE.UNITTEST
+        is_valid_framework |= self.framework == FWTYPE.PYTEST
+        is_valid_framework |= self.framework == FWTYPE.ROBOTFRAMEWORK
+
+        if not is_valid_framework:
+            fmt = '{!r} framework is not implemented.'
+            raise NotImplementedFrameworkError(fmt.format(self.framework))
+
+    def get_display_statement(self, message=''):
+        message = getattr(self, 'message', message)
+        is_logger = getattr(self, 'is_logger', False)
         func_name = 'self.logger.info' if is_logger else 'print'
-        if framework == FWTYPE.UNITTEST:
+        if self.framework == FWTYPE.UNITTEST:
             stmt = '{}({!r})'.format(func_name, message)
             return stmt
-        elif framework == FWTYPE.PYTEST:
+        elif self.framework == FWTYPE.PYTEST:
             stmt = '{}({!r})'.format(func_name, message)
             return stmt
-        elif framework == FWTYPE.ROBOTFRAMEWORK:
+        else:   # i.e ROBOTFRAMEWORK
             stmt = 'log   {}'.format(message)
             return stmt
-        else:
-            stmt = '{}({!r})'.format('print', message)
-            return stmt
 
-    @classmethod
-    def get_assert_statement(cls, expected_result, result='', framework=''):
-
+    def get_assert_statement(self, expected_result, assert_only=False):
         is_eresult_number, eresult = Misc.try_to_get_number(expected_result)
         if Misc.is_boolean(eresult):
             eresult = int(eresult)
 
-        if framework == FWTYPE.UNITTEST:
-            fmt1 = 'self.assertTrue({} == {})'
+        if self.framework == FWTYPE.UNITTEST:
+            fmt1 = 'self.assertTrue(True == {})'
             fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == {})'
-            if result:
-                stmt = fmt1.format(result, expected_result)
-                return stmt
-            else:
-                stmt = fmt2.format(eresult)
-                return stmt
-        elif framework == FWTYPE.PYTEST:
-            fmt1 = 'assert {} == {}'
+        elif self.framework == FWTYPE.PYTEST:
+            fmt1 = 'assert True == {}'
             fmt2 = 'total_count = len(result)\nassert total_count == {}'
-            if result:
-                stmt = fmt1.format(result, expected_result)
-                return stmt
-            else:
-                stmt = fmt2.format(eresult)
-                return stmt
-
-        elif framework == FWTYPE.ROBOTFRAMEWORK:
-            fmt1 = 'should be true   {} == {}'
+        else:   # i.e ROBOTFRAMEWORK
+            fmt1 = 'should be true   True == {}'
             fmt2 = ('${total_count}=   get length ${result}\nshould be '
                     'true   ${result} == %s')
-            if result:
-                stmt = fmt1.format(result, expected_result)
-                return stmt
-            else:
-                stmt = fmt2 % eresult
-                return stmt
-        else:
-            failure = '{!r} test framework is not implement.'.format(framework)
-            NotImplementedFrameworkError(failure)
+
+        fmt = fmt1 if assert_only else fmt2
+        eresult = expected_result if assert_only else eresult
+        stmt = fmt.format(eresult)
+        return stmt
 
 
 class DummyStatement(Statement):
-    def __init__(self, data, parent=None):
-        super().__init__(data, parent=parent)
+    def __init__(self, data, parent=None, framework=''):
+        super().__init__(data, parent=parent, framework=framework)
         self.case = ''
         self.message = ''
         self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        fmt = 'DUMMY {} - {}'
+        expected_result = True if self.case.lower() == 'pass' else False
+
+        message = fmt.format(self.case.upper(), self.message)
+        displayed_stmt = self.get_display_statement(message=message)
+        assert_stmt = self.get_assert_statement(expected_result, assert_only=True)
+        return '{}\n{}'.format(displayed_stmt, assert_stmt)
 
     def parse(self):
         pattern = ' *dummy[_. -]*(?P<case>pass|fail) *[^a-z0-9]*(?P<message> *.+) *$'
@@ -144,25 +152,25 @@ class DummyStatement(Statement):
 
 
 class SectionStatement(Statement):
-    def __init__(self, data, parent=None):
-        super().__init__(data, parent=parent)
+    def __init__(self, data, parent=None, framework=''):
+        super().__init__(data, parent=parent, framework=framework)
 
 
 class LoopStatement(Statement):
-    def __init__(self, data, parent=None):
-        super().__init__(data, parent=parent)
+    def __init__(self, data, parent=None, framework=''):
+        super().__init__(data, parent=parent, framework=framework)
 
 
 class PerformerStatement(Statement):
-    def __init__(self, data, parent=None):
-        super().__init__(data, parent=parent)
+    def __init__(self, data, parent=None, framework=''):
+        super().__init__(data, parent=parent, framework=framework)
 
 
 class VerificationStatement(Statement):
-    def __init__(self, data, parent=None):
-        super().__init__(data, parent=parent)
+    def __init__(self, data, parent=None, framework=''):
+        super().__init__(data, parent=parent, framework=framework)
 
 
 class SystemStatement(Statement):
-    def __init__(self, data, parent=None):
-        super().__init__(data, parent=parent)
+    def __init__(self, data, parent=None, framework=''):
+        super().__init__(data, parent=parent, framework=framework)
