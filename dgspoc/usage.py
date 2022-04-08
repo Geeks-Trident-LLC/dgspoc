@@ -6,7 +6,8 @@ from enum import IntFlag
 
 from dgspoc.utils import Printer
 from dgspoc.utils import Misc
-from dgspoc.utils import ECODE
+
+from dgspoc.constant import ECODE
 
 from dgspoc import example
 from dgspoc.example import get_number_of_example

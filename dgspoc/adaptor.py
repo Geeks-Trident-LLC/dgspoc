@@ -5,7 +5,7 @@ import re
 
 from dgspoc.exceptions import AdaptorAuthenticationError
 
-from dgspoc.utils import ECODE
+from dgspoc.constant import ECODE
 
 
 class Adaptor:

@@ -7,9 +7,9 @@ import argparse
 from dgspoc.utils import File
 from dgspoc.utils import Printer
 from dgspoc.utils import Text
-
-from dgspoc.utils import ECODE
 from dgspoc.utils import DictObject
+
+from dgspoc.constant import ECODE
 
 from dgspoc.storage import TemplateStorage
 
