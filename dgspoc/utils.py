@@ -378,7 +378,7 @@ class Misc:
         Parameters
         ----------
         obj (object): a number or text number.
-        referred_return_type (int, float, bool): a referred return type.
+        return_type (int, float, bool): a referred return type.
 
         Returns
         -------
@@ -390,7 +390,7 @@ class Misc:
             data = obj.strip()
             try:
                 if data.lower() == 'true' or data.lower() == 'false':
-                    result = bool(data)
+                    result = True if data.lower() == 'true' else False
                 else:
                     result = float(data) if '.' in data else int(data)
 
