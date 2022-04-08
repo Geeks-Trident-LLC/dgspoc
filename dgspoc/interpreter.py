@@ -5,11 +5,11 @@ user describing problem"""
 import re
 
 # from dgspoc.utils import DictObject
-# from dgspoc.utils import Misc
+from dgspoc.utils import Misc
 
 from dgspoc.constant import FWTYPE
 
-# from dgspoc.exceptions import NotImplementFrameworkError
+from dgspoc.exceptions import NotImplementedFrameworkError
 
 
 class Statement:
@@ -42,7 +42,7 @@ class Statement:
 
     @property
     def is_empty(self):
-        return self.data.strip() != ''
+        return self.data.strip() == ''
 
     @property
     def is_statement(self):
@@ -84,21 +84,61 @@ class Statement:
             stmt = '{}({!r})'.format('print', message)
             return stmt
 
+    @classmethod
+    def get_assert_statement(cls, expected_result, result='', framework=''):
+
+        is_eresult_number, eresult = Misc.try_to_get_number(expected_result)
+        if Misc.is_boolean(eresult):
+            eresult = int(eresult)
+
+        if framework == FWTYPE.UNITTEST:
+            fmt1 = 'self.assertTrue({} == {})'
+            fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == {})'
+            if result:
+                stmt = fmt1.format(result, expected_result)
+                return stmt
+            else:
+                stmt = fmt2.format(eresult)
+                return stmt
+        elif framework == FWTYPE.PYTEST:
+            fmt1 = 'assert {} == {}'
+            fmt2 = 'total_count = len(result)\nassert total_count == {}'
+            if result:
+                stmt = fmt1.format(result, expected_result)
+                return stmt
+            else:
+                stmt = fmt2.format(eresult)
+                return stmt
+
+        elif framework == FWTYPE.ROBOTFRAMEWORK:
+            fmt1 = 'should be true   {} == {}'
+            fmt2 = ('${total_count}=   get length ${result}\nshould be '
+                    'true   ${result} == %s')
+            if result:
+                stmt = fmt1.format(result, expected_result)
+                return stmt
+            else:
+                stmt = fmt2 % eresult
+                return stmt
+        else:
+            failure = '{!r} test framework is not implement.'.format(framework)
+            NotImplementedFrameworkError(failure)
+
 
 class DummyStatement(Statement):
     def __init__(self, data, parent=None):
         super().__init__(data, parent=parent)
         self.case = ''
-        self.msg = ''
+        self.message = ''
         self.parse()
 
     def parse(self):
-        pattern = '(?i) *dummy(?P<case>pass|fail) *[^a-z0-9]*(?P<msg> *.+) *$'
-        match = re.match(pattern, self.statement_data)
+        pattern = ' *dummy[_. -]*(?P<case>pass|fail) *[^a-z0-9]*(?P<message> *.+) *$'
+        match = re.match(pattern, self.statement_data, re.I)
         if match:
             self._is_parsed = True
             self.case = match.group('case').lower()
-            self.msg = match.group('msg')
+            self.message = match.group('message')
         else:
             self._is_parsed = False
 
