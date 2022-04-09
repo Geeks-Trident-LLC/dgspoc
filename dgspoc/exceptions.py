@@ -11,3 +11,11 @@ class TemplateStorageError(DGSError):
 
 class AdaptorAuthenticationError(DGSError):
     """Use to capture error for adaptor connection"""
+
+
+class InterpreterError(DGSError):
+    """Use to capture error for interpreter"""
+
+
+class NotImplementedFrameworkError(InterpreterError):
+    """Use to capture error for not implement framework"""

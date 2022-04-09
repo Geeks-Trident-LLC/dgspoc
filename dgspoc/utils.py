@@ -11,12 +11,6 @@ from textwrap import wrap
 import yaml
 
 import typing
-from enum import IntFlag
-
-
-class ECODE(IntFlag):
-    SUCCESS = 0
-    BAD = 1
 
 
 class Text(str):
@@ -378,7 +372,7 @@ class Misc:
         Parameters
         ----------
         obj (object): a number or text number.
-        referred_return_type (int, float, bool): a referred return type.
+        return_type (int, float, bool): a referred return type.
 
         Returns
         -------
@@ -390,7 +384,7 @@ class Misc:
             data = obj.strip()
             try:
                 if data.lower() == 'true' or data.lower() == 'false':
-                    result = bool(data)
+                    result = True if data.lower() == 'true' else False
                 else:
                     result = float(data) if '.' in data else int(data)
 
@@ -473,12 +467,12 @@ class DictObject(dict):
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
-        self.update(**{key: value})
+        self.update({key: value})
 
     def update(self, *args, is_updated_attr=True, **kwargs):
         obj = dict(*args, **kwargs)
-        super().update(**obj)
+        super().update(obj)
         if is_updated_attr:
             for attr, value in obj.items():
-                if re.match(r'(?i)[a-z]\w*$', attr):
+                if Misc.is_string(attr) and re.match(r'(?i)[a-z]\w*$', attr):
                     setattr(self, attr, value)

@@ -8,8 +8,9 @@ from dgspoc import version
 from dgspoc.config import Data
 
 from dgspoc.utils import Printer
-from dgspoc.utils import ECODE
 from dgspoc.utils import Text
+
+from dgspoc.constant import ECODE
 
 from dgspoc.usage import get_global_usage
 from dgspoc.usage import validate_usage
