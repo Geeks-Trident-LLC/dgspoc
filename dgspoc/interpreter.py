@@ -95,6 +95,12 @@ class Statement:
     def remaining_data(self):
         return self._remaining_data
 
+    @property
+    def is_setup_statement(self):
+        is_matched = self.name.lower() == 'setup'
+        is_matched |= bool(re.match(r'(?i)setup', self.statement_data))
+        return is_matched
+
     def prepare(self):
         if self.is_empty:
             self._stmt_data = ''
