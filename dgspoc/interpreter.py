@@ -117,6 +117,13 @@ class Statement:
         is_matched = self.is_matched_statement(pattern)
         return is_matched
 
+    @property
+    def is_base_statement(self):
+        is_base_stmt = self.is_setup_statement
+        is_base_stmt |= self.is_section_statement
+        is_base_stmt |= self.is_teardown_statement
+        return is_base_stmt
+
     def is_matched_statement(self, pat, data=None):
         data = data or [self.name, self.statement_data]
         lst = data if Misc.is_list(data) else [data]
@@ -153,11 +160,7 @@ class Statement:
                     self._stmt_data = line
                     self._remaining_data = '\n'.join(lst[index:])
 
-                    is_base_stmt = self.is_setup_statement
-                    is_base_stmt |= self.is_teardown_statement
-                    is_base_stmt |= self.is_section_statement
-
-                    if is_base_stmt:
+                    if self.is_base_statement:
                         self._level = 0
                         self._spacers = ''
 
@@ -280,6 +283,7 @@ class DummyStatement(Statement):
             self._is_parsed = True
             self.case = match.group('case').lower()
             self.message = match.group('message')
+            self.name = 'dummy'
         else:
             self._is_parsed = False
 
