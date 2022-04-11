@@ -17,6 +17,7 @@ class Statement:
         self.data = data
         self.prev = None
         self.next = None
+        self.current = None
         self.parent = parent
         self.framework = str(framework).strip()
         self._children = []
@@ -28,7 +29,7 @@ class Statement:
         self.prepare()
 
     def __len__(self):
-        return True
+        return 1 if self.name != '' else 0
 
     @property
     def is_parsed(self):
