@@ -6,12 +6,35 @@ import re
 
 from textwrap import indent
 
-# from dgspoc.utils import DictObject
+from dgspoc.utils import DictObject
 from dgspoc.utils import Misc
 
 from dgspoc.constant import FWTYPE
 
 from dgspoc.exceptions import NotImplementedFrameworkError
+
+
+class ScriptInfo(DictObject):
+    def __init__(self, *args, testcase='', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.testcase = testcase
+
+    def get_class_name(self):
+        node = self.get(self.testcase)
+        cls_name = node.get('class_name', 'TestClass') if node else 'TestClass'
+        return cls_name
+
+    def get_method_name(self, value):
+        node = self.get(self.testcase)
+        if node:
+            for method_name, val in node.items():
+                if val == value:
+                    return method_name
+            else:
+                return 'test_step'
+
+
+SCRIPTINFO = ScriptInfo()
 
 
 class Statement:
