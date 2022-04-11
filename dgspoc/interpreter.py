@@ -107,6 +107,12 @@ class Statement:
         is_matched = self.is_matched_statement(pattern)
         return is_matched
 
+    @property
+    def is_section_statement(self):
+        pattern = r'section'
+        is_matched = self.is_matched_statement(pattern)
+        return is_matched
+
     def is_matched_statement(self, pat, data=None):
         data = data or [self.name, self.statement_data]
         lst = data if Misc.is_list(data) else [data]
@@ -143,6 +149,15 @@ class Statement:
                     self._prev_spacers = self._spacers
                     self._stmt_data = line
                     self._remaining_data = '\n'.join(lst[index:])
+
+                    is_base_stmt = self.is_setup_statement
+                    is_base_stmt |= self.is_teardown_statement
+                    is_base_stmt |= self.is_section_statement
+
+                    if is_base_stmt:
+                        self._level = 0
+                        self._spacers = ''
+
                     return
 
     def validate_framework(self):
