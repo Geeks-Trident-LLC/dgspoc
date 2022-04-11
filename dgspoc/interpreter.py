@@ -97,8 +97,20 @@ class Statement:
 
     @property
     def is_setup_statement(self):
-        is_matched = self.name.lower() == 'setup'
-        is_matched |= bool(re.match(r'(?i)setup', self.statement_data))
+        pattern = r'setup'
+        is_matched = self.is_matched_statement(pattern)
+        return is_matched
+
+    @property
+    def is_teardown_statement(self):
+        pattern = r'cleanup|teardown'
+        is_matched = self.is_matched_statement(pattern)
+        return is_matched
+
+    def is_matched_statement(self, pat, data=None):
+        data = data or [self.name, self.statement_data]
+        lst = data if Misc.is_list(data) else [data]
+        is_matched = any(bool(re.match(pat, str(item), re.I)) for item in lst)
         return is_matched
 
     def prepare(self):
