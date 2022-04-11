@@ -4,6 +4,8 @@ user describing problem"""
 
 import re
 
+from textwrap import indent
+
 # from dgspoc.utils import DictObject
 from dgspoc.utils import Misc
 
@@ -13,7 +15,7 @@ from dgspoc.exceptions import NotImplementedFrameworkError
 
 
 class Statement:
-    def __init__(self, data, parent=None, framework=''):
+    def __init__(self, data, parent=None, framework='', indentation=4):
         self.data = data
         self.prev = None
         self.next = None
@@ -23,8 +25,15 @@ class Statement:
         self._children = []
         self._name = ''
         self._is_parsed = False
+
         self._stmt_data = ''
         self._remaining_data = ''
+
+        self._prev_spacers = ''
+        self._spacers = ''
+        self._level = 0
+        self.indentation = indentation
+
         self.validate_framework()
         self.prepare()
 
@@ -38,6 +47,10 @@ class Statement:
     @property
     def name(self):
         return self._name
+
+    @property
+    def level(self):
+        return self._level
 
     @name.setter
     def name(self, value):
@@ -65,11 +78,31 @@ class Statement:
             self._remaining_data = ''
         else:
             lst = self.data.splitlines()
+            spacer_pat = r'(?P<spacers> *)[^ ].*'
             for index, line in enumerate(lst):
                 line = str(line).rstrip()
                 if line.strip():
+                    match = re.match(spacer_pat, line)
+                    if match:
+                        self._spacers = match.group('spacers')
+                        length = len(self._spacers)
+                        if length == 0:
+                            self._level = 0
+                        else:
+                            if self.parent:
+                                chk_lst = ['setup', 'cleanup', 'teardown', 'section']
+                                if self.parent.name in chk_lst:
+                                    self._level = 1
+                                else:
+                                    self._level += 1
+                            else:
+                                if self._prev_spacers > self._spacers:
+                                    self._level += 1
+
+                    self._prev_spacers = self._spacers
                     self._stmt_data = line
                     self._remaining_data = '\n'.join(lst[index:])
+                    return
 
     def validate_framework(self):
 
@@ -91,13 +124,13 @@ class Statement:
         func_name = 'self.logger.info' if is_logger else 'print'
         if self.framework == FWTYPE.UNITTEST:
             stmt = '{}({!r})'.format(func_name, message)
-            return stmt
         elif self.framework == FWTYPE.PYTEST:
             stmt = '{}({!r})'.format(func_name, message)
-            return stmt
         else:   # i.e ROBOTFRAMEWORK
             stmt = 'log   {}'.format(message)
-            return stmt
+
+        stmt = indent(stmt, ' ' * self.level * self.indentation)
+        return stmt
 
     def get_assert_statement(self, expected_result, assert_only=False):
         is_eresult_number, eresult = Misc.try_to_get_number(expected_result)
@@ -118,12 +151,14 @@ class Statement:
         fmt = fmt1 if assert_only else fmt2
         eresult = expected_result if assert_only else eresult
         stmt = fmt.format(eresult)
+        stmt = indent(stmt, ' ' * self.level * self.indentation)
         return stmt
 
 
 class DummyStatement(Statement):
-    def __init__(self, data, parent=None, framework=''):
-        super().__init__(data, parent=parent, framework=framework)
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
         self.case = ''
         self.message = ''
         self.parse()
@@ -153,25 +188,30 @@ class DummyStatement(Statement):
 
 
 class SectionStatement(Statement):
-    def __init__(self, data, parent=None, framework=''):
-        super().__init__(data, parent=parent, framework=framework)
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
 
 
 class LoopStatement(Statement):
-    def __init__(self, data, parent=None, framework=''):
-        super().__init__(data, parent=parent, framework=framework)
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
 
 
 class PerformerStatement(Statement):
-    def __init__(self, data, parent=None, framework=''):
-        super().__init__(data, parent=parent, framework=framework)
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
 
 
 class VerificationStatement(Statement):
-    def __init__(self, data, parent=None, framework=''):
-        super().__init__(data, parent=parent, framework=framework)
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
 
 
 class SystemStatement(Statement):
-    def __init__(self, data, parent=None, framework=''):
-        super().__init__(data, parent=parent, framework=framework)
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
