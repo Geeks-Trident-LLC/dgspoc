@@ -288,6 +288,98 @@ class DummyStatement(Statement):
             self._is_parsed = False
 
 
+class SetupStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+
+        if self.framework == FWTYPE.UNITTEST:
+            lst.append(self.indentation('def setUp(self)', self.level))
+        elif self.framework == FWTYPE.PYTEST:
+            lst.append(self.indentation('def setup_class(self)', self.level))
+        else:   # i.e ROBOTFRAMEWORK
+            lst.append(self.indentation('setup', self.level))
+
+        for child in self._children:
+            lst.append(child.snippet, child.level)
+
+        script = '\n'.join(lst)
+        return script
+
+    def indent_data(self, data, lvl):
+        lvl = lvl if self.framework == FWTYPE.ROBOTFRAMEWORK else lvl + 1
+        new_data = indent(data, ' ' * lvl * self.indentation)
+        return new_data
+
+    def parse(self):
+        if self.is_setup_statement:
+            self.name = 'setup'
+            self._is_parsed = True
+            self.create_child_node(self)
+            if self.is_next_statement_children():
+                node = self.create_child(self)
+                while node and node.is_next_statement_sibling():
+                    self._children.append(node)
+                    node = self.create_child(node)
+                if self._children:
+                    last_child = self._children[-1]
+                    self.remaining_data = last_child.remaining_data
+                else:
+                    kwargs = dict(framework=self.framework, indentation=self.indentation)
+                    data = '    dummy_pass - Dummy Setup'
+                    dummy_stmt = DummyStatement(data, **kwargs)
+                    self._children.append(dummy_stmt)
+        else:
+            self._is_parsed = False
+
+    def create_child(self, node):
+        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        next_line = node.get_next_statement_data()
+
+        if node.is_matched_statement('(?i) +connect +data', next_line):
+            other = ConnectDataStatement(node.remaining_data, **kwargs)
+        elif node.is_matched_statement('(?i) +connect +data', next_line):
+            other = UseTestCaseStatement(node.remaining_data, **kwargs)
+        elif node.is_matched_statement('(?i) +connect +device', next_line):
+            other = ConnectDeviceStatement(node.remaining_data, **kwargs)
+        else:
+            return None
+
+        other.prev = node
+        # node.next = other
+        if node.is_next_statement_children():
+            other.parent = node
+        else:
+            other.parent = node.prev.parent
+        return node
+
+
+class ConnectDataStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+
+class UseTestCaseStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+
+class ConnectDeviceStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+
 class SectionStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
