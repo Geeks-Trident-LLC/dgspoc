@@ -3,6 +3,7 @@ user describing problem"""
 
 
 import re
+import operator
 
 from textwrap import indent
 
@@ -12,6 +13,7 @@ from dgspoc.utils import Misc
 from dgspoc.constant import FWTYPE
 
 from dgspoc.exceptions import NotImplementedFrameworkError
+from dgspoc.exceptions import ComparisonOperatorError
 
 
 class ScriptInfo(DictObject):
@@ -56,6 +58,8 @@ class Statement:
         self._spacers = ''
         self._level = 0
         self.indentation = indentation
+
+        self.spacer_pattern = r'(?P<spacers> *)[^ ].*'
 
         self.validate_framework()
         self.prepare()
@@ -125,11 +129,10 @@ class Statement:
             self._remaining_data = ''
         else:
             lst = self.data.splitlines()
-            spacer_pat = r'(?P<spacers> *)[^ ].*'
             for index, line in enumerate(lst):
                 line = str(line).rstrip()
                 if line.strip():
-                    match = re.match(spacer_pat, line)
+                    match = re.match(self.spacer_patter, line)
                     if match:
                         self._spacers = match.group('spacers')
                         length = len(self._spacers)
@@ -159,6 +162,36 @@ class Statement:
                         self._spacers = ''
 
                     return
+
+    def get_next_statement_data(self):
+        for line in self.remaining_data.splitlines():
+            if line.strip():
+                return line
+        else:
+            return ''
+
+    def has_next_statement(self):
+        next_stmt_data = self.get_next_statement_data()
+        return next_stmt_data.strip() != ''
+
+    def check_next_statement(self, op):
+        op = str(op).strip().lower()
+        if op not in ['eq', 'le', 'lt', 'gt', 'ge', 'ne']:
+            failure = 'Operator MUST BE eq, ne, le, lt, ge, or gt'
+            raise ComparisonOperatorError(failure)
+
+        if not self.has_next_statement():
+            return False
+        next_stmt_data = self.get_next_statement_data()
+        match = re.match(self.spacer_patter, next_stmt_data)
+        spacers = match.group('spacers') if match else ''
+
+        result = getattr(operator, op)(spacers, self._spacers)
+        return result
+
+    def is_next_statement_sibling(self):
+        result = self.check_next_statement('eq')
+        return result
 
     def validate_framework(self):
 
