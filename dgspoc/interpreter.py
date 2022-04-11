@@ -193,6 +193,10 @@ class Statement:
         result = self.check_next_statement('eq')
         return result
 
+    def is_next_statement_children(self):
+        result = self.check_next_statement('gt')
+        return result
+
     def validate_framework(self):
 
         if self.framework.strip() == '':
