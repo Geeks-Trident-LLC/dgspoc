@@ -9,6 +9,7 @@ from textwrap import indent
 
 from dgspoc.utils import DictObject
 from dgspoc.utils import Misc
+from dgspoc.utils import File
 
 from dgspoc.constant import FWTYPE
 
@@ -218,6 +219,11 @@ class Statement:
             fmt = '{!r} framework is not implemented.'
             raise NotImplementedFrameworkError(fmt.format(self.framework))
 
+    def indent_data(self, data, lvl):
+        lvl = lvl if self.framework == FWTYPE.ROBOTFRAMEWORK else lvl + 1
+        new_data = indent(data, ' ' * lvl * self.indentation)
+        return new_data
+
     def get_display_statement(self, message=''):
         message = getattr(self, 'message', message)
         is_logger = getattr(self, 'is_logger', False)
@@ -314,11 +320,6 @@ class SetupStatement(Statement):
         script = '\n'.join(lst)
         return script
 
-    def indent_data(self, data, lvl):
-        lvl = lvl if self.framework == FWTYPE.ROBOTFRAMEWORK else lvl + 1
-        new_data = indent(data, ' ' * lvl * self.indentation)
-        return new_data
-
     def parse(self):
         if self.is_setup_statement:
             self.name = 'setup'
@@ -366,6 +367,44 @@ class ConnectDataStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
+        self.var_name = ''
+        self.test_resource_reference = ''
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            fmt = "${%s}=   connect data   filename='%s'\nset global variable   %s"
+            stmt = fmt.format(self.var_name, self.test_resource_reference, self.var_name)
+        else:
+            fmt = "self.%s = ta.connect_data(filename='%s')"
+            stmt = fmt.format(self.var_name, self.test_resource_reference)
+
+        stmt = self.indent_data(stmt, self.level)
+
+        return stmt
+
+    def parse(self):
+        pattern = r'(?i) +connect +data +(?P<test_rsrc_ref>\S+)( +as (?P<var>[a-z]\w*))? *$'
+        match = re.match(pattern, self.statement_data)
+        if match:
+            test_rsrc_ref = match.group('test_rsrc_ref')
+            var_name = match.group('var') or 'test_resource'
+
+            yaml_obj = File.get_result_from_yaml_file(test_rsrc_ref)
+            if 'testcases' in yaml_obj:
+                self.var_name = var_name
+                self.test_resource_reference = test_rsrc_ref
+                SCRIPTINFO.update(yaml_obj.get('testcases'))
+                variables = SCRIPTINFO.get('variables', DictObject())
+                variables.test_resource_var = self.var_name
+                self.name = 'connect_data'
+                self._is_parsed = True
+        else:
+            self._is_parsed = False
 
 
 class UseTestCaseStatement(Statement):
