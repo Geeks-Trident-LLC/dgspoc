@@ -400,6 +400,7 @@ class ConnectDataStatement(Statement):
                 self.test_resource_reference = test_rsrc_ref
                 SCRIPTINFO.update(yaml_obj.get('testcases'))
                 variables = SCRIPTINFO.get('variables', DictObject())
+                SCRIPTINFO.variables = variables
                 variables.test_resource_var = self.var_name
                 self.name = 'connect_data'
                 self._is_parsed = True
@@ -411,6 +412,43 @@ class UseTestCaseStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
+        self.var_name = ''
+        self.test_name = ''
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            fmt = "${%s}=   connect data   filename='%s'\nset global variable   %s"
+            stmt = fmt.format(self.var_name, self.test_resource_reference, self.var_name)
+        else:
+            fmt = "self.%s = ta.connect_data(filename='%s')"
+            stmt = fmt.format(self.var_name, self.test_resource_reference)
+
+        stmt = self.indent_data(stmt, self.level)
+
+        return stmt
+
+    def parse(self):
+        pattern = r'(?i) +use +testcase +(?P<test_name>\S+)( +as (?P<var>[a-z]\w*))? *$'
+        match = re.match(pattern, self.statement_data)
+        if match:
+            test_name = match.group('test_name')
+            var_name = match.group('var') or 'test_data'
+
+            if test_name in SCRIPTINFO:
+                self.var_name = var_name
+                self.test_name = test_name
+
+                variables = SCRIPTINFO.get('variables', DictObject())
+                SCRIPTINFO.variables = variables
+                SCRIPTINFO.variables.test_data_var = self.var_name
+                self.name = 'use_testcase'
+                self._is_parsed = True
+        else:
+            self._is_parsed = False
 
 
 class ConnectDeviceStatement(Statement):
