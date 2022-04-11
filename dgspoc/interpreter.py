@@ -197,6 +197,10 @@ class Statement:
         result = self.check_next_statement('gt')
         return result
 
+    def is_next_statement_ancestor(self):
+        result = self.check_next_statement('lt')
+        return result
+
     def validate_framework(self):
 
         if self.framework.strip() == '':
