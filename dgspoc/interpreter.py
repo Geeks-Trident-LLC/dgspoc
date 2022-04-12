@@ -4,17 +4,20 @@ user describing problem"""
 
 import re
 import operator
+import yaml
 
 from textwrap import indent
 
 from dgspoc.utils import DictObject
 from dgspoc.utils import Misc
 from dgspoc.utils import File
+from dgspoc.utils import Text
 
 from dgspoc.constant import FWTYPE
 
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
+from dgspoc.exceptions import ConnectDataStatementError
 from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 
@@ -370,7 +373,7 @@ class ConnectDataStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
         self.var_name = ''
-        self.test_resource_reference = ''
+        self.test_resource_ref = ''
         self.parse()
 
     @property
@@ -380,33 +383,56 @@ class ConnectDataStatement(Statement):
 
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
             fmt = "${%s}=   connect data   filename='%s'\nset global variable   %s"
-            stmt = fmt.format(self.var_name, self.test_resource_reference, self.var_name)
+            stmt = fmt.format(self.var_name, self.test_resource_ref, self.var_name)
         else:
             fmt = "self.%s = ta.connect_data(filename='%s')"
-            stmt = fmt.format(self.var_name, self.test_resource_reference)
+            stmt = fmt.format(self.var_name, self.test_resource_ref)
 
         stmt = self.indent_data(stmt, self.level)
 
         return stmt
 
     def parse(self):
-        pattern = r'(?i) +connect +data +(?P<test_rsrc_ref>\S+)( +as (?P<var>[a-z]\w*))? *$'
+        pattern = r'(?i) +connect +data +(?P<capture_data>.+)'
         match = re.match(pattern, self.statement_data)
         if match:
-            test_rsrc_ref = match.group('test_rsrc_ref')
-            var_name = match.group('var') or 'test_resource'
-
-            yaml_obj = File.get_result_from_yaml_file(test_rsrc_ref)
-            self.var_name = var_name
-            self.test_resource_reference = test_rsrc_ref
-            SCRIPTINFO.update(yaml_obj)
-            variables = SCRIPTINFO.get('variables', DictObject())
-            SCRIPTINFO.variables = variables
-            variables.test_resource_var = self.var_name
+            capture_data = match.group('capture_data').strip()
+            pattern = r'(?i)(?P<test_resource_ref>.+)( +as (?P<var_name>[a-z]\w*))?$'
+            match = re.match(pattern, capture_data)
+            
+            if not match:
+                fmt = 'Invalid connect data statement - "{}"'
+                raise ConnectDataStatementError(fmt.format(self.statement_data))
+            
+            test_resource_ref = match.group('test_resource_ref').strip()
+            var_name = match.group('var_name') or 'test_resource'
+            self.reserve_data(test_resource_ref, var_name)
             self.name = 'connect_data'
             self._is_parsed = True
         else:
             self._is_parsed = False
+
+    def reserve_data(self, test_resource_ref, var_name):
+        try:
+            with open(test_resource_ref) as stream:
+                content = stream.read().strip()
+                if not content:
+                    fmt = '"{}" test resource reference has no data'
+                    raise ConnectDataStatementError(fmt.format(test_resource_ref))
+                yaml_obj = yaml.safe_load(content)
+                
+                if not Misc.is_dict(yaml_obj):
+                    fmt = '"" test resource reference has invalid format'
+                    raise ConnectDataStatementError(fmt.format(test_resource_ref))
+                
+                SCRIPTINFO.update(yaml_obj)
+                variables = SCRIPTINFO.get('variables', DictObject())
+                SCRIPTINFO.variables = variables
+                SCRIPTINFO.variables.test_data_var = self.var_name
+                self.var_name = var_name
+                self.test_resource_ref = test_resource_ref
+        except Exception as ex:
+            raise ConnectDataStatementError(Text(ex))
 
 
 class UseTestCaseStatement(Statement):
@@ -446,14 +472,14 @@ class UseTestCaseStatement(Statement):
             return
 
         capture_data = match.group('capture_data').strip()
-        pattern = r'(?i)(?P<test_name>.+)( +as (?P<var>[a-z]\w*))? *$'
+        pattern = r'(?i)(?P<test_name>.+)( +as (?P<var_name>[a-z]\w*))? *$'
         match = re.match(pattern, capture_data)
         if not match:
             fmt = 'Invalid use testcase statement - {}'
             raise UseTestcaseStatementError(fmt.format(self.statement_data))
 
         test_name = match.group('test_name')
-        var_name = match.group('var') or 'test_data'
+        var_name = match.group('var_name') or 'test_data'
 
         if test_name in SCRIPTINFO.get('testcases', DictObject()):
             self.reserve_data(test_name, var_name)
@@ -514,11 +540,11 @@ class ConnectDeviceStatement(Statement):
         devices_info = match.group('devices_info').strip()
         devices_info = devices_info.replace('{', '').replace('}', '')
 
-        pattern = r'(?i)(?P<host>\S+)( +as (?P<var>[a-z]\w*))?$'
+        pattern = r'(?i)(?P<host>\S+)( +as (?P<var_name>[a-z]\w*))?$'
         for device_info in devices_info.split(','):
             match = re.match(pattern, device_info.strip())
             if match:
-                host, var_name = match.group('host'), match.group('var')
+                host, var_name = match.group('host'), match.group('var_name')
                 self.reserve_data(host, var_name)
             else:
                 fmt = 'Invalid connect device statement - {}'
@@ -526,6 +552,7 @@ class ConnectDeviceStatement(Statement):
                 raise ConnectDeviceStatementError(failure)
 
         self.name = 'connect_device'
+        self._is_parsed = True
 
     def reserve_data(self, host, var_name):
         devices_vars = SCRIPTINFO.get('devices_vars', DictObject())
