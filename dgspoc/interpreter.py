@@ -15,6 +15,7 @@ from dgspoc.constant import FWTYPE
 
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
+from dgspoc.exceptions import ConnectDeviceStatementError
 
 
 class ScriptInfo(DictObject):
@@ -395,15 +396,14 @@ class ConnectDataStatement(Statement):
             var_name = match.group('var') or 'test_resource'
 
             yaml_obj = File.get_result_from_yaml_file(test_rsrc_ref)
-            if 'testcases' in yaml_obj:
-                self.var_name = var_name
-                self.test_resource_reference = test_rsrc_ref
-                SCRIPTINFO.update(yaml_obj.get('testcases'))
-                variables = SCRIPTINFO.get('variables', DictObject())
-                SCRIPTINFO.variables = variables
-                variables.test_resource_var = self.var_name
-                self.name = 'connect_data'
-                self._is_parsed = True
+            self.var_name = var_name
+            self.test_resource_reference = test_rsrc_ref
+            SCRIPTINFO.update(yaml_obj)
+            variables = SCRIPTINFO.get('variables', DictObject())
+            SCRIPTINFO.variables = variables
+            variables.test_resource_var = self.var_name
+            self.name = 'connect_data'
+            self._is_parsed = True
         else:
             self._is_parsed = False
 
@@ -461,6 +461,84 @@ class ConnectDeviceStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
+
+        self.devices_vars = DictObject()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if not self.has_devices_variables():
+            fmt = 'Failed to generate invalid connect device statement - {}'
+            failure = fmt.format(self.statement_data)
+            raise ConnectDeviceStatementError(failure)
+
+        test_resource_var = SCRIPTINFO.variables.test_resource_var  # noqa
+
+        lst = []
+        for var_name, device_name in self.devices_vars.items():
+            if self.framework == FWTYPE.ROBOTFRAMEWORK:
+                fmt = "${%s}=  connect device   %s  name='%s'\nset global variable   %s"
+                stmt = fmt.format(var_name, test_resource_var, device_name, var_name)
+
+            else:
+                fmt = "self.%s = ta.connect_device(self.%s, name='%s')"
+                stmt = fmt.format(var_name, test_resource_var, device_name)
+            lst.append(self.indent_data(stmt, self.level))
+
+        connect_device_statements = '\n'.join(lst)
+        return connect_device_statements
+
+    def parse(self):
+        pattern = r'(?i) +connect +device +(?P<devices_info>.+) *$'
+        match = re.match(pattern, self.statement_data)
+        if not match:
+            self._is_parsed = False
+            return
+
+        devices_info = match.group('devices_info').strip()
+        devices_info = devices_info.replace('{', '').replace('}', '')
+
+        pattern = r'(?i)(?P<host>\S+)( +as (?P<var>[a-z]\w*))?$'
+        for device_info in devices_info.split(','):
+            match = re.match(pattern, device_info.strip())
+            if match:
+                host, var_name = match.group('host'), match.group('var')
+                self.reserve_data(host, var_name)
+            else:
+                fmt = 'Invalid connect device statement - {}'
+                failure = fmt.format(self.statement_data)
+                raise ConnectDeviceStatementError(failure)
+
+        self.name = 'connect_device'
+
+    def reserve_data(self, host, var_name):
+        devices_vars = SCRIPTINFO.get('devices_vars', DictObject())
+        SCRIPTINFO.devices_vars = devices_vars
+
+        pattern = r'device[0-9]+$'
+
+        if var_name and str(var_name).strip():
+            if var_name not in devices_vars:
+                devices_vars[var_name] = host
+                self.devices_vars[var_name] = host
+            else:
+                failure = 'Duplicate device variable - "{}"'.format(var_name)
+                raise ConnectDeviceStatementError(failure)
+        else:
+            var_names = [k for k in devices_vars if re.match(pattern, k)]
+            if var_names:
+                new_index = int(var_names[-1].strip('device')) + 1
+                key = 'device{}'.format(new_index)
+                devices_vars[key] = host
+                self.devices_vars[key] = host
+            else:
+                devices_vars['device1'] = host
+                self.devices_vars['device1'] = host
+
+    def has_devices_variables(self):
+        return bool(list(self.devices_vars))
 
 
 class SectionStatement(Statement):
