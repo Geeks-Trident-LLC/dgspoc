@@ -19,3 +19,7 @@ class InterpreterError(DGSError):
 
 class NotImplementedFrameworkError(InterpreterError):
     """Use to capture error for not implement framework"""
+
+
+class ComparisonOperatorError(InterpreterError):
+    """Use to capture error for invalid comparison operator"""
