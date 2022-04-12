@@ -140,7 +140,7 @@ class Statement:
             for index, line in enumerate(lst):
                 line = str(line).rstrip()
                 if line.strip():
-                    match = re.match(self.spacer_patter, line)
+                    match = re.match(self.spacer_pattern, line)
                     if match:
                         self._spacers = match.group('spacers')
                         length = len(self._spacers)
@@ -187,7 +187,7 @@ class Statement:
         if not self.has_next_statement():
             return False
         next_stmt_data = self.get_next_statement_data()
-        match = re.match(self.spacer_patter, next_stmt_data)
+        match = re.match(self.spacer_pattern, next_stmt_data)
         spacers = match.group('spacers') if match else ''
 
         result = getattr(operator, op)(spacers, self._spacers)
@@ -308,14 +308,14 @@ class SetupStatement(Statement):
         lst = []
 
         if self.framework == FWTYPE.UNITTEST:
-            lst.append(self.indentation('def setUp(self)', self.level))
+            lst.append(self.indent_data('def setUp(self)', self.level))
         elif self.framework == FWTYPE.PYTEST:
-            lst.append(self.indentation('def setup_class(self)', self.level))
+            lst.append(self.indent_data('def setup_class(self)', self.level))
         else:   # i.e ROBOTFRAMEWORK
-            lst.append(self.indentation('setup', self.level))
+            lst.append(self.indent_data('setup', self.level))
 
         for child in self._children:
-            lst.append(child.snippet, child.level)
+            lst.append(self.indent_data(child.snippet, child.level))
 
         script = '\n'.join(lst)
         return script
@@ -324,7 +324,7 @@ class SetupStatement(Statement):
         if self.is_setup_statement:
             self.name = 'setup'
             self._is_parsed = True
-            self.create_child_node(self)
+            self.create_child(self)
             if self.is_next_statement_children():
                 node = self.create_child(self)
                 while node and node.is_next_statement_sibling():
@@ -332,7 +332,7 @@ class SetupStatement(Statement):
                     node = self.create_child(node)
                 if self._children:
                     last_child = self._children[-1]
-                    self.remaining_data = last_child.remaining_data
+                    self._remaining_data = last_child.remaining_data
                 else:
                     kwargs = dict(framework=self.framework, indentation=self.indentation)
                     data = '    dummy_pass - Dummy Setup'
@@ -420,12 +420,18 @@ class UseTestCaseStatement(Statement):
         if not self.is_parsed:
             return ''
 
+        test_resource_var = SCRIPTINFO.variables.test_resource_var  # noqa
+
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
-            fmt = "${%s}=   connect data   filename='%s'\nset global variable   %s"
-            stmt = fmt.format(self.var_name, self.test_resource_reference, self.var_name)
+            fmt = "${%s}=  use testcase   %s  device='%s'\nset global variable   %s"
+            stmt = fmt.format(
+                self.var_name, test_resource_var, self.test_name, self.var_name
+            )
         else:
-            fmt = "self.%s = ta.connect_data(filename='%s')"
-            stmt = fmt.format(self.var_name, self.test_resource_reference)
+            fmt = "self.%s = ta.use_testcase(self.%s, device='%s')"
+            stmt = fmt.format(
+                self.var_name, test_resource_var, self.test_name
+            )
 
         stmt = self.indent_data(stmt, self.level)
 
