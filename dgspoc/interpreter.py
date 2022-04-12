@@ -15,6 +15,7 @@ from dgspoc.constant import FWTYPE
 
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
+from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 
 
@@ -438,23 +439,36 @@ class UseTestCaseStatement(Statement):
         return stmt
 
     def parse(self):
-        pattern = r'(?i) +use +testcase +(?P<test_name>\S+)( +as (?P<var>[a-z]\w*))? *$'
+        pattern = r'(?i) +use +testcase +(?P<capture_data>[a-z0-9].+'
         match = re.match(pattern, self.statement_data)
-        if match:
-            test_name = match.group('test_name')
-            var_name = match.group('var') or 'test_data'
-
-            if test_name in SCRIPTINFO:
-                self.var_name = var_name
-                self.test_name = test_name
-
-                variables = SCRIPTINFO.get('variables', DictObject())
-                SCRIPTINFO.variables = variables
-                SCRIPTINFO.variables.test_data_var = self.var_name
-                self.name = 'use_testcase'
-                self._is_parsed = True
-        else:
+        if not match:
             self._is_parsed = False
+            return
+
+        capture_data = match.group('capture_data').strip()
+        pattern = r'(?i)(?P<test_name>.+)( +as (?P<var>[a-z]\w*))? *$'
+        match = re.match(pattern, capture_data)
+        if not match:
+            fmt = 'Invalid use testcase statement - {}'
+            raise UseTestcaseStatementError(fmt.format(self.statement_data))
+
+        test_name = match.group('test_name')
+        var_name = match.group('var') or 'test_data'
+
+        if test_name in SCRIPTINFO.get('testcases', DictObject()):
+            self.reserve_data(test_name, var_name)
+            self.name = 'use_testcase'
+            self._is_parsed = True
+        else:
+            fmt = 'CANT find "{}" test name in test resource'
+            raise UseTestcaseStatementError(fmt.format(test_name))
+
+    def reserve_data(self, test_name, var_name):
+        variables = SCRIPTINFO.get('variables', DictObject())
+        SCRIPTINFO.variables = variables
+        SCRIPTINFO.variables.test_data_var = self.var_name
+        self.var_name = var_name
+        self.test_name = test_name
 
 
 class ConnectDeviceStatement(Statement):
