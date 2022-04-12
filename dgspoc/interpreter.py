@@ -164,7 +164,7 @@ class Statement:
 
                     self._prev_spacers = self._spacers
                     self._stmt_data = line
-                    self._remaining_data = '\n'.join(lst[index:])
+                    self._remaining_data = '\n'.join(lst[index+1:])
 
                     if self.is_base_statement:
                         self._level = 0
@@ -225,7 +225,6 @@ class Statement:
             raise NotImplementedFrameworkError(fmt.format(self.framework))
 
     def indent_data(self, data, lvl):
-        lvl = lvl if self.framework == FWTYPE.ROBOTFRAMEWORK else lvl + 1
         new_data = indent(data, ' ' * lvl * self.indentation)
         return new_data
 
@@ -240,7 +239,8 @@ class Statement:
         else:   # i.e ROBOTFRAMEWORK
             stmt = 'log   {}'.format(message)
 
-        stmt = indent(stmt, ' ' * self.level * self.indentation)
+        level = self.parent.level + 1 if self.parent else self.level
+        stmt = self.indent_data(stmt, level)
         return stmt
 
     def get_assert_statement(self, expected_result, assert_only=False):
@@ -249,11 +249,11 @@ class Statement:
             eresult = int(eresult)
 
         if self.framework == FWTYPE.UNITTEST:
-            fmt1 = 'self.assertTrue(True == {})'
-            fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == {})'
+            fmt1 = 'self.assertTrue(True == %s)'
+            fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
         elif self.framework == FWTYPE.PYTEST:
             fmt1 = 'assert True == {}'
-            fmt2 = 'total_count = len(result)\nassert total_count == {}'
+            fmt2 = 'total_count = len(result)\nassert total_count == %s'
         else:   # i.e ROBOTFRAMEWORK
             fmt1 = 'should be true   True == {}'
             fmt2 = ('${total_count}=   get length ${result}\nshould be '
@@ -261,8 +261,8 @@ class Statement:
 
         fmt = fmt1 if assert_only else fmt2
         eresult = expected_result if assert_only else eresult
-        stmt = fmt.format(eresult)
-        stmt = indent(stmt, ' ' * self.level * self.indentation)
+        level = self.parent.level + 1 if self.parent else self.level
+        stmt = self.indent_data(fmt % eresult, level)
         return stmt
 
 
@@ -303,6 +303,7 @@ class SetupStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
+
         self.parse()
 
     @property
@@ -313,36 +314,38 @@ class SetupStatement(Statement):
         lst = []
 
         if self.framework == FWTYPE.UNITTEST:
-            lst.append(self.indent_data('def setUp(self)', self.level))
+            lst.append('def setUp(self):')
         elif self.framework == FWTYPE.PYTEST:
-            lst.append(self.indent_data('def setup_class(self)', self.level))
+            lst.append('def setup_class(self):')
         else:   # i.e ROBOTFRAMEWORK
-            lst.append(self.indent_data('setup', self.level))
+            lst.append('setup')
 
         for child in self._children:
-            lst.append(self.indent_data(child.snippet, child.level))
+            lst.append(child.snippet)
 
-        script = '\n'.join(lst)
+        level = 0 if self.framework == FWTYPE.ROBOTFRAMEWORK else 1
+        script = self.indent_data('\n'.join(lst), level)
         return script
 
     def parse(self):
         if self.is_setup_statement:
             self.name = 'setup'
             self._is_parsed = True
-            self.create_child(self)
             if self.is_next_statement_children():
                 node = self.create_child(self)
+                node and self._children.append(node)
                 while node and node.is_next_statement_sibling():
-                    self._children.append(node)
                     node = self.create_child(node)
+                    node and self._children.append(node)
                 if self._children:
                     last_child = self._children[-1]
                     self._remaining_data = last_child.remaining_data
-                else:
-                    kwargs = dict(framework=self.framework, indentation=self.indentation)
-                    data = '    dummy_pass - Dummy Setup'
-                    dummy_stmt = DummyStatement(data, **kwargs)
-                    self._children.append(dummy_stmt)
+            if not self._children:
+                kwargs = dict(framework=self.framework, indentation=self.indentation)
+                data = 'dummy_pass - Dummy Setup'
+                dummy_stmt = DummyStatement(data, **kwargs, parent=self)
+                dummy_stmt._level = 1
+                self._children.append(dummy_stmt)
         else:
             self._is_parsed = False
 
@@ -352,7 +355,7 @@ class SetupStatement(Statement):
 
         if node.is_matched_statement('(?i) +connect +data', next_line):
             other = ConnectDataStatement(node.remaining_data, **kwargs)
-        elif node.is_matched_statement('(?i) +connect +data', next_line):
+        elif node.is_matched_statement('(?i) +use +testcase', next_line):
             other = UseTestCaseStatement(node.remaining_data, **kwargs)
         elif node.is_matched_statement('(?i) +connect +device', next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
@@ -361,11 +364,13 @@ class SetupStatement(Statement):
 
         other.prev = node
         # node.next = other
-        if node.is_next_statement_children():
+        if node.name == 'setup':
             other.parent = node
+            other._level = other.parent.level + 1
         else:
-            other.parent = node.prev.parent
-        return node
+            other.parent = node.parent
+            other._level = other.parent.level + 1
+        return other
 
 
 class ConnectDataStatement(Statement):
@@ -383,12 +388,13 @@ class ConnectDataStatement(Statement):
 
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
             fmt = "${%s}=   connect data   filename='%s'\nset global variable   %s"
-            stmt = fmt.format(self.var_name, self.test_resource_ref, self.var_name)
+            stmt = fmt % (self.var_name, self.test_resource_ref, self.var_name)
         else:
             fmt = "self.%s = ta.connect_data(filename='%s')"
-            stmt = fmt.format(self.var_name, self.test_resource_ref)
+            stmt = fmt % (self.var_name, self.test_resource_ref)
 
-        stmt = self.indent_data(stmt, self.level)
+        level = self.parent.level + 1 if self.parent else self.level
+        stmt = self.indent_data(stmt, level)
 
         return stmt
 
@@ -397,7 +403,7 @@ class ConnectDataStatement(Statement):
         match = re.match(pattern, self.statement_data)
         if match:
             capture_data = match.group('capture_data').strip()
-            pattern = r'(?i)(?P<test_resource_ref>.+)( +as (?P<var_name>[a-z]\w*))?$'
+            pattern = r'(?i)(?P<test_resource_ref>.+?)( +as +(?P<var_name>[a-z]\w*))?$'
             match = re.match(pattern, capture_data)
             
             if not match:
@@ -428,7 +434,8 @@ class ConnectDataStatement(Statement):
                 SCRIPTINFO.update(yaml_obj)
                 variables = SCRIPTINFO.get('variables', DictObject())
                 SCRIPTINFO.variables = variables
-                SCRIPTINFO.variables.test_data_var = self.var_name
+                SCRIPTINFO.variables.test_resource_var = var_name
+                SCRIPTINFO.variables.test_resource_ref = test_resource_ref
                 self.var_name = var_name
                 self.test_resource_ref = test_resource_ref
         except Exception as ex:
@@ -441,6 +448,7 @@ class UseTestCaseStatement(Statement):
                          indentation=indentation)
         self.var_name = ''
         self.test_name = ''
+        self.parse()
 
     @property
     def snippet(self):
@@ -451,28 +459,25 @@ class UseTestCaseStatement(Statement):
 
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
             fmt = "${%s}=  use testcase   %s  device='%s'\nset global variable   %s"
-            stmt = fmt.format(
-                self.var_name, test_resource_var, self.test_name, self.var_name
-            )
+            stmt = fmt % (self.var_name, test_resource_var, self.test_name, self.var_name)
         else:
             fmt = "self.%s = ta.use_testcase(self.%s, device='%s')"
-            stmt = fmt.format(
-                self.var_name, test_resource_var, self.test_name
-            )
+            stmt = fmt % (self.var_name, test_resource_var, self.test_name)
 
-        stmt = self.indent_data(stmt, self.level)
+        level = self.parent.level + 1 if self.parent else self.level
+        stmt = self.indent_data(stmt, level)
 
         return stmt
 
     def parse(self):
-        pattern = r'(?i) +use +testcase +(?P<capture_data>[a-z0-9].+'
+        pattern = r'(?i) +use +testcase +(?P<capture_data>[a-z0-9].+)'
         match = re.match(pattern, self.statement_data)
         if not match:
             self._is_parsed = False
             return
 
         capture_data = match.group('capture_data').strip()
-        pattern = r'(?i)(?P<test_name>.+)( +as (?P<var_name>[a-z]\w*))? *$'
+        pattern = r'(?i)(?P<test_name>.+?)( +as +(?P<var_name>[a-z]\w*))? *$'
         match = re.match(pattern, capture_data)
         if not match:
             fmt = 'Invalid use testcase statement - {}'
@@ -503,6 +508,7 @@ class ConnectDeviceStatement(Statement):
                          indentation=indentation)
 
         self.devices_vars = DictObject()
+        self.parse()
 
     @property
     def snippet(self):
@@ -519,15 +525,17 @@ class ConnectDeviceStatement(Statement):
         lst = []
         for var_name, device_name in self.devices_vars.items():
             if self.framework == FWTYPE.ROBOTFRAMEWORK:
-                fmt = "${%s}=  connect device   %s  name='%s'\nset global variable   %s"
-                stmt = fmt.format(var_name, test_resource_var, device_name, var_name)
+                fmt = "${%s}=  connect device   %s   name='%s'\nset global variable   %s"
+                stmt = fmt % (var_name, test_resource_var, device_name, var_name)
 
             else:
                 fmt = "self.%s = ta.connect_device(self.%s, name='%s')"
-                stmt = fmt.format(var_name, test_resource_var, device_name)
-            lst.append(self.indent_data(stmt, self.level))
+                stmt = fmt % (var_name, test_resource_var, device_name)
+            lst.append(stmt)
 
-        connect_device_statements = '\n'.join(lst)
+        level = self.parent.level + 1 if self.parent else self.level
+        connect_device_statements = self.indent_data('\n'.join(lst), level)
+
         return connect_device_statements
 
     def parse(self):
@@ -540,7 +548,7 @@ class ConnectDeviceStatement(Statement):
         devices_info = match.group('devices_info').strip()
         devices_info = devices_info.replace('{', '').replace('}', '')
 
-        pattern = r'(?i)(?P<host>\S+)( +as (?P<var_name>[a-z]\w*))?$'
+        pattern = r'(?i)(?P<host>\S+)( +as +(?P<var_name>[a-z]\w*))?$'
         for device_info in devices_info.split(','):
             match = re.match(pattern, device_info.strip())
             if match:
