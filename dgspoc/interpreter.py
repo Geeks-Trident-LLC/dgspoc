@@ -26,6 +26,10 @@ class ScriptInfo(DictObject):
     def __init__(self, *args, testcase='', **kwargs):
         super().__init__(*args, **kwargs)
         self.testcase = testcase
+        self.variables = DictObject(
+            test_resource_var='test_resource', test_resource_ref='',
+            test_data_var='test_data'
+        )
 
     def get_class_name(self):
         node = self.get(self.testcase)
@@ -43,6 +47,12 @@ class ScriptInfo(DictObject):
 
     def clear_devices_vars(self):
         setattr(self, 'devices_vars', DictObject())
+
+    def reset_global_vars(self):
+        self.variables = DictObject(
+            test_resource_var='test_resource', test_resource_ref='',
+            test_data_var='test_data'
+        )
 
 
 SCRIPTINFO = ScriptInfo()
@@ -477,7 +487,7 @@ class UseTestCaseStatement(Statement):
         if not self.is_parsed:
             return ''
 
-        test_resource_var = SCRIPTINFO.variables.test_resource_var  # noqa
+        test_resource_var = SCRIPTINFO.variables.get('test_resource_var', 'test_resource')
 
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
             fmt = "${%s}=  use testcase   ${%s}  testcase=%s\nset global variable   ${%s}"
@@ -492,7 +502,7 @@ class UseTestCaseStatement(Statement):
         return stmt
 
     def parse(self):
-        pattern = r'(?i) +use +testcase +(?P<capture_data>[a-z0-9].+)'
+        pattern = r'(?i) *use +testcase +(?P<capture_data>[a-z0-9].+)'
         match = re.match(pattern, self.statement_data)
         if not match:
             self._is_parsed = False
