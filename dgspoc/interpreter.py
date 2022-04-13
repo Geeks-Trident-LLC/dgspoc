@@ -387,10 +387,10 @@ class ConnectDataStatement(Statement):
             return ''
 
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
-            fmt = "${%s}=   connect data   filename='%s'\nset global variable   %s"
+            fmt = "${%s}=   connect data   filename=%s\nset global variable   ${%s}"
             stmt = fmt % (self.var_name, self.test_resource_ref, self.var_name)
         else:
-            fmt = "self.%s = ta.connect_data(filename='%s')"
+            fmt = "self.%s = ta.connect_data(filename=%r)"
             stmt = fmt % (self.var_name, self.test_resource_ref)
 
         level = self.parent.level + 1 if self.parent else self.level
@@ -458,10 +458,10 @@ class UseTestCaseStatement(Statement):
         test_resource_var = SCRIPTINFO.variables.test_resource_var  # noqa
 
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
-            fmt = "${%s}=  use testcase   %s  device='%s'\nset global variable   %s"
+            fmt = "${%s}=  use testcase   ${%s}  testcase=%s\nset global variable   ${%s}"
             stmt = fmt % (self.var_name, test_resource_var, self.test_name, self.var_name)
         else:
-            fmt = "self.%s = ta.use_testcase(self.%s, device='%s')"
+            fmt = "self.%s = ta.use_testcase(self.%s, testcase=%r)"
             stmt = fmt % (self.var_name, test_resource_var, self.test_name)
 
         level = self.parent.level + 1 if self.parent else self.level
@@ -525,11 +525,11 @@ class ConnectDeviceStatement(Statement):
         lst = []
         for var_name, device_name in self.devices_vars.items():
             if self.framework == FWTYPE.ROBOTFRAMEWORK:
-                fmt = "${%s}=  connect device   %s   name='%s'\nset global variable   %s"
+                fmt = "${%s}=  connect device   %s   name=%s\nset global variable   ${%s}"
                 stmt = fmt % (var_name, test_resource_var, device_name, var_name)
 
             else:
-                fmt = "self.%s = ta.connect_device(self.%s, name='%s')"
+                fmt = "self.%s = ta.connect_device(self.%s, name=%r)"
                 stmt = fmt % (var_name, test_resource_var, device_name)
             lst.append(stmt)
 
