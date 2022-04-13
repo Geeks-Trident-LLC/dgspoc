@@ -157,12 +157,12 @@ class Statement:
                         self._spacers = match.group('spacers')
                         length = len(self._spacers)
                         if length == 0:
-                            self._level = 0
+                            self.set_level(level=0)
                         else:
                             if self.parent:
                                 chk_lst = ['setup', 'cleanup', 'teardown', 'section']
                                 if self.parent.name in chk_lst:
-                                    self._level = 1
+                                    self.set_level(level=1)
                                 else:
                                     self._level += 1
                             else:
@@ -174,7 +174,7 @@ class Statement:
                     self._remaining_data = '\n'.join(lst[index+1:])
 
                     if self.is_base_statement:
-                        self._level = 0
+                        self.set_level(level=0)
                         self._spacers = ''
 
                     return
@@ -184,6 +184,9 @@ class Statement:
             self._children.append(child)
             if isinstance(child.parent, Statement):
                 child._level = self.level + 1
+
+    def set_level(self, level=0):
+        self._level = level
 
     def get_next_statement_data(self):
         for line in self.remaining_data.splitlines():
