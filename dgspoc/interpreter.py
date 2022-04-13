@@ -41,6 +41,9 @@ class ScriptInfo(DictObject):
             else:
                 return 'test_step'
 
+    def clear_devices_vars(self):
+        setattr(self, 'devices_vars', DictObject())
+
 
 SCRIPTINFO = ScriptInfo()
 

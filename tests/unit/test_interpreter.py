@@ -3,6 +3,7 @@ from os import path
 
 
 from dgspoc.interpreter import SetupStatement
+from dgspoc.interpreter import SCRIPTINFO
 
 from dgspoc.utils import Misc
 
@@ -129,6 +130,7 @@ class TestSetupStatement:
     def test_setup_connect_data_and_use_testcase_and_connect_device(
         self, framework, indentation, user_data, expected_result
     ):
+        SCRIPTINFO.clear_devices_vars()
         node = SetupStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
