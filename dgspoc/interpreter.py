@@ -164,10 +164,10 @@ class Statement:
                                 if self.parent.name in chk_lst:
                                     self.set_level(level=1)
                                 else:
-                                    self._level += 1
+                                    self.increase_level()
                             else:
                                 if self._prev_spacers > self._spacers:
-                                    self._level += 1
+                                    self.increase_level()
 
                     self._prev_spacers = self._spacers
                     self._stmt_data = line
@@ -187,6 +187,9 @@ class Statement:
 
     def set_level(self, level=0):
         self._level = level
+
+    def increase_level(self):
+        self.set_level(level=self.level+1)
 
     def get_next_statement_data(self):
         for line in self.remaining_data.splitlines():
