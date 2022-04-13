@@ -421,7 +421,7 @@ class ConnectDataStatement(Statement):
         return stmt
 
     def parse(self):
-        pattern = r'(?i) +connect +data +(?P<capture_data>.+)'
+        pattern = r'(?i) *connect +data +(?P<capture_data>.+)'
         match = re.match(pattern, self.statement_data)
         if match:
             capture_data = match.group('capture_data').strip()

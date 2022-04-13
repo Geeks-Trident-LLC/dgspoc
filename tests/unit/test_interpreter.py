@@ -1,9 +1,10 @@
 import pytest
 from os import path
 
+from dgspoc.interpreter import SCRIPTINFO
 
 from dgspoc.interpreter import SetupStatement
-from dgspoc.interpreter import SCRIPTINFO
+from dgspoc.interpreter import ConnectDataStatement
 
 from dgspoc.utils import Misc
 
@@ -132,5 +133,66 @@ class TestSetupStatement:
     ):
         SCRIPTINFO.clear_devices_vars()
         node = SetupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestConnectDataStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case1.data,
+                TESTDATA.connect_data_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case1.data,
+                TESTDATA.connect_data_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case1.data,
+                TESTDATA.connect_data_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_connect_data_statement(self, framework, indentation,
+                                    user_data, expected_result):
+        node = ConnectDataStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case2.data,
+                TESTDATA.connect_data_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case2.data,
+                TESTDATA.connect_data_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case2.data,
+                TESTDATA.connect_data_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_connect_data_statement_and_assign_to_var(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = ConnectDataStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
