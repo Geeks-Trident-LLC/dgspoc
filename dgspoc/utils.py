@@ -455,6 +455,14 @@ class Misc:
         sep = kwargs.get('sep', sep)
         return sep.join(str(item) for item in args)
 
+    @classmethod
+    def skip_first_line(cls, data):
+        if not cls.is_string(data):
+            return data
+        else:
+            new_data = '\n'.join(data.splitlines()[1:])
+            return new_data
+
 
 class DictObject(dict):
     def __init__(self, *args, **kwargs):
