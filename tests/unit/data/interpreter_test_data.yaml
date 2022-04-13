@@ -106,3 +106,21 @@ connect_data_statement:
     robotframework: |-
       ${my_test_resource_var}=   connect data   filename=test_resource.yaml
       set global variable   ${my_test_resource_var}
+
+use_testcase_statement:
+
+  case1:
+    data: use testcase test1
+    unittest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+    pytest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+    robotframework: |-
+      ${test_data}=  use testcase   ${test_resource}  testcase=test1
+      set global variable   ${test_data}
+
+  case2:
+    data:  use testcase test1 as test_data_var
+    unittest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
+    pytest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
+    robotframework: |-
+      ${test_data_var}=  use testcase   ${test_resource}  testcase=test1
+      set global variable   ${test_data_var}

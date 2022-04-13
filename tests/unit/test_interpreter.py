@@ -5,6 +5,7 @@ from dgspoc.interpreter import SCRIPTINFO
 
 from dgspoc.interpreter import SetupStatement
 from dgspoc.interpreter import ConnectDataStatement
+from dgspoc.interpreter import UseTestCaseStatement
 
 from dgspoc.utils import Misc
 
@@ -194,5 +195,68 @@ class TestConnectDataStatement:
         self, framework, indentation, user_data, expected_result
     ):
         node = ConnectDataStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestUseTestcaseStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case1.data,
+                TESTDATA.use_testcase_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case1.data,
+                TESTDATA.use_testcase_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case1.data,
+                TESTDATA.use_testcase_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_use_testcase_statement(self, framework, indentation,
+                                    user_data, expected_result):
+        SCRIPTINFO.reset_global_vars()
+        node = UseTestCaseStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case2.data,
+                TESTDATA.use_testcase_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case2.data,
+                TESTDATA.use_testcase_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case2.data,
+                TESTDATA.use_testcase_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_use_testcase_statement_and_assign_to_var(
+        self, framework, indentation, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        node = UseTestCaseStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
