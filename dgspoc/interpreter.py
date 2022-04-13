@@ -183,13 +183,17 @@ class Statement:
         if isinstance(child, Statement):
             self._children.append(child)
             if isinstance(child.parent, Statement):
-                child._level = self.level + 1
+                child.set_level(level=self.level+1)
 
     def set_level(self, level=0):
         self._level = level
 
     def increase_level(self):
         self.set_level(level=self.level+1)
+
+    def update_level_from_parent(self):
+        if isinstance(self.parent, Statement):
+            self.set_level(level=self.parent.level+1)
 
     def get_next_statement_data(self):
         for line in self.remaining_data.splitlines():
@@ -384,10 +388,10 @@ class SetupStatement(Statement):
         # node.next = other
         if node.name == 'setup':
             other.parent = node
-            other._level = other.parent.level + 1
+            other.update_level_from_parent()
         else:
             other.parent = node.parent
-            other._level = other.parent.level + 1
+            other.update_level_from_parent()
         return other
 
 
