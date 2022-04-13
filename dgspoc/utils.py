@@ -484,3 +484,13 @@ class DictObject(dict):
             for attr, value in obj.items():
                 if Misc.is_string(attr) and re.match(r'(?i)[a-z]\w*$', attr):
                     setattr(self, attr, value)
+
+
+class DotObject(DictObject):
+    def __getattribute__(self, attr):
+        value = super().__getattribute__(attr)
+        return DotObject(value) if Misc.is_dict(value) else value
+
+    def __getitem__(self, key):
+        value = super().__getitem__(key)
+        return DotObject(value) if Misc.is_dict(value) else value
