@@ -82,6 +82,10 @@ class Statement:
         return self._name
 
     @property
+    def children(self):
+        return self._children
+
+    @property
     def level(self):
         return self._level
 
@@ -171,6 +175,12 @@ class Statement:
                         self._spacers = ''
 
                     return
+
+    def add_child(self, child):
+        if isinstance(child, Statement):
+            self._children.append(child)
+            if isinstance(child.parent, Statement):
+                child._level = self.level + 1
 
     def get_next_statement_data(self):
         for line in self.remaining_data.splitlines():
@@ -320,7 +330,7 @@ class SetupStatement(Statement):
         else:   # i.e ROBOTFRAMEWORK
             lst.append('setup')
 
-        for child in self._children:
+        for child in self.children:
             lst.append(child.snippet)
 
         level = 0 if self.framework == FWTYPE.ROBOTFRAMEWORK else 1
@@ -333,19 +343,18 @@ class SetupStatement(Statement):
             self._is_parsed = True
             if self.is_next_statement_children():
                 node = self.create_child(self)
-                node and self._children.append(node)
+                self.add_child(node)
                 while node and node.is_next_statement_sibling():
                     node = self.create_child(node)
-                    node and self._children.append(node)
-                if self._children:
+                    self.add_child(node)
+                if self.children:
                     last_child = self._children[-1]
                     self._remaining_data = last_child.remaining_data
-            if not self._children:
+            if not self.children:
                 kwargs = dict(framework=self.framework, indentation=self.indentation)
                 data = 'dummy_pass - Dummy Setup'
                 dummy_stmt = DummyStatement(data, **kwargs, parent=self)
-                dummy_stmt._level = 1
-                self._children.append(dummy_stmt)
+                self.add_child(dummy_stmt)
         else:
             self._is_parsed = False
 
