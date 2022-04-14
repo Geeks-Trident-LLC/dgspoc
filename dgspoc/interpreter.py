@@ -8,9 +8,9 @@ import yaml
 
 from textwrap import indent
 
-from dgspoc.utils import DictObject
+from dgspoc.utils import DotObject
 from dgspoc.utils import Misc
-from dgspoc.utils import File
+# from dgspoc.utils import File
 from dgspoc.utils import Text
 
 from dgspoc.constant import FWTYPE
@@ -22,11 +22,11 @@ from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 
 
-class ScriptInfo(DictObject):
+class ScriptInfo(DotObject):
     def __init__(self, *args, testcase='', **kwargs):
         super().__init__(*args, **kwargs)
         self.testcase = testcase
-        self.variables = DictObject(
+        self.variables = dict(
             test_resource_var='test_resource', test_resource_ref='',
             test_data_var='test_data'
         )
@@ -46,10 +46,10 @@ class ScriptInfo(DictObject):
                 return 'test_step'
 
     def clear_devices_vars(self):
-        setattr(self, 'devices_vars', DictObject())
+        setattr(self, 'devices_vars', dict())
 
     def reset_global_vars(self):
-        self.variables = DictObject(
+        self.variables = dict(
             test_resource_var='test_resource', test_resource_ref='',
             test_data_var='test_data'
         )
@@ -464,7 +464,7 @@ class ConnectDataStatement(Statement):
                     raise ConnectDataStatementError(fmt.format(test_resource_ref))
                 
                 SCRIPTINFO.update(yaml_obj)
-                variables = SCRIPTINFO.get('variables', DictObject())
+                variables = SCRIPTINFO.get('variables', dict())
                 SCRIPTINFO.variables = variables
                 SCRIPTINFO.variables.test_resource_var = var_name
                 SCRIPTINFO.variables.test_resource_ref = test_resource_ref
@@ -518,7 +518,7 @@ class UseTestCaseStatement(Statement):
         test_name = match.group('test_name')
         var_name = match.group('var_name') or 'test_data'
 
-        if test_name in SCRIPTINFO.get('testcases', DictObject()):
+        if test_name in SCRIPTINFO.get('testcases', dict()):
             self.reserve_data(test_name, var_name)
             self.name = 'use_testcase'
             self._is_parsed = True
@@ -527,7 +527,7 @@ class UseTestCaseStatement(Statement):
             raise UseTestcaseStatementError(fmt.format(test_name))
 
     def reserve_data(self, test_name, var_name):
-        variables = SCRIPTINFO.get('variables', DictObject())
+        variables = SCRIPTINFO.get('variables', dict())
         SCRIPTINFO.variables = variables
         SCRIPTINFO.variables.test_data_var = self.var_name
         self.var_name = var_name
@@ -539,7 +539,7 @@ class ConnectDeviceStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
-        self.devices_vars = DictObject()
+        self.devices_vars = dict()
         self.parse()
 
     @property
@@ -595,7 +595,7 @@ class ConnectDeviceStatement(Statement):
         self._is_parsed = True
 
     def reserve_data(self, host, var_name):
-        devices_vars = SCRIPTINFO.get('devices_vars', DictObject())
+        devices_vars = SCRIPTINFO.get('devices_vars', dict())
         SCRIPTINFO.devices_vars = devices_vars
 
         pattern = r'device[0-9]+$'
