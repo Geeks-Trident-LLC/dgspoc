@@ -21,6 +21,7 @@ from dgspoc.exceptions import ConnectDataStatementError
 from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 from dgspoc.exceptions import DisconnectDeviceStatementError
+from dgspoc.exceptions import ReleaseDeviceStatementError
 
 
 class ScriptInfo(DotObject):
@@ -688,7 +689,7 @@ class DisconnectStatement(Statement):
         if not self.vars_lst:
             fmt = 'Failed to generate invalid disconnect device statement - {}'
             failure = fmt.format(self.statement_data)
-            raise ConnectDeviceStatementError(failure)
+            raise DisconnectDeviceStatementError(failure)
 
         lst = []
         for var_name in self.vars_lst:
@@ -725,6 +726,70 @@ class DisconnectStatement(Statement):
                 raise DisconnectDeviceStatementError(failure)
 
         self.name = 'disconnect_device'
+        self._is_parsed = True
+
+    def reserve_data(self, host, index):
+        for var_name, host_name in SCRIPTINFO.devices_vars.items():
+            if host == host_name:
+                self.vars_lst.append(var_name)
+                return
+
+        self.vars_lst.append('device{}'.format(index + 1))
+
+
+class ReleaseDeviceStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+        self.vars_lst = []
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if not self.vars_lst:
+            fmt = 'Failed to generate invalid release device statement - {}'
+            failure = fmt.format(self.statement_data)
+            raise ReleaseDeviceStatementError(failure)
+
+        lst = []
+        for var_name in self.vars_lst:
+            if self.framework == FWTYPE.ROBOTFRAMEWORK:
+                stmt = "release device   ${%s}" % var_name
+            else:
+                stmt = "ta.release_device(self.%s)" % var_name
+            lst.append(stmt)
+
+        level = self.parent.level + 1 if self.parent else self.level
+        release_device_statements = self.indent_data('\n'.join(lst), level)
+
+        return release_device_statements
+
+    def parse(self):
+        pattern = r'(?i) *release +device +(?P<devices_info>.+) *$'
+        match = re.match(pattern, self.statement_data)
+        if not match:
+            self._is_parsed = False
+            return
+
+        devices_info = match.group('devices_info').strip()
+        devices_info = devices_info.replace('{', '').replace('}', '')
+
+        pattern = r'(?i)(?P<host>\S+)$'
+        for index, device_info in enumerate(devices_info.split(',')):
+            match = re.match(pattern, device_info.strip())
+            if match:
+                host = match.group('host')
+                self.reserve_data(host, index)
+            else:
+                fmt = 'Invalid release device statement - {}'
+                failure = fmt.format(self.statement_data)
+                raise ReleaseDeviceStatementError(failure)
+
+        self.name = 'release_device'
         self._is_parsed = True
 
     def reserve_data(self, host, index):
