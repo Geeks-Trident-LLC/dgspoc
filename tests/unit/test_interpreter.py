@@ -1,8 +1,12 @@
 import pytest
 from os import path
 
+from dgspoc.interpreter import SCRIPTINFO
 
 from dgspoc.interpreter import SetupStatement
+from dgspoc.interpreter import ConnectDataStatement
+from dgspoc.interpreter import UseTestCaseStatement
+from dgspoc.interpreter import ConnectDeviceStatement
 
 from dgspoc.utils import Misc
 
@@ -129,6 +133,293 @@ class TestSetupStatement:
     def test_setup_connect_data_and_use_testcase_and_connect_device(
         self, framework, indentation, user_data, expected_result
     ):
+        SCRIPTINFO.clear_devices_vars()
         node = SetupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestConnectDataStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case1.data,
+                TESTDATA.connect_data_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case1.data,
+                TESTDATA.connect_data_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case1.data,
+                TESTDATA.connect_data_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_connect_data_statement(self, framework, indentation,
+                                    user_data, expected_result):
+        node = ConnectDataStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case2.data,
+                TESTDATA.connect_data_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case2.data,
+                TESTDATA.connect_data_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_data_statement.case2.data,
+                TESTDATA.connect_data_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_connect_data_statement_and_assign_to_var(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = ConnectDataStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestUseTestcaseStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case1.data,
+                TESTDATA.use_testcase_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case1.data,
+                TESTDATA.use_testcase_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case1.data,
+                TESTDATA.use_testcase_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_use_testcase_statement(self, framework, indentation,
+                                    user_data, expected_result):
+        SCRIPTINFO.reset_global_vars()
+        node = UseTestCaseStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case2.data,
+                TESTDATA.use_testcase_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case2.data,
+                TESTDATA.use_testcase_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.use_testcase_statement.case2.data,
+                TESTDATA.use_testcase_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_use_testcase_statement_and_assign_to_var(
+        self, framework, indentation, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        node = UseTestCaseStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestConnectDeviceStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case1.data,
+                TESTDATA.connect_device_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case1.data,
+                TESTDATA.connect_device_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case1.data,
+                TESTDATA.connect_device_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_connect_single_device_with_default_var_name(
+        self, framework, indentation, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.clear_devices_vars()
+        node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case2.data,
+                TESTDATA.connect_device_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case2.data,
+                TESTDATA.connect_device_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case2.data,
+                TESTDATA.connect_device_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_connect_multiple_devices_with_default_var_name(
+        self, framework, indentation, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.clear_devices_vars()
+        node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case3.data,
+                TESTDATA.connect_device_statement.case3.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case3.data,
+                TESTDATA.connect_device_statement.case3.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case3.data,
+                TESTDATA.connect_device_statement.case3.robotframework,
+            ),
+        ]
+    )
+    def test_connect_devices_with_custom_var_name(
+        self, framework, indentation, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.clear_devices_vars()
+        node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case4.data,
+                TESTDATA.connect_device_statement.case4.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case4.data,
+                TESTDATA.connect_device_statement.case4.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case4.data,
+                TESTDATA.connect_device_statement.case4.robotframework,
+            ),
+        ]
+    )
+    def test_connect_devices_with_mixing_var_name(
+        self, framework, indentation, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.clear_devices_vars()
+        node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case5.data,
+                TESTDATA.connect_device_statement.case5.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case5.data,
+                TESTDATA.connect_device_statement.case5.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.connect_device_statement.case5.data,
+                TESTDATA.connect_device_statement.case5.robotframework,
+            ),
+        ]
+    )
+    def test_connect_device_with_other_format(
+        self, framework, indentation, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.clear_devices_vars()
+        node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result

@@ -1,4 +1,5 @@
 indentation: 2
+
 setup_statement:
 
   default:
@@ -85,5 +86,123 @@ setup_statement:
         set global variable   ${test_resource}
         ${test_data}=  use testcase   ${test_resource}  testcase=test1
         set global variable   ${test_data}
-        ${device1}=  connect device   test_resource   name=device1
+        ${device1}=   connect device   ${test_resource}   name=device1
         set global variable   ${device1}
+
+connect_data_statement:
+
+  case1:
+    data: connect data test_resource.yaml
+    unittest: self.test_resource = ta.connect_data(filename='test_resource.yaml')
+    pytest: self.test_resource = ta.connect_data(filename='test_resource.yaml')
+    robotframework: |-
+      ${test_resource}=   connect data   filename=test_resource.yaml
+      set global variable   ${test_resource}
+
+  case2:
+    data: connect data test_resource.yaml as my_test_resource_var
+    unittest: self.my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
+    pytest: self.my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
+    robotframework: |-
+      ${my_test_resource_var}=   connect data   filename=test_resource.yaml
+      set global variable   ${my_test_resource_var}
+
+use_testcase_statement:
+
+  case1:
+    data: use testcase test1
+    unittest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+    pytest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+    robotframework: |-
+      ${test_data}=  use testcase   ${test_resource}  testcase=test1
+      set global variable   ${test_data}
+
+  case2:
+    data:  use testcase test1 as test_data_var
+    unittest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
+    pytest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
+    robotframework: |-
+      ${test_data_var}=  use testcase   ${test_resource}  testcase=test1
+      set global variable   ${test_data_var}
+
+connect_device_statement:
+
+  case1:
+    data: connect device device1
+    unittest: self.device1 = ta.connect_device(self.test_resource, name='device1')
+    pytest: self.device1 = ta.connect_device(self.test_resource, name='device1')
+    robotframework: |-
+      ${device1}=   connect device   ${test_resource}   name=device1
+      set global variable   ${device1}
+
+  case2:
+    data: connect device device1, device5, device8
+    unittest: |-
+      self.device1 = ta.connect_device(self.test_resource, name='device1')
+      self.device2 = ta.connect_device(self.test_resource, name='device5')
+      self.device3 = ta.connect_device(self.test_resource, name='device8')
+    pytest: |-
+      self.device1 = ta.connect_device(self.test_resource, name='device1')
+      self.device2 = ta.connect_device(self.test_resource, name='device5')
+      self.device3 = ta.connect_device(self.test_resource, name='device8')
+    robotframework: |-
+      ${device1}=   connect device   ${test_resource}   name=device1
+      set global variable   ${device1}
+      ${device2}=   connect device   ${test_resource}   name=device5
+      set global variable   ${device2}
+      ${device3}=   connect device   ${test_resource}   name=device8
+      set global variable   ${device3}
+
+  case3:
+    data: connect device device1 as first_device, device5 as second_device, device8 as third_device
+    unittest: |-
+      self.first_device = ta.connect_device(self.test_resource, name='device1')
+      self.second_device = ta.connect_device(self.test_resource, name='device5')
+      self.third_device = ta.connect_device(self.test_resource, name='device8')
+    pytest: |-
+      self.first_device = ta.connect_device(self.test_resource, name='device1')
+      self.second_device = ta.connect_device(self.test_resource, name='device5')
+      self.third_device = ta.connect_device(self.test_resource, name='device8')
+    robotframework: |-
+      ${first_device}=   connect device   ${test_resource}   name=device1
+      set global variable   ${first_device}
+      ${second_device}=   connect device   ${test_resource}   name=device5
+      set global variable   ${second_device}
+      ${third_device}=   connect device   ${test_resource}   name=device8
+      set global variable   ${third_device}
+
+  case4:
+    data: connect device device1, device5 as peer_device, device8
+    unittest: |-
+      self.device1 = ta.connect_device(self.test_resource, name='device1')
+      self.peer_device = ta.connect_device(self.test_resource, name='device5')
+      self.device2 = ta.connect_device(self.test_resource, name='device8')
+    pytest: |-
+      self.device1 = ta.connect_device(self.test_resource, name='device1')
+      self.peer_device = ta.connect_device(self.test_resource, name='device5')
+      self.device2 = ta.connect_device(self.test_resource, name='device8')
+    robotframework: |-
+      ${device1}=   connect device   ${test_resource}   name=device1
+      set global variable   ${device1}
+      ${peer_device}=   connect device   ${test_resource}   name=device5
+      set global variable   ${peer_device}
+      ${device2}=   connect device   ${test_resource}   name=device8
+      set global variable   ${device2}
+
+  case5:
+    data: connect device {device1, device5 as peer_device, device8}
+    unittest: |-
+      self.device1 = ta.connect_device(self.test_resource, name='device1')
+      self.peer_device = ta.connect_device(self.test_resource, name='device5')
+      self.device2 = ta.connect_device(self.test_resource, name='device8')
+    pytest: |-
+      self.device1 = ta.connect_device(self.test_resource, name='device1')
+      self.peer_device = ta.connect_device(self.test_resource, name='device5')
+      self.device2 = ta.connect_device(self.test_resource, name='device8')
+    robotframework: |-
+      ${device1}=   connect device   ${test_resource}   name=device1
+      set global variable   ${device1}
+      ${peer_device}=   connect device   ${test_resource}   name=device5
+      set global variable   ${peer_device}
+      ${device2}=   connect device   ${test_resource}   name=device8
+      set global variable   ${device2}

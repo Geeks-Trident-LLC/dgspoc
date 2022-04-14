@@ -26,6 +26,10 @@ class ScriptInfo(DictObject):
     def __init__(self, *args, testcase='', **kwargs):
         super().__init__(*args, **kwargs)
         self.testcase = testcase
+        self.variables = DictObject(
+            test_resource_var='test_resource', test_resource_ref='',
+            test_data_var='test_data'
+        )
 
     def get_class_name(self):
         node = self.get(self.testcase)
@@ -40,6 +44,15 @@ class ScriptInfo(DictObject):
                     return method_name
             else:
                 return 'test_step'
+
+    def clear_devices_vars(self):
+        setattr(self, 'devices_vars', DictObject())
+
+    def reset_global_vars(self):
+        self.variables = DictObject(
+            test_resource_var='test_resource', test_resource_ref='',
+            test_data_var='test_data'
+        )
 
 
 SCRIPTINFO = ScriptInfo()
@@ -80,6 +93,10 @@ class Statement:
     @property
     def name(self):
         return self._name
+
+    @property
+    def children(self):
+        return self._children
 
     @property
     def level(self):
@@ -150,27 +167,43 @@ class Statement:
                         self._spacers = match.group('spacers')
                         length = len(self._spacers)
                         if length == 0:
-                            self._level = 0
+                            self.set_level(level=0)
                         else:
                             if self.parent:
                                 chk_lst = ['setup', 'cleanup', 'teardown', 'section']
                                 if self.parent.name in chk_lst:
-                                    self._level = 1
+                                    self.set_level(level=1)
                                 else:
-                                    self._level += 1
+                                    self.increase_level()
                             else:
                                 if self._prev_spacers > self._spacers:
-                                    self._level += 1
+                                    self.increase_level()
 
                     self._prev_spacers = self._spacers
                     self._stmt_data = line
                     self._remaining_data = '\n'.join(lst[index+1:])
 
                     if self.is_base_statement:
-                        self._level = 0
+                        self.set_level(level=0)
                         self._spacers = ''
 
                     return
+
+    def add_child(self, child):
+        if isinstance(child, Statement):
+            self._children.append(child)
+            if isinstance(child.parent, Statement):
+                child.set_level(level=self.level+1)
+
+    def set_level(self, level=0):
+        self._level = level
+
+    def increase_level(self):
+        self.set_level(level=self.level+1)
+
+    def update_level_from_parent(self):
+        if isinstance(self.parent, Statement):
+            self.set_level(level=self.parent.level+1)
 
     def get_next_statement_data(self):
         for line in self.remaining_data.splitlines():
@@ -320,7 +353,7 @@ class SetupStatement(Statement):
         else:   # i.e ROBOTFRAMEWORK
             lst.append('setup')
 
-        for child in self._children:
+        for child in self.children:
             lst.append(child.snippet)
 
         level = 0 if self.framework == FWTYPE.ROBOTFRAMEWORK else 1
@@ -333,19 +366,18 @@ class SetupStatement(Statement):
             self._is_parsed = True
             if self.is_next_statement_children():
                 node = self.create_child(self)
-                node and self._children.append(node)
+                self.add_child(node)
                 while node and node.is_next_statement_sibling():
                     node = self.create_child(node)
-                    node and self._children.append(node)
-                if self._children:
+                    self.add_child(node)
+                if self.children:
                     last_child = self._children[-1]
                     self._remaining_data = last_child.remaining_data
-            if not self._children:
+            if not self.children:
                 kwargs = dict(framework=self.framework, indentation=self.indentation)
                 data = 'dummy_pass - Dummy Setup'
                 dummy_stmt = DummyStatement(data, **kwargs, parent=self)
-                dummy_stmt._level = 1
-                self._children.append(dummy_stmt)
+                self.add_child(dummy_stmt)
         else:
             self._is_parsed = False
 
@@ -366,10 +398,10 @@ class SetupStatement(Statement):
         # node.next = other
         if node.name == 'setup':
             other.parent = node
-            other._level = other.parent.level + 1
+            other.update_level_from_parent()
         else:
             other.parent = node.parent
-            other._level = other.parent.level + 1
+            other.update_level_from_parent()
         return other
 
 
@@ -399,7 +431,7 @@ class ConnectDataStatement(Statement):
         return stmt
 
     def parse(self):
-        pattern = r'(?i) +connect +data +(?P<capture_data>.+)'
+        pattern = r'(?i) *connect +data +(?P<capture_data>.+)'
         match = re.match(pattern, self.statement_data)
         if match:
             capture_data = match.group('capture_data').strip()
@@ -455,7 +487,7 @@ class UseTestCaseStatement(Statement):
         if not self.is_parsed:
             return ''
 
-        test_resource_var = SCRIPTINFO.variables.test_resource_var  # noqa
+        test_resource_var = SCRIPTINFO.variables.get('test_resource_var', 'test_resource')
 
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
             fmt = "${%s}=  use testcase   ${%s}  testcase=%s\nset global variable   ${%s}"
@@ -470,7 +502,7 @@ class UseTestCaseStatement(Statement):
         return stmt
 
     def parse(self):
-        pattern = r'(?i) +use +testcase +(?P<capture_data>[a-z0-9].+)'
+        pattern = r'(?i) *use +testcase +(?P<capture_data>[a-z0-9].+)'
         match = re.match(pattern, self.statement_data)
         if not match:
             self._is_parsed = False
@@ -525,7 +557,7 @@ class ConnectDeviceStatement(Statement):
         lst = []
         for var_name, device_name in self.devices_vars.items():
             if self.framework == FWTYPE.ROBOTFRAMEWORK:
-                fmt = "${%s}=  connect device   %s   name=%s\nset global variable   ${%s}"
+                fmt = "${%s}=   connect device   ${%s}   name=%s\nset global variable   ${%s}"
                 stmt = fmt % (var_name, test_resource_var, device_name, var_name)
 
             else:
@@ -539,7 +571,7 @@ class ConnectDeviceStatement(Statement):
         return connect_device_statements
 
     def parse(self):
-        pattern = r'(?i) +connect +device +(?P<devices_info>.+) *$'
+        pattern = r'(?i) *connect +device +(?P<devices_info>.+) *$'
         match = re.match(pattern, self.statement_data)
         if not match:
             self._is_parsed = False
