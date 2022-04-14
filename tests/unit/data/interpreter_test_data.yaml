@@ -222,3 +222,12 @@ disconnect_device_statement:
     pytest: ta.disconnect_device(self.device1)
     robotframework: |-
       disconnect device   ${device1}
+
+release_device_statement:
+
+  case1:
+    data: release device device1
+    unittest: ta.release_device(self.device1)
+    pytest: ta.release_device(self.device1)
+    robotframework: |-
+      release device   ${device1}
