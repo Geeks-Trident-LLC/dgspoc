@@ -133,7 +133,7 @@ class TestSetupStatement:
     def test_setup_connect_data_and_use_testcase_and_connect_device(
         self, framework, indentation, user_data, expected_result
     ):
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = SetupStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -291,7 +291,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -323,7 +323,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -355,7 +355,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -387,7 +387,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -419,7 +419,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result

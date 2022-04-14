@@ -26,6 +26,7 @@ class ScriptInfo(DotObject):
     def __init__(self, *args, testcase='', **kwargs):
         super().__init__(*args, **kwargs)
         self.testcase = testcase
+        self.devices_vars = dict()
         self.variables = dict(
             test_resource_var='test_resource', test_resource_ref='',
             test_data_var='test_data'
@@ -45,8 +46,8 @@ class ScriptInfo(DotObject):
             else:
                 return 'test_step'
 
-    def clear_devices_vars(self):
-        setattr(self, 'devices_vars', dict())
+    def reset_devices_vars(self):
+        self.devices_vars = dict()
 
     def reset_global_vars(self):
         self.variables = dict(
