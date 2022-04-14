@@ -557,7 +557,7 @@ class ConnectDeviceStatement(Statement):
         lst = []
         for var_name, device_name in self.devices_vars.items():
             if self.framework == FWTYPE.ROBOTFRAMEWORK:
-                fmt = "${%s}=  connect device   %s   name=%s\nset global variable   ${%s}"
+                fmt = "${%s}=   connect device   ${%s}   name=%s\nset global variable   ${%s}"
                 stmt = fmt % (var_name, test_resource_var, device_name, var_name)
 
             else:
@@ -571,7 +571,7 @@ class ConnectDeviceStatement(Statement):
         return connect_device_statements
 
     def parse(self):
-        pattern = r'(?i) +connect +device +(?P<devices_info>.+) *$'
+        pattern = r'(?i) *connect +device +(?P<devices_info>.+) *$'
         match = re.match(pattern, self.statement_data)
         if not match:
             self._is_parsed = False
