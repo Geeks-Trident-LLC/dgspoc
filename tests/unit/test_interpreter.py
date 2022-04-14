@@ -17,6 +17,8 @@ fn = path.join(path.dirname(__file__), 'data/interpreter_test_data.yaml')
 TESTDATA = File.get_result_from_yaml_file(fn)
 TESTDATA = DotObject(TESTDATA)
 
+SCRIPTINFO.enable_testing()
+
 
 class TestSetupStatement:
     @pytest.mark.parametrize(

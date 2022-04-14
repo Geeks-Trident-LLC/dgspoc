@@ -28,9 +28,49 @@ class ScriptInfo(DotObject):
         self.testcase = testcase
         self.devices_vars = dict()
         self.variables = dict(
-            test_resource_var='test_resource', test_resource_ref='',
+            test_resource_var='test_resource',
+            test_resource_ref='',
             test_data_var='test_data'
         )
+        self._enabled_testing = False
+
+    @property
+    def is_testing_enabled(self):
+        return self._enabled_testing
+
+    def enable_testing(self):
+        self._enabled_testing = True
+
+    def disable_testing(self):
+        self._enabled_testing = False
+
+    def load_testing_data(self):
+        if not self.is_testing_enabled:
+            return
+
+        data = """
+            devices:
+              1.1.1.1:
+                name: device1
+              1.1.1.2:
+                name: device2
+            testcases:
+              test1:
+                ref_1: blab blab
+                script_builder:
+                  class_name: Testcase1
+                  test_precondition: precondition
+                  test_case1: case1
+                  test_case2: case2
+              test2:
+                ref_2: blab blab
+                script_builder:
+                  class_name: Testcase2
+                  test_precondition: precondition
+                  test_case1: case1
+                  test_case2: case2
+        """
+        self.update(yaml.safe_load(data))
 
     def get_class_name(self):
         node = self.get(self.testcase)
@@ -51,7 +91,8 @@ class ScriptInfo(DotObject):
 
     def reset_global_vars(self):
         self.variables = dict(
-            test_resource_var='test_resource', test_resource_ref='',
+            test_resource_var='test_resource',
+            test_resource_ref='',
             test_data_var='test_data'
         )
 
@@ -453,26 +494,33 @@ class ConnectDataStatement(Statement):
 
     def reserve_data(self, test_resource_ref, var_name):
         try:
+            SCRIPTINFO.variables.test_resource_var = var_name
+            SCRIPTINFO.variables.test_resource_ref = test_resource_ref
+            self.var_name = var_name
+            self.test_resource_ref = test_resource_ref
             with open(test_resource_ref) as stream:
                 content = stream.read().strip()
                 if not content:
+                    if SCRIPTINFO.is_testing_enabled:
+                        SCRIPTINFO.load_testing_data()
+                        return
                     fmt = '"{}" test resource reference has no data'
                     raise ConnectDataStatementError(fmt.format(test_resource_ref))
                 yaml_obj = yaml.safe_load(content)
                 
                 if not Misc.is_dict(yaml_obj):
+                    if SCRIPTINFO.is_testing_enabled:
+                        SCRIPTINFO.load_testing_data()
+                        return
                     fmt = '"" test resource reference has invalid format'
                     raise ConnectDataStatementError(fmt.format(test_resource_ref))
                 
                 SCRIPTINFO.update(yaml_obj)
-                variables = SCRIPTINFO.get('variables', dict())
-                SCRIPTINFO.variables = variables
-                SCRIPTINFO.variables.test_resource_var = var_name
-                SCRIPTINFO.variables.test_resource_ref = test_resource_ref
-                self.var_name = var_name
-                self.test_resource_ref = test_resource_ref
         except Exception as ex:
-            raise ConnectDataStatementError(Text(ex))
+            if SCRIPTINFO.is_testing_enabled:
+                SCRIPTINFO.load_testing_data()
+            else:
+                raise ConnectDataStatementError(Text(ex))
 
 
 class UseTestCaseStatement(Statement):
