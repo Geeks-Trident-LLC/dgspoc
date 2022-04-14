@@ -7,6 +7,7 @@ from dgspoc.interpreter import SetupStatement
 from dgspoc.interpreter import ConnectDataStatement
 from dgspoc.interpreter import UseTestCaseStatement
 from dgspoc.interpreter import ConnectDeviceStatement
+from dgspoc.interpreter import DisconnectStatement
 
 from dgspoc.utils import Misc
 
@@ -423,5 +424,67 @@ class TestConnectDeviceStatement:
         SCRIPTINFO.reset_global_vars()
         SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestDisconnectDeviceStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case1.data,
+                TESTDATA.disconnect_device_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case1.data,
+                TESTDATA.disconnect_device_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case1.data,
+                TESTDATA.disconnect_device_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_disconnect_device(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = DisconnectStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case2.data,
+                TESTDATA.disconnect_device_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case2.data,
+                TESTDATA.disconnect_device_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case2.data,
+                TESTDATA.disconnect_device_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_disconnect_device_other_format(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = DisconnectStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
