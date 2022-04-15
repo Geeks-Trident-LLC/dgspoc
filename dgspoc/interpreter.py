@@ -22,6 +22,7 @@ from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 from dgspoc.exceptions import DisconnectDeviceStatementError
 from dgspoc.exceptions import ReleaseDeviceStatementError
+from dgspoc.exceptions import ReleaseResourceStatementError
 
 
 class ScriptInfo(DotObject):
@@ -799,6 +800,57 @@ class ReleaseDeviceStatement(Statement):
                 return
 
         self.vars_lst.append('device{}'.format(index + 1))
+
+
+class ReleaseResourceStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+        self.var_name = ''
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if not self.var_name:
+            fmt = 'Failed to generate invalid release resource statement - {}'
+            failure = fmt.format(self.statement_data)
+            raise ReleaseResourceStatementError(failure)
+
+        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            stmt = "release resource   ${%s}" % self.var_name
+        else:
+            stmt = "ta.release_resource(self.%s)" % self.var_name
+
+        level = self.parent.level + 1 if self.parent else self.level
+        release_resource_statement = self.indent_data(stmt, level)
+
+        return release_resource_statement
+
+    def parse(self):
+        pattern = r'(?i) *release +resource +(?P<resource_ref>\w(\S*\w)?) *$'
+        match = re.match(pattern, self.statement_data)
+        if not match:
+            self._is_parsed = False
+            return
+
+        resource_ref = match.group('resource_ref').strip()
+
+        if SCRIPTINFO.variables.test_resource_ref != resource_ref:
+            if SCRIPTINFO.is_testing_enabled:
+                self.var_name = 'test_resource'
+            else:
+                fmt = 'CANT find {!r} resource for release resource statement'
+                failure = fmt.format(resource_ref)
+                raise ReleaseResourceStatementError(failure)
+        else:
+            self.var_name = SCRIPTINFO.variables.test_resource_var
+
+        self.name = 'release_resource'
+        self._is_parsed = True
 
 
 class SectionStatement(Statement):
