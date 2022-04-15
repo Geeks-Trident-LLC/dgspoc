@@ -354,6 +354,20 @@ class Statement:
         stmt = self.indent_data(fmt % eresult, level)
         return stmt
 
+    def try_to_get_base_statement(self):
+        if self.is_base_statement:
+            tbl = dict(setup=SetupStatement,
+                       cleanup=CleanupStatement,
+                       teardown=TeardownStatement)
+            key = self.statement_data.lower().strip()
+            cls = tbl.get(key, SectionStatement)
+            stmt = cls(self.data, framework=self.framework,
+                       indentation=self.indentation)
+            return stmt if isinstance(stmt, Statement) else self
+
+        else:
+            return self
+
 
 class DummyStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
