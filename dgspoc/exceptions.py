@@ -36,3 +36,14 @@ class UseTestcaseStatementError(InterpreterError):
 class ConnectDeviceStatementError(InterpreterError):
     """Use to capture error for interpreting connect device statement"""
 
+
+class DisconnectDeviceStatementError(InterpreterError):
+    """Use to capture error for interpreting disconnect device statement"""
+
+
+class ReleaseDeviceStatementError(InterpreterError):
+    """Use to capture error for interpreting release device statement"""
+
+
+class ReleaseResourceStatementError(InterpreterError):
+    """Use to capture error for interpreting release resource statement"""

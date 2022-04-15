@@ -8,9 +8,9 @@ import yaml
 
 from textwrap import indent
 
-from dgspoc.utils import DictObject
+from dgspoc.utils import DotObject
 from dgspoc.utils import Misc
-from dgspoc.utils import File
+# from dgspoc.utils import File
 from dgspoc.utils import Text
 
 from dgspoc.constant import FWTYPE
@@ -20,16 +20,60 @@ from dgspoc.exceptions import ComparisonOperatorError
 from dgspoc.exceptions import ConnectDataStatementError
 from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
+from dgspoc.exceptions import DisconnectDeviceStatementError
+from dgspoc.exceptions import ReleaseDeviceStatementError
+from dgspoc.exceptions import ReleaseResourceStatementError
 
 
-class ScriptInfo(DictObject):
+class ScriptInfo(DotObject):
     def __init__(self, *args, testcase='', **kwargs):
         super().__init__(*args, **kwargs)
         self.testcase = testcase
-        self.variables = DictObject(
-            test_resource_var='test_resource', test_resource_ref='',
+        self.devices_vars = dict()
+        self.variables = dict(
+            test_resource_var='test_resource',
+            test_resource_ref='',
             test_data_var='test_data'
         )
+        self._enabled_testing = False
+
+    @property
+    def is_testing_enabled(self):
+        return self._enabled_testing
+
+    def enable_testing(self):
+        self._enabled_testing = True
+
+    def disable_testing(self):
+        self._enabled_testing = False
+
+    def load_testing_data(self):
+        if not self.is_testing_enabled:
+            return
+
+        data = """
+            devices:
+              1.1.1.1:
+                name: device1
+              1.1.1.2:
+                name: device2
+            testcases:
+              test1:
+                ref_1: blab blab
+                script_builder:
+                  class_name: Testcase1
+                  test_precondition: precondition
+                  test_case1: case1
+                  test_case2: case2
+              test2:
+                ref_2: blab blab
+                script_builder:
+                  class_name: Testcase2
+                  test_precondition: precondition
+                  test_case1: case1
+                  test_case2: case2
+        """
+        self.update(yaml.safe_load(data))
 
     def get_class_name(self):
         node = self.get(self.testcase)
@@ -45,12 +89,13 @@ class ScriptInfo(DictObject):
             else:
                 return 'test_step'
 
-    def clear_devices_vars(self):
-        setattr(self, 'devices_vars', DictObject())
+    def reset_devices_vars(self):
+        self.devices_vars = dict()
 
     def reset_global_vars(self):
-        self.variables = DictObject(
-            test_resource_var='test_resource', test_resource_ref='',
+        self.variables = dict(
+            test_resource_var='test_resource',
+            test_resource_ref='',
             test_data_var='test_data'
         )
 
@@ -452,26 +497,33 @@ class ConnectDataStatement(Statement):
 
     def reserve_data(self, test_resource_ref, var_name):
         try:
+            SCRIPTINFO.variables.test_resource_var = var_name
+            SCRIPTINFO.variables.test_resource_ref = test_resource_ref
+            self.var_name = var_name
+            self.test_resource_ref = test_resource_ref
             with open(test_resource_ref) as stream:
                 content = stream.read().strip()
                 if not content:
+                    if SCRIPTINFO.is_testing_enabled:
+                        SCRIPTINFO.load_testing_data()
+                        return
                     fmt = '"{}" test resource reference has no data'
                     raise ConnectDataStatementError(fmt.format(test_resource_ref))
                 yaml_obj = yaml.safe_load(content)
                 
                 if not Misc.is_dict(yaml_obj):
+                    if SCRIPTINFO.is_testing_enabled:
+                        SCRIPTINFO.load_testing_data()
+                        return
                     fmt = '"" test resource reference has invalid format'
                     raise ConnectDataStatementError(fmt.format(test_resource_ref))
                 
                 SCRIPTINFO.update(yaml_obj)
-                variables = SCRIPTINFO.get('variables', DictObject())
-                SCRIPTINFO.variables = variables
-                SCRIPTINFO.variables.test_resource_var = var_name
-                SCRIPTINFO.variables.test_resource_ref = test_resource_ref
-                self.var_name = var_name
-                self.test_resource_ref = test_resource_ref
         except Exception as ex:
-            raise ConnectDataStatementError(Text(ex))
+            if SCRIPTINFO.is_testing_enabled:
+                SCRIPTINFO.load_testing_data()
+            else:
+                raise ConnectDataStatementError(Text(ex))
 
 
 class UseTestCaseStatement(Statement):
@@ -518,7 +570,7 @@ class UseTestCaseStatement(Statement):
         test_name = match.group('test_name')
         var_name = match.group('var_name') or 'test_data'
 
-        if test_name in SCRIPTINFO.get('testcases', DictObject()):
+        if test_name in SCRIPTINFO.get('testcases', dict()):
             self.reserve_data(test_name, var_name)
             self.name = 'use_testcase'
             self._is_parsed = True
@@ -527,7 +579,7 @@ class UseTestCaseStatement(Statement):
             raise UseTestcaseStatementError(fmt.format(test_name))
 
     def reserve_data(self, test_name, var_name):
-        variables = SCRIPTINFO.get('variables', DictObject())
+        variables = SCRIPTINFO.get('variables', dict())
         SCRIPTINFO.variables = variables
         SCRIPTINFO.variables.test_data_var = self.var_name
         self.var_name = var_name
@@ -539,7 +591,7 @@ class ConnectDeviceStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
-        self.devices_vars = DictObject()
+        self.devices_vars = dict()
         self.parse()
 
     @property
@@ -595,7 +647,7 @@ class ConnectDeviceStatement(Statement):
         self._is_parsed = True
 
     def reserve_data(self, host, var_name):
-        devices_vars = SCRIPTINFO.get('devices_vars', DictObject())
+        devices_vars = SCRIPTINFO.get('devices_vars', dict())
         SCRIPTINFO.devices_vars = devices_vars
 
         pattern = r'device[0-9]+$'
@@ -620,6 +672,263 @@ class ConnectDeviceStatement(Statement):
 
     def has_devices_variables(self):
         return bool(list(self.devices_vars))
+
+
+class DisconnectStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+        self.vars_lst = []
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if not self.vars_lst:
+            fmt = 'Failed to generate invalid disconnect device statement - {}'
+            failure = fmt.format(self.statement_data)
+            raise DisconnectDeviceStatementError(failure)
+
+        lst = []
+        for var_name in self.vars_lst:
+            if self.framework == FWTYPE.ROBOTFRAMEWORK:
+                stmt = "disconnect device   ${%s}" % var_name
+            else:
+                stmt = "ta.disconnect_device(self.%s)" % var_name
+            lst.append(stmt)
+
+        level = self.parent.level + 1 if self.parent else self.level
+        disconnect_device_statements = self.indent_data('\n'.join(lst), level)
+
+        return disconnect_device_statements
+
+    def parse(self):
+        pattern = r'(?i) *disconnect *(device)? +(?P<devices_info>.+) *$'
+        match = re.match(pattern, self.statement_data)
+        if not match:
+            self._is_parsed = False
+            return
+
+        devices_info = match.group('devices_info').strip()
+        devices_info = devices_info.replace('{', '').replace('}', '')
+
+        pattern = r'(?i)(?P<host>\S+)$'
+        for index, device_info in enumerate(devices_info.split(',')):
+            match = re.match(pattern, device_info.strip())
+            if match:
+                host = match.group('host')
+                self.reserve_data(host, index)
+            else:
+                fmt = 'Invalid disconnect device statement - {}'
+                failure = fmt.format(self.statement_data)
+                raise DisconnectDeviceStatementError(failure)
+
+        self.name = 'disconnect_device'
+        self._is_parsed = True
+
+    def reserve_data(self, host, index):
+        for var_name, host_name in SCRIPTINFO.devices_vars.items():
+            if host == host_name:
+                self.vars_lst.append(var_name)
+                return
+
+        self.vars_lst.append('device{}'.format(index + 1))
+
+
+class ReleaseDeviceStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+        self.vars_lst = []
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if not self.vars_lst:
+            fmt = 'Failed to generate invalid release device statement - {}'
+            failure = fmt.format(self.statement_data)
+            raise ReleaseDeviceStatementError(failure)
+
+        lst = []
+        for var_name in self.vars_lst:
+            if self.framework == FWTYPE.ROBOTFRAMEWORK:
+                stmt = "release device   ${%s}" % var_name
+            else:
+                stmt = "ta.release_device(self.%s)" % var_name
+            lst.append(stmt)
+
+        level = self.parent.level + 1 if self.parent else self.level
+        release_device_statements = self.indent_data('\n'.join(lst), level)
+
+        return release_device_statements
+
+    def parse(self):
+        pattern = r'(?i) *release +device +(?P<devices_info>.+) *$'
+        match = re.match(pattern, self.statement_data)
+        if not match:
+            self._is_parsed = False
+            return
+
+        devices_info = match.group('devices_info').strip()
+        devices_info = devices_info.replace('{', '').replace('}', '')
+
+        pattern = r'(?i)(?P<host>\S+)$'
+        for index, device_info in enumerate(devices_info.split(',')):
+            match = re.match(pattern, device_info.strip())
+            if match:
+                host = match.group('host')
+                self.reserve_data(host, index)
+            else:
+                fmt = 'Invalid release device statement - {}'
+                failure = fmt.format(self.statement_data)
+                raise ReleaseDeviceStatementError(failure)
+
+        self.name = 'release_device'
+        self._is_parsed = True
+
+    def reserve_data(self, host, index):
+        for var_name, host_name in SCRIPTINFO.devices_vars.items():
+            if host == host_name:
+                self.vars_lst.append(var_name)
+                return
+
+        self.vars_lst.append('device{}'.format(index + 1))
+
+
+class ReleaseResourceStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+        self.var_name = ''
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        if not self.var_name:
+            fmt = 'Failed to generate invalid release resource statement - {}'
+            failure = fmt.format(self.statement_data)
+            raise ReleaseResourceStatementError(failure)
+
+        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            stmt = "release resource   ${%s}" % self.var_name
+        else:
+            stmt = "ta.release_resource(self.%s)" % self.var_name
+
+        level = self.parent.level + 1 if self.parent else self.level
+        release_resource_statement = self.indent_data(stmt, level)
+
+        return release_resource_statement
+
+    def parse(self):
+        pattern = r'(?i) *release +resource +(?P<resource_ref>\w(\S*\w)?) *$'
+        match = re.match(pattern, self.statement_data)
+        if not match:
+            self._is_parsed = False
+            return
+
+        resource_ref = match.group('resource_ref').strip()
+
+        if SCRIPTINFO.variables.test_resource_ref != resource_ref:  # noqa
+            if SCRIPTINFO.is_testing_enabled:
+                self.var_name = 'test_resource'
+            else:
+                fmt = 'CANT find {!r} resource for release resource statement'
+                failure = fmt.format(resource_ref)
+                raise ReleaseResourceStatementError(failure)
+        else:
+            self.var_name = SCRIPTINFO.variables.test_resource_var  # noqa
+
+        self.name = 'release_resource'
+        self._is_parsed = True
+
+
+class CleanupStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+        txt = 'tearDown' if self.name == 'teardown' else 'cleanUp'
+
+        if self.framework == FWTYPE.UNITTEST:
+            lst.append('def %s(self):' % txt)
+        elif self.framework == FWTYPE.PYTEST:
+            lst.append('def %s_class(self):' % txt.lower())
+        else:   # i.e ROBOTFRAMEWORK
+            lst.append(txt.lower())
+
+        for child in self.children:
+            lst.append(child.snippet)
+
+        level = 0 if self.framework == FWTYPE.ROBOTFRAMEWORK else 1
+        script = self.indent_data('\n'.join(lst), level)
+        return script
+
+    def parse(self):
+        if self.is_teardown_statement:
+            self.name = self.statement_data.strip().lower()
+            self._is_parsed = True
+            if self.is_next_statement_children():
+                node = self.create_child(self)
+                self.add_child(node)
+                while node and node.is_next_statement_sibling():
+                    node = self.create_child(node)
+                    self.add_child(node)
+                if self.children:
+                    last_child = self._children[-1]
+                    self._remaining_data = last_child.remaining_data
+            if not self.children:
+                kwargs = dict(framework=self.framework, indentation=self.indentation)
+                data = 'dummy_pass - Dummy %s' % self.name.title()
+                dummy_stmt = DummyStatement(data, **kwargs, parent=self)
+                self.add_child(dummy_stmt)
+        else:
+            self._is_parsed = False
+
+    def create_child(self, node):
+        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        next_line = node.get_next_statement_data()
+
+        if node.is_matched_statement('(?i) +disconnect( +device)? ', next_line):
+            other = DisconnectStatement(node.remaining_data, **kwargs)
+        elif node.is_matched_statement('(?i) +release +device', next_line):
+            other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
+        elif node.is_matched_statement('(?i) +release +resource', next_line):
+            other = ReleaseResourceStatement(node.remaining_data, **kwargs)
+        else:
+            return None
+
+        other.prev = node
+        # node.next = other
+        if node.name == 'cleanup' or node.name == 'teardown':
+            other.parent = node
+            other.update_level_from_parent()
+        else:
+            other.parent = node.parent
+            other.update_level_from_parent()
+        return other
+
+
+class TeardownStatement(CleanupStatement):
+    """Teardown Statement class"""
 
 
 class SectionStatement(Statement):

@@ -206,3 +206,127 @@ connect_device_statement:
       set global variable   ${peer_device}
       ${device2}=   connect device   ${test_resource}   name=device8
       set global variable   ${device2}
+
+disconnect_device_statement:
+
+  case1:
+    data: disconnect device device1
+    unittest: ta.disconnect_device(self.device1)
+    pytest: ta.disconnect_device(self.device1)
+    robotframework: |-
+      disconnect device   ${device1}
+
+  case2:
+    data: disconnect device1
+    unittest: ta.disconnect_device(self.device1)
+    pytest: ta.disconnect_device(self.device1)
+    robotframework: |-
+      disconnect device   ${device1}
+
+release_device_statement:
+
+  case1:
+    data: release device device1
+    unittest: ta.release_device(self.device1)
+    pytest: ta.release_device(self.device1)
+    robotframework: |-
+      release device   ${device1}
+
+release_resource_statement:
+
+  case1:
+    data: release resource test_resource.yaml
+    unittest: ta.release_resource(self.test_resource)
+    pytest: ta.release_resource(self.test_resource)
+    robotframework: |-
+      release resource   ${test_resource}
+
+cleanup_statement:
+
+  default:
+    data: cleanup
+    unittest: |-
+      ############ skip this line ############
+        def cleanUp(self):
+          print('Dummy Cleanup')
+          self.assertTrue(True == True)
+    pytest: |-
+      ############ skip this line ############
+        def cleanup_class(self):
+          print('Dummy Cleanup')
+          assert True == True
+    robotframework: |-
+      ############ skip this line ############
+      cleanup
+        log   Dummy Cleanup
+        should be true   True == True
+
+  case1:
+    data: |-
+      cleanup
+        disconnect device device1
+        release device device1
+        release resource test_resource.yaml
+    unittest: |-
+      ############ skip this line ############
+        def cleanUp(self):
+          ta.disconnect_device(self.device1)
+          ta.release_device(self.device1)
+          ta.release_resource(self.test_resource)
+    pytest: |-
+      ############ skip this line ############
+        def cleanup_class(self):
+          ta.disconnect_device(self.device1)
+          ta.release_device(self.device1)
+          ta.release_resource(self.test_resource)
+    robotframework: |-
+      ############ skip this line ############
+      cleanup
+        disconnect device   ${device1}
+        release device   ${device1}
+        release resource   ${test_resource}
+
+teardown_statement:
+
+  default:
+    data: teardown
+    unittest: |-
+      ############ skip this line ############
+        def tearDown(self):
+          print('Dummy Teardown')
+          self.assertTrue(True == True)
+    pytest: |-
+      ############ skip this line ############
+        def teardown_class(self):
+          print('Dummy Teardown')
+          assert True == True
+    robotframework: |-
+      ############ skip this line ############
+      teardown
+        log   Dummy Teardown
+        should be true   True == True
+
+  case1:
+    data: |-
+      teardown
+        disconnect device device1
+        release device device1
+        release resource test_resource.yaml
+    unittest: |-
+      ############ skip this line ############
+        def tearDown(self):
+          ta.disconnect_device(self.device1)
+          ta.release_device(self.device1)
+          ta.release_resource(self.test_resource)
+    pytest: |-
+      ############ skip this line ############
+        def teardown_class(self):
+          ta.disconnect_device(self.device1)
+          ta.release_device(self.device1)
+          ta.release_resource(self.test_resource)
+    robotframework: |-
+      ############ skip this line ############
+      teardown
+        disconnect device   ${device1}
+        release device   ${device1}
+        release resource   ${test_resource}

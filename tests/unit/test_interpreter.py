@@ -4,9 +4,14 @@ from os import path
 from dgspoc.interpreter import SCRIPTINFO
 
 from dgspoc.interpreter import SetupStatement
+from dgspoc.interpreter import CleanupStatement
+from dgspoc.interpreter import TeardownStatement
 from dgspoc.interpreter import ConnectDataStatement
 from dgspoc.interpreter import UseTestCaseStatement
 from dgspoc.interpreter import ConnectDeviceStatement
+from dgspoc.interpreter import DisconnectStatement
+from dgspoc.interpreter import ReleaseDeviceStatement
+from dgspoc.interpreter import ReleaseResourceStatement
 
 from dgspoc.utils import Misc
 
@@ -16,6 +21,8 @@ from dgspoc.utils import DotObject
 fn = path.join(path.dirname(__file__), 'data/interpreter_test_data.yaml')
 TESTDATA = File.get_result_from_yaml_file(fn)
 TESTDATA = DotObject(TESTDATA)
+
+SCRIPTINFO.enable_testing()
 
 
 class TestSetupStatement:
@@ -133,7 +140,7 @@ class TestSetupStatement:
     def test_setup_connect_data_and_use_testcase_and_connect_device(
         self, framework, indentation, user_data, expected_result
     ):
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = SetupStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -291,7 +298,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -323,7 +330,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -355,7 +362,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -387,7 +394,7 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -419,7 +426,256 @@ class TestConnectDeviceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.clear_devices_vars()
+        SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestDisconnectDeviceStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case1.data,
+                TESTDATA.disconnect_device_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case1.data,
+                TESTDATA.disconnect_device_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case1.data,
+                TESTDATA.disconnect_device_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_disconnect_device(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = DisconnectStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case2.data,
+                TESTDATA.disconnect_device_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case2.data,
+                TESTDATA.disconnect_device_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.disconnect_device_statement.case2.data,
+                TESTDATA.disconnect_device_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_disconnect_device_other_format(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = DisconnectStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestReleaseDeviceStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.release_device_statement.case1.data,
+                TESTDATA.release_device_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.release_device_statement.case1.data,
+                TESTDATA.release_device_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.release_device_statement.case1.data,
+                TESTDATA.release_device_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_release_device(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = ReleaseDeviceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestReleaseResourceStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.release_resource_statement.case1.data,
+                TESTDATA.release_resource_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.release_resource_statement.case1.data,
+                TESTDATA.release_resource_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.release_resource_statement.case1.data,
+                TESTDATA.release_resource_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_release_device(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = ReleaseResourceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestCleanupStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.default.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.default.unittest),
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.default.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.default.pytest),
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.default.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.default.robotframework),
+            ),
+        ]
+    )
+    def test_default_cleanup_statement(self, framework, indentation,
+                                       user_data, expected_result):
+        node = CleanupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.case1.unittest),
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.case1.pytest),
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.case1.robotframework),
+            ),
+        ]
+    )
+    def test_cleanup_with_disconnect_and_release(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = CleanupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestTeardownStatement:
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.teardown_statement.default.data,
+                Misc.skip_first_line(TESTDATA.teardown_statement.default.unittest),
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.teardown_statement.default.data,
+                Misc.skip_first_line(TESTDATA.teardown_statement.default.pytest),
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.teardown_statement.default.data,
+                Misc.skip_first_line(TESTDATA.teardown_statement.default.robotframework),
+            ),
+        ]
+    )
+    def test_default_teardown_statement(self, framework, indentation,
+                                        user_data, expected_result):
+        node = TeardownStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.teardown_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.teardown_statement.case1.unittest),
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.teardown_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.teardown_statement.case1.pytest),
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.teardown_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.teardown_statement.case1.robotframework),
+            ),
+        ]
+    )
+    def test_teardown_with_disconnect_and_release(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = CleanupStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
