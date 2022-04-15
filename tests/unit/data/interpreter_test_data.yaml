@@ -231,3 +231,12 @@ release_device_statement:
     pytest: ta.release_device(self.device1)
     robotframework: |-
       release device   ${device1}
+
+release_resource_statement:
+
+  case1:
+    data: release resource test_resource.yaml
+    unittest: ta.release_resource(self.test_resource)
+    pytest: ta.release_resource(self.test_resource)
+    robotframework: |-
+      release resource   ${test_resource}
