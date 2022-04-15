@@ -839,7 +839,7 @@ class ReleaseResourceStatement(Statement):
 
         resource_ref = match.group('resource_ref').strip()
 
-        if SCRIPTINFO.variables.test_resource_ref != resource_ref:
+        if SCRIPTINFO.variables.test_resource_ref != resource_ref:  # noqa
             if SCRIPTINFO.is_testing_enabled:
                 self.var_name = 'test_resource'
             else:
@@ -847,10 +847,84 @@ class ReleaseResourceStatement(Statement):
                 failure = fmt.format(resource_ref)
                 raise ReleaseResourceStatementError(failure)
         else:
-            self.var_name = SCRIPTINFO.variables.test_resource_var
+            self.var_name = SCRIPTINFO.variables.test_resource_var  # noqa
 
         self.name = 'release_resource'
         self._is_parsed = True
+
+
+class CleanupStatement(Statement):
+    def __init__(self, data, parent=None, framework='', indentation=4):
+        super().__init__(data, parent=parent, framework=framework,
+                         indentation=indentation)
+
+        self.parse()
+
+    @property
+    def snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+        txt = 'tearDown' if self.name == 'teardown' else 'cleanUp'
+
+        if self.framework == FWTYPE.UNITTEST:
+            lst.append('def %s(self):' % txt)
+        elif self.framework == FWTYPE.PYTEST:
+            lst.append('def %s_class(self):' % txt.lower())
+        else:   # i.e ROBOTFRAMEWORK
+            lst.append(txt.lower())
+
+        for child in self.children:
+            lst.append(child.snippet)
+
+        level = 0 if self.framework == FWTYPE.ROBOTFRAMEWORK else 1
+        script = self.indent_data('\n'.join(lst), level)
+        return script
+
+    def parse(self):
+        if self.is_teardown_statement:
+            self.name = self.statement_data.strip().lower()
+            self._is_parsed = True
+            if self.is_next_statement_children():
+                node = self.create_child(self)
+                self.add_child(node)
+                while node and node.is_next_statement_sibling():
+                    node = self.create_child(node)
+                    self.add_child(node)
+                if self.children:
+                    last_child = self._children[-1]
+                    self._remaining_data = last_child.remaining_data
+            if not self.children:
+                kwargs = dict(framework=self.framework, indentation=self.indentation)
+                data = 'dummy_pass - Dummy %s' % self.name.title()
+                dummy_stmt = DummyStatement(data, **kwargs, parent=self)
+                self.add_child(dummy_stmt)
+        else:
+            self._is_parsed = False
+
+    def create_child(self, node):
+        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        next_line = node.get_next_statement_data()
+
+        if node.is_matched_statement('(?i) +disconnect( +device)? ', next_line):
+            other = DisconnectStatement(node.remaining_data, **kwargs)
+        elif node.is_matched_statement('(?i) +release +device', next_line):
+            other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
+        elif node.is_matched_statement('(?i) +release +resource', next_line):
+            other = ReleaseResourceStatement(node.remaining_data, **kwargs)
+        else:
+            return None
+
+        other.prev = node
+        # node.next = other
+        if node.name == 'cleanup' or node.name == 'teardown':
+            other.parent = node
+            other.update_level_from_parent()
+        else:
+            other.parent = node.parent
+            other.update_level_from_parent()
+        return other
 
 
 class SectionStatement(Statement):
