@@ -4,6 +4,7 @@ from os import path
 from dgspoc.interpreter import SCRIPTINFO
 
 from dgspoc.interpreter import SetupStatement
+from dgspoc.interpreter import CleanupStatement
 from dgspoc.interpreter import ConnectDataStatement
 from dgspoc.interpreter import UseTestCaseStatement
 from dgspoc.interpreter import ConnectDeviceStatement
@@ -552,5 +553,66 @@ class TestReleaseResourceStatement:
         self, framework, indentation, user_data, expected_result
     ):
         node = ReleaseResourceStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestCleanupStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.default.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.default.unittest),
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.default.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.default.pytest),
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.default.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.default.robotframework),
+            ),
+        ]
+    )
+    def test_default_cleanup_statement(self, framework, indentation,
+                                       user_data, expected_result):
+        node = CleanupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.case1.unittest),
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.case1.pytest),
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.cleanup_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.cleanup_statement.case1.robotframework),
+            ),
+        ]
+    )
+    def test_cleanup_with_disconnect_and_release(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = CleanupStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
