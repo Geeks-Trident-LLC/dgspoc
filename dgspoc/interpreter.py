@@ -169,15 +169,25 @@ class Statement:
 
     @property
     def is_setup_statement(self):
-        pattern = r'setup'
+        pattern = r'setup *$'
+        is_matched = self.is_matched_statement(pattern)
+        return is_matched
+
+    @property
+    def is_cleanup_statement(self):
+        pattern = r'cleanup *$'
         is_matched = self.is_matched_statement(pattern)
         return is_matched
 
     @property
     def is_teardown_statement(self):
-        pattern = r'cleanup|teardown'
+        pattern = r'teardown *$'
         is_matched = self.is_matched_statement(pattern)
         return is_matched
+
+    @property
+    def is_cleanup_or_teardown_statement(self):
+        return self.is_cleanup_statement or self.is_teardown_statement
 
     @property
     def is_section_statement(self):
@@ -189,7 +199,7 @@ class Statement:
     def is_base_statement(self):
         is_base_stmt = self.is_setup_statement
         is_base_stmt |= self.is_section_statement
-        is_base_stmt |= self.is_teardown_statement
+        is_base_stmt |= self.is_cleanup_or_teardown_statement
         return is_base_stmt
 
     def is_matched_statement(self, pat, data=None):
@@ -299,7 +309,8 @@ class Statement:
         is_valid_framework |= self.framework == FWTYPE.ROBOTFRAMEWORK
 
         if not is_valid_framework:
-            fmt = '{!r} framework is not implemented.'
+            fmt = ('{!r} framework is not implemented.  It MUST be '
+                   '"unittest", "pytest", or "robotframework"')
             raise NotImplementedFrameworkError(fmt.format(self.framework))
 
     def indent_data(self, data, lvl):
@@ -883,7 +894,7 @@ class CleanupStatement(Statement):
         return script
 
     def parse(self):
-        if self.is_teardown_statement:
+        if self.is_cleanup_or_teardown_statement:
             self.name = self.statement_data.strip().lower()
             self._is_parsed = True
             if self.is_next_statement_children():
