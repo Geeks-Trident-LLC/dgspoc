@@ -927,6 +927,10 @@ class CleanupStatement(Statement):
         return other
 
 
+class TeardownStatement(CleanupStatement):
+    """Teardown Statement class"""
+
+
 class SectionStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
