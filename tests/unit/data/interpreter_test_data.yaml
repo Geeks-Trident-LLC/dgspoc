@@ -285,3 +285,48 @@ cleanup_statement:
         disconnect device   ${device1}
         release device   ${device1}
         release resource   ${test_resource}
+
+teardown_statement:
+
+  default:
+    data: teardown
+    unittest: |-
+      ############ skip this line ############
+        def tearDown(self):
+          print('Dummy Teardown')
+          self.assertTrue(True == True)
+    pytest: |-
+      ############ skip this line ############
+        def teardown_class(self):
+          print('Dummy Teardown')
+          assert True == True
+    robotframework: |-
+      ############ skip this line ############
+      teardown
+        log   Dummy Teardown
+        should be true   True == True
+
+  case1:
+    data: |-
+      teardown
+        disconnect device device1
+        release device device1
+        release resource test_resource.yaml
+    unittest: |-
+      ############ skip this line ############
+        def tearDown(self):
+          ta.disconnect_device(self.device1)
+          ta.release_device(self.device1)
+          ta.release_resource(self.test_resource)
+    pytest: |-
+      ############ skip this line ############
+        def teardown_class(self):
+          ta.disconnect_device(self.device1)
+          ta.release_device(self.device1)
+          ta.release_resource(self.test_resource)
+    robotframework: |-
+      ############ skip this line ############
+      teardown
+        disconnect device   ${device1}
+        release device   ${device1}
+        release resource   ${test_resource}
