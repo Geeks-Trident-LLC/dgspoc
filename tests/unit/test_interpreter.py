@@ -13,6 +13,8 @@ from dgspoc.interpreter import DisconnectStatement
 from dgspoc.interpreter import ReleaseDeviceStatement
 from dgspoc.interpreter import ReleaseResourceStatement
 
+from dgspoc.interpreter import ScriptBuilder
+
 from dgspoc.utils import Misc
 
 from dgspoc.utils import File
@@ -679,3 +681,118 @@ class TestTeardownStatement:
         node = CleanupStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
+
+
+class TestScriptBuilder:
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.script_builder.default.data,
+                TESTDATA.script_builder.default.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.script_builder.default.data,
+                TESTDATA.script_builder.default.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.script_builder.default.data,
+                TESTDATA.script_builder.default.robotframework,
+            ),
+        ]
+    )
+    def test_default_script_builder(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = ScriptBuilder(user_data, indentation=indentation, framework=framework)
+        test_script = node.testscript
+        assert test_script == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_info', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.user_info,
+                TESTDATA.script_builder.default_with_user_info.data,
+                TESTDATA.script_builder.default_with_user_info.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.user_info,
+                TESTDATA.script_builder.default_with_user_info.data,
+                TESTDATA.script_builder.default_with_user_info.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.user_info,
+                TESTDATA.script_builder.default_with_user_info.data,
+                TESTDATA.script_builder.default_with_user_info.robotframework,
+            ),
+        ]
+    )
+    def test_default_script_builder_with_user_info(
+        self, framework, indentation, user_info, user_data, expected_result
+    ):
+        node = ScriptBuilder(
+            user_data,
+            indentation=indentation,
+            framework=framework,
+            username=user_info.username,
+            email=user_info.email,
+            company=user_info.company
+        )
+        test_script = node.testscript
+        assert test_script == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_info', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.user_info,
+                TESTDATA.script_builder.case1.data,
+                TESTDATA.script_builder.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.user_info,
+                TESTDATA.script_builder.case1.data,
+                TESTDATA.script_builder.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.user_info,
+                TESTDATA.script_builder.case1.data,
+                TESTDATA.script_builder.case1.robotframework,
+            ),
+        ]
+    )
+    def test_building_script_case1(
+        self, framework, indentation, user_info, user_data, expected_result
+    ):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.reset_devices_vars()
+        node = ScriptBuilder(
+            user_data,
+            indentation=indentation,
+            framework=framework,
+            username=user_info.username,
+            email=user_info.email,
+            company=user_info.company
+        )
+        test_script = node.testscript
+        assert test_script == expected_result

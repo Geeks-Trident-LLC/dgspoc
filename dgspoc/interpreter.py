@@ -169,15 +169,25 @@ class Statement:
 
     @property
     def is_setup_statement(self):
-        pattern = r'setup'
+        pattern = r'setup *$'
+        is_matched = self.is_matched_statement(pattern)
+        return is_matched
+
+    @property
+    def is_cleanup_statement(self):
+        pattern = r'cleanup *$'
         is_matched = self.is_matched_statement(pattern)
         return is_matched
 
     @property
     def is_teardown_statement(self):
-        pattern = r'cleanup|teardown'
+        pattern = r'teardown *$'
         is_matched = self.is_matched_statement(pattern)
         return is_matched
+
+    @property
+    def is_cleanup_or_teardown_statement(self):
+        return self.is_cleanup_statement or self.is_teardown_statement
 
     @property
     def is_section_statement(self):
@@ -189,7 +199,7 @@ class Statement:
     def is_base_statement(self):
         is_base_stmt = self.is_setup_statement
         is_base_stmt |= self.is_section_statement
-        is_base_stmt |= self.is_teardown_statement
+        is_base_stmt |= self.is_cleanup_or_teardown_statement
         return is_base_stmt
 
     def is_matched_statement(self, pat, data=None):
@@ -299,7 +309,8 @@ class Statement:
         is_valid_framework |= self.framework == FWTYPE.ROBOTFRAMEWORK
 
         if not is_valid_framework:
-            fmt = '{!r} framework is not implemented.'
+            fmt = ('{!r} framework is not implemented.  It MUST be '
+                   '"unittest", "pytest", or "robotframework"')
             raise NotImplementedFrameworkError(fmt.format(self.framework))
 
     def indent_data(self, data, lvl):
@@ -342,6 +353,20 @@ class Statement:
         level = self.parent.level + 1 if self.parent else self.level
         stmt = self.indent_data(fmt % eresult, level)
         return stmt
+
+    def try_to_get_base_statement(self):
+        if self.is_base_statement:
+            tbl = dict(setup=SetupStatement,
+                       cleanup=CleanupStatement,
+                       teardown=TeardownStatement)
+            key = self.statement_data.lower().strip()
+            cls = tbl.get(key, SectionStatement)
+            stmt = cls(self.data, framework=self.framework,
+                       indentation=self.indentation)
+            return stmt if isinstance(stmt, Statement) else self
+
+        else:
+            return self
 
 
 class DummyStatement(Statement):
@@ -883,7 +908,7 @@ class CleanupStatement(Statement):
         return script
 
     def parse(self):
-        if self.is_teardown_statement:
+        if self.is_cleanup_or_teardown_statement:
             self.name = self.statement_data.strip().lower()
             self._is_parsed = True
             if self.is_next_statement_children():
@@ -959,3 +984,173 @@ class SystemStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
+
+
+class ScriptBuilder:
+    def __init__(self, data, framework='', indentation=4,
+                 username='', email='', company='',):
+        self.data = data
+        self.framework = str(framework).strip()
+        self.indentation = indentation
+        self.username = str(username).strip()
+        self.email = str(email).strip()
+        self.company = str(company).strip() or self.username
+
+        self.setup_statement = None
+        self.cleanup_statement = None
+        self.section_statements = []
+        self.build()
+
+    @property
+    def testscript(self):
+        if self.setup_statement and self.cleanup_statement:
+            if self.framework == FWTYPE.UNITTEST:
+                script = self.unittest_script
+                return script
+            elif self.framework == FWTYPE.PYTEST:
+                script = self.pytest_script
+                return script
+            else:
+                script = self.robotframework_script
+                return script
+        else:
+            pass
+
+    @property
+    def unittest_script(self):
+        cls_name = SCRIPTINFO.get_class_name()
+        lst = [
+            self.script_intro,
+            '',
+            'import unittest',
+            'import dgspoc as ta',
+            '\n',
+            'class {}(unittest.Testcase):'.format(cls_name),
+            self.setup_statement.snippet,
+            '',
+            self.cleanup_statement.snippet,
+        ]
+
+        for stmt in self.section_statements:
+            lst.append('')
+            lst.append(stmt.snippet)
+
+        script = '\n'.join(lst)
+        return script
+
+    @property
+    def pytest_script(self):
+        cls_name = SCRIPTINFO.get_class_name()
+        lst = [
+            self.script_intro,
+            '',
+            '# import pytest',
+            'import dgspoc as ta',
+            '\n',
+            'class {}:'.format(cls_name),
+            self.setup_statement.snippet,
+            '',
+            self.cleanup_statement.snippet,
+        ]
+
+        for stmt in self.section_statements:
+            lst.append('')
+            lst.append(stmt.snippet)
+
+        script = '\n'.join(lst)
+        return script
+
+    @property
+    def robotframework_script(self):
+        lst = [
+            self.script_intro,
+            '',
+            '*** Settings ***',
+            'library         builtin',
+            'library         collections',
+            'library         describegetsystempoc',
+            'test setup      setup',
+            'test teardown   {}'.format(self.cleanup_statement.name),
+        ]
+
+        if self.section_statements:
+            cls_name = SCRIPTINFO.get_class_name()
+            lst.append('\n*** Test Cases ***')
+            lst.append(cls_name)
+            for stmt in self.section_statements:
+                lst.append(stmt.name)
+
+        lst.append('\n*** Keywords ***')
+        lst.append(self.setup_statement.snippet)
+        lst.append('')
+        lst.append(self.cleanup_statement.snippet)
+
+        for stmt in self.section_statements:
+            lst.append('')
+            lst.append(stmt.snippet)
+
+        script = '\n'.join(lst)
+        return script
+
+    @property
+    def script_intro(self):
+        fmt = '# {} script is generated by Describe-Get-System Proof of Concept'
+        user_fmt = '# Created by  : {0.username}'
+        email_fmt = '# Email       : {0.email}'
+        company_fmt = '# Company     : {0.company}'
+        date_fmt = '# Created date: {}'
+        lst = [fmt.format(self.framework.lower())]
+        self.username and lst.append(user_fmt.format(self))
+        self.email and lst.append(email_fmt.format(self))
+        self.company and lst.append(company_fmt.format(self))
+        not SCRIPTINFO.is_testing_enabled and lst.append(date_fmt)
+
+        intro = '\n'.join(['#' * 80] + lst + ['#' * 80])
+        return intro
+
+    def build(self):
+        data = self.data
+        count = 2000
+
+        while data.strip() and count > 0:
+            stmt = Statement(data, framework=self.framework,
+                             indentation=self.indentation)
+            stmt = stmt.try_to_get_base_statement()
+            self.add_statement(stmt)
+            data = stmt.remaining_data
+            count -= 1
+
+    def add_statement(self, stmt):
+        if stmt.is_setup_statement:
+            if not self.setup_statement:
+                self.setup_statement = stmt
+            else:
+                self.warn_duplicate_statement(stmt)
+        elif stmt.is_cleanup_or_teardown_statement:
+            if not self.cleanup_statement:
+                self.cleanup_statement = stmt
+            else:
+                self.warn_duplicate_statement(stmt)
+        elif stmt.is_section_statement:
+            if self.is_uniq_section_statement(stmt):
+                self.section_statements.append(stmt)
+            else:
+                self.warn_duplicate_statement(stmt)
+        else:
+            self.warn_not_implement_statement(stmt)
+
+    def is_uniq_section_statement(self, stmt):
+        if not self.section_statements:
+            return True
+
+        chk = stmt.snippet
+        is_duplicate = any(chk == k.snippet for k in self.section_statements)
+        return not is_duplicate
+
+    def warn_duplicate_statement(self, stmt):
+        fmt = 'TODO - Need to implement warn_duplicate_statement\n{}'
+        raise NotImplementedError(fmt.format(stmt.statement_data))
+
+    def warn_not_implement_statement(self, stmt):
+        fmt = 'TODO - Need to implement warn_not_implement_statement\n{}'
+        raise NotImplementedError(fmt.format(stmt.statement_data))
