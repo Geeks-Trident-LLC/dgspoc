@@ -1016,7 +1016,7 @@ class VerificationStatement(Statement):
         """IncompleteTask: need to implement VerificationStatement.parse"""
 
 
-class SystemStatement(Statement):
+class WaitForStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
@@ -1025,10 +1025,10 @@ class SystemStatement(Statement):
 
     @property
     def snippet(self):
-        return 'IncompleteTask: need to implement SystemStatement.snippet'
+        return 'IncompleteTask: need to implement WaitForStatement.snippet'
 
     def parse(self):
-        """IncompleteTask: need to implement SystemStatement.parse"""
+        """IncompleteTask: need to implement WaitForStatement.parse"""
 
 
 class ScriptBuilder:
