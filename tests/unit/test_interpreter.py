@@ -12,6 +12,7 @@ from dgspoc.interpreter import ConnectDeviceStatement
 from dgspoc.interpreter import DisconnectStatement
 from dgspoc.interpreter import ReleaseDeviceStatement
 from dgspoc.interpreter import ReleaseResourceStatement
+from dgspoc.interpreter import WaitForStatement
 
 from dgspoc.interpreter import ScriptBuilder
 
@@ -679,6 +680,128 @@ class TestTeardownStatement:
         self, framework, indentation, user_data, expected_result
     ):
         node = CleanupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestWaitForStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case1.data,
+                TESTDATA.waitfor_statement.case1.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case1.data,
+                TESTDATA.waitfor_statement.case1.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case1.data,
+                TESTDATA.waitfor_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_wait_for_statement_case1(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = WaitForStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case2.data,
+                TESTDATA.waitfor_statement.case2.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case2.data,
+                TESTDATA.waitfor_statement.case2.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case2.data,
+                TESTDATA.waitfor_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_wait_for_statement_case2(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = WaitForStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case3.data,
+                TESTDATA.waitfor_statement.case3.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case3.data,
+                TESTDATA.waitfor_statement.case3.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case3.data,
+                TESTDATA.waitfor_statement.case3.robotframework,
+            ),
+        ]
+    )
+    def test_wait_for_statement_case3(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = WaitForStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'indentation', 'user_data', 'expected_result'),
+        [
+            (
+                'unittest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case4.data,
+                TESTDATA.waitfor_statement.case4.unittest,
+            ),
+            (
+                'pytest',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case4.data,
+                TESTDATA.waitfor_statement.case4.pytest,
+            ),
+            (
+                'robotframework',
+                TESTDATA.indentation,
+                TESTDATA.waitfor_statement.case4.data,
+                TESTDATA.waitfor_statement.case4.robotframework,
+            ),
+        ]
+    )
+    def test_wait_for_statement_case3(
+        self, framework, indentation, user_data, expected_result
+    ):
+        node = WaitForStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
 

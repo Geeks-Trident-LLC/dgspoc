@@ -336,6 +336,32 @@ teardown_statement:
         release device   ${device1}
         release resource   ${test_resource}
 
+waitfor_statement:
+
+  case1:
+    data: sleep 10 seconds
+    unittest: "ta.wait_for(10)"
+    pytest: "ta.wait_for(10)"
+    robotframework: "wait for   10"
+
+  case2:
+    data: wait for 10.12 seconds
+    unittest: "ta.wait_for(10.12)"
+    pytest: "ta.wait_for(10.12)"
+    robotframework: "wait for   10.12"
+
+  case3:
+    data: "wait for 3 minutes"
+    unittest: "ta.wait_for(180)"
+    pytest: "ta.wait_for(180)"
+    robotframework: "wait for   180"
+
+  case4:
+    data: "wait for 1.5 hrs"
+    unittest: "ta.wait_for(5400)"
+    pytest: "ta.wait_for(5400)"
+    robotframework: "wait for   5400"
+
 script_builder:
   default:
     data: |-
