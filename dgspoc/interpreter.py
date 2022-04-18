@@ -23,6 +23,7 @@ from dgspoc.exceptions import ConnectDeviceStatementError
 from dgspoc.exceptions import DisconnectDeviceStatementError
 from dgspoc.exceptions import ReleaseDeviceStatementError
 from dgspoc.exceptions import ReleaseResourceStatementError
+from dgspoc.exceptions import WaitForStatementError
 
 
 class ScriptInfo(DotObject):
@@ -1020,15 +1021,44 @@ class WaitForStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
-
+        self.total_seconds = 0
         self.parse()
 
     @property
     def snippet(self):
-        return 'IncompleteTask: need to implement WaitForStatement.snippet'
+        if not self.is_parsed:
+            return ''
+
+        is_robotframework = self.framework == FWTYPE.ROBOTFRAMEWORK
+        fmt = 'wait for   %s' if is_robotframework else 'ta.wait_for(%s)'
+        stmt = self.indent_data(fmt % self.total_seconds, self.level)
+        return stmt
 
     def parse(self):
-        """IncompleteTask: need to implement WaitForStatement.parse"""
+        pattern = r'(?i) *((wait +for)|sleep) +(?P<capture_data>[0-9].+) *$'
+        match = re.match(pattern, self.statement_data)
+        if not match:
+            self._is_parsed = False
+            return
+
+        capture_data = match.group('capture_data').strip()
+
+        pattern = ('(?P<val>([0-9]*[.])?[0-9]+) *'
+                   '(?P<unit>h((ou)?rs?)?|m(in(utes?)?)?|'
+                   's(ec(onds?)?)?|d(ays?)?)?')
+        match = re.match(pattern, capture_data, re. I)
+        if not match:
+            failure = 'Invalid wait for statement format'
+            raise WaitForStatementError(failure)
+
+        result = DotObject(match.groupdict())
+        tbl = dict(s=1, m=60, h=60 * 60, d=60 * 60 * 24)
+        multiplier = tbl.get(str(result.unit).lower()[:1], 1)
+        seconds = float(result.val) * multiplier
+        self.total_seconds = int(seconds) if int(seconds) == seconds else seconds
+        self._is_parsed = True
+        self.name = 'wait_for'
+        self.update_level_from_parent()
 
 
 class ScriptBuilder:

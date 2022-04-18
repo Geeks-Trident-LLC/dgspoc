@@ -47,3 +47,7 @@ class ReleaseDeviceStatementError(InterpreterError):
 
 class ReleaseResourceStatementError(InterpreterError):
     """Use to capture error for interpreting release resource statement"""
+
+
+class WaitForStatementError(InterpreterError):
+    """Use to capture error for interpreting wait for statement"""
