@@ -961,11 +961,29 @@ class SectionStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
+        self.parse()
+
+    @property
+    def snippet(self):
+        return 'IncompleteTask: need to implement SectionStatement.snippet'
+
+    def parse(self):
+        """IncompleteTask: Need to implement SectionStatement.parse"""
+
 
 class LoopStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
+
+        self.parse()
+
+    @property
+    def snippet(self):
+        return 'IncompleteTask: need to implement LoopStatement.snippet'
+
+    def parse(self):
+        """IncompleteTask: need to implement LoopStatement.parse"""
 
 
 class PerformerStatement(Statement):
@@ -973,17 +991,44 @@ class PerformerStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
+        self.parse()
+
+    @property
+    def snippet(self):
+        return 'IncompleteTask: need to implement PerformerStatement.snippet'
+
+    def parse(self):
+        """IncompleteTask: need to implement PerformerStatement.parse"""
+
 
 class VerificationStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
+        self.parse()
+
+    @property
+    def snippet(self):
+        return 'IncompleteTask: need to implement VerificationStatement.snippet'
+
+    def parse(self):
+        """IncompleteTask: need to implement VerificationStatement.parse"""
+
 
 class SystemStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
+
+        self.parse()
+
+    @property
+    def snippet(self):
+        return 'IncompleteTask: need to implement SystemStatement.snippet'
+
+    def parse(self):
+        """IncompleteTask: need to implement SystemStatement.parse"""
 
 
 class ScriptBuilder:
@@ -1148,9 +1193,9 @@ class ScriptBuilder:
         return not is_duplicate
 
     def warn_duplicate_statement(self, stmt):
-        fmt = 'TODO - Need to implement warn_duplicate_statement\n{}'
+        fmt = 'IncompleteTask - Need to implement warn_duplicate_statement\n{}'
         raise NotImplementedError(fmt.format(stmt.statement_data))
 
     def warn_not_implement_statement(self, stmt):
-        fmt = 'TODO - Need to implement warn_not_implement_statement\n{}'
+        fmt = 'IncompleteTask - Need to implement warn_not_implement_statement\n{}'
         raise NotImplementedError(fmt.format(stmt.statement_data))
