@@ -28,6 +28,7 @@ TESTDATA = DotObject(TESTDATA)
 SCRIPTINFO.enable_testing()
 
 indentation = TESTDATA.indentation
+user_info = TESTDATA.user_info
 
 
 class TestSetupStatement:
@@ -729,30 +730,27 @@ class TestScriptBuilder:
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
-        ('framework', 'user_info', 'user_data', 'expected_result'),
+        ('framework', 'user_data', 'expected_result'),
         [
             (
                 'unittest',
-                TESTDATA.user_info,
                 TESTDATA.script_builder.default_with_user_info.data,
                 TESTDATA.script_builder.default_with_user_info.unittest,
             ),
             (
                 'pytest',
-                TESTDATA.user_info,
                 TESTDATA.script_builder.default_with_user_info.data,
                 TESTDATA.script_builder.default_with_user_info.pytest,
             ),
             (
                 'robotframework',
-                TESTDATA.user_info,
                 TESTDATA.script_builder.default_with_user_info.data,
                 TESTDATA.script_builder.default_with_user_info.robotframework,
             ),
         ]
     )
     def test_default_script_builder_with_user_info(
-            self, framework, user_info, user_data, expected_result
+            self, framework, user_data, expected_result
     ):
         node = ScriptBuilder(
             user_data,
@@ -766,30 +764,27 @@ class TestScriptBuilder:
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
-        ('framework', 'user_info', 'user_data', 'expected_result'),
+        ('framework', 'user_data', 'expected_result'),
         [
             (
                 'unittest',
-                TESTDATA.user_info,
                 TESTDATA.script_builder.case1.data,
                 TESTDATA.script_builder.case1.unittest,
             ),
             (
                 'pytest',
-                TESTDATA.user_info,
                 TESTDATA.script_builder.case1.data,
                 TESTDATA.script_builder.case1.pytest,
             ),
             (
                 'robotframework',
-                TESTDATA.user_info,
                 TESTDATA.script_builder.case1.data,
                 TESTDATA.script_builder.case1.robotframework,
             ),
         ]
     )
     def test_building_script_case1(
-        self, framework, user_info, user_data, expected_result
+        self, framework, user_data, expected_result
     ):
         SCRIPTINFO.reset_global_vars()
         SCRIPTINFO.reset_devices_vars()
