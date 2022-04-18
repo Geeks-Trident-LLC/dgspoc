@@ -140,6 +140,10 @@ class Statement:
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def children(self):
         return self._children
@@ -148,9 +152,21 @@ class Statement:
     def level(self):
         return self._level
 
-    @name.setter
-    def name(self, value):
-        self._name = value
+    @property
+    def is_unittest(self):
+        return self.framework == FWTYPE.UNITTEST
+
+    @property
+    def is_pytest(self):
+        return self.framework == FWTYPE.PYTEST
+
+    @property
+    def is_robotframework(self):
+        return self.framework == FWTYPE.ROBOTFRAMEWORK
+
+    @property
+    def is_not_robotframework(self):
+        return not self.is_robotframework
 
     @property
     def is_empty(self):
@@ -305,9 +321,9 @@ class Statement:
             failure = 'framework MUST be "unittest", "pytest", or "robotframework"'
             raise NotImplementedFrameworkError(failure)
 
-        is_valid_framework = self.framework == FWTYPE.UNITTEST
-        is_valid_framework |= self.framework == FWTYPE.PYTEST
-        is_valid_framework |= self.framework == FWTYPE.ROBOTFRAMEWORK
+        is_valid_framework = self.is_unittest
+        is_valid_framework |= self.is_pytest
+        is_valid_framework |= self.is_robotframework
 
         if not is_valid_framework:
             fmt = ('{!r} framework is not implemented.  It MUST be '
@@ -322,9 +338,7 @@ class Statement:
         message = getattr(self, 'message', message)
         is_logger = getattr(self, 'is_logger', False)
         func_name = 'self.logger.info' if is_logger else 'print'
-        if self.framework == FWTYPE.UNITTEST:
-            stmt = '%s(%r)' % (func_name, message)
-        elif self.framework == FWTYPE.PYTEST:
+        if self.is_unittest or self.is_pytest:
             stmt = '%s(%r)' % (func_name, message)
         else:   # i.e ROBOTFRAMEWORK
             stmt = 'log   %s' % message
@@ -338,10 +352,10 @@ class Statement:
         if Misc.is_boolean(eresult):
             eresult = int(eresult)
 
-        if self.framework == FWTYPE.UNITTEST:
+        if self.is_unittest:
             fmt1 = 'self.assertTrue(True == %s)'
             fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
-        elif self.framework == FWTYPE.PYTEST:
+        elif self.is_pytest:
             fmt1 = 'assert True == %s'
             fmt2 = 'total_count = len(result)\nassert total_count == %s'
         else:   # i.e ROBOTFRAMEWORK
@@ -417,9 +431,9 @@ class SetupStatement(Statement):
 
         lst = []
 
-        if self.framework == FWTYPE.UNITTEST:
+        if self.is_unittest:
             lst.append('def setUp(self):')
-        elif self.framework == FWTYPE.PYTEST:
+        elif self.is_pytest:
             lst.append('def setup_class(self):')
         else:   # i.e ROBOTFRAMEWORK
             lst.append('setup')
@@ -427,7 +441,7 @@ class SetupStatement(Statement):
         for child in self.children:
             lst.append(child.snippet)
 
-        level = 0 if self.framework == FWTYPE.ROBOTFRAMEWORK else 1
+        level = 0 if self.is_robotframework else 1
         script = self.indent_data('\n'.join(lst), level)
         return script
 
@@ -489,7 +503,7 @@ class ConnectDataStatement(Statement):
         if not self.is_parsed:
             return ''
 
-        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+        if self.is_robotframework:
             fmt = "${%s}=   connect data   filename=%s\nset global variable   ${%s}"
             stmt = fmt % (self.var_name, self.test_resource_ref, self.var_name)
         else:
@@ -567,7 +581,7 @@ class UseTestCaseStatement(Statement):
 
         test_resource_var = SCRIPTINFO.variables.get('test_resource_var', 'test_resource')
 
-        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+        if self.is_robotframework:
             fmt = "${%s}=  use testcase   ${%s}  testcase=%s\nset global variable   ${%s}"
             stmt = fmt % (self.var_name, test_resource_var, self.test_name, self.var_name)
         else:
@@ -634,7 +648,7 @@ class ConnectDeviceStatement(Statement):
 
         lst = []
         for var_name, device_name in self.devices_vars.items():
-            if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            if self.is_robotframework:
                 fmt = "${%s}=   connect device   ${%s}   name=%s\nset global variable   ${%s}"
                 stmt = fmt % (var_name, test_resource_var, device_name, var_name)
 
@@ -720,7 +734,7 @@ class DisconnectStatement(Statement):
 
         lst = []
         for var_name in self.vars_lst:
-            if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            if self.is_robotframework:
                 stmt = "disconnect device   ${%s}" % var_name
             else:
                 stmt = "ta.disconnect_device(self.%s)" % var_name
@@ -784,7 +798,7 @@ class ReleaseDeviceStatement(Statement):
 
         lst = []
         for var_name in self.vars_lst:
-            if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            if self.is_robotframework:
                 stmt = "release device   ${%s}" % var_name
             else:
                 stmt = "ta.release_device(self.%s)" % var_name
@@ -846,7 +860,7 @@ class ReleaseResourceStatement(Statement):
             failure = fmt.format(self.statement_data)
             raise ReleaseResourceStatementError(failure)
 
-        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+        if self.is_robotframework:
             stmt = "release resource   ${%s}" % self.var_name
         else:
             stmt = "ta.release_resource(self.%s)" % self.var_name
@@ -894,9 +908,9 @@ class CleanupStatement(Statement):
         lst = []
         txt = 'tearDown' if self.name == 'teardown' else 'cleanUp'
 
-        if self.framework == FWTYPE.UNITTEST:
+        if self.is_unittest:
             lst.append('def %s(self):' % txt)
-        elif self.framework == FWTYPE.PYTEST:
+        elif self.is_pytest:
             lst.append('def %s_class(self):' % txt.lower())
         else:   # i.e ROBOTFRAMEWORK
             lst.append(txt.lower())
@@ -904,7 +918,7 @@ class CleanupStatement(Statement):
         for child in self.children:
             lst.append(child.snippet)
 
-        level = 0 if self.framework == FWTYPE.ROBOTFRAMEWORK else 1
+        level = 0 if self.is_robotframework else 1
         script = self.indent_data('\n'.join(lst), level)
         return script
 
@@ -1029,8 +1043,7 @@ class WaitForStatement(Statement):
         if not self.is_parsed:
             return ''
 
-        is_robotframework = self.framework == FWTYPE.ROBOTFRAMEWORK
-        fmt = 'wait for   %s' if is_robotframework else 'ta.wait_for(%s)'
+        fmt = 'wait for   %s' if self.is_robotframework else 'ta.wait_for(%s)'
         stmt = self.indent_data(fmt % self.total_seconds, self.level)
         return stmt
 
