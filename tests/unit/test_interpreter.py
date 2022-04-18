@@ -1,6 +1,8 @@
 import pytest
 from os import path
 
+from dgspoc.constant import FWTYPE
+
 from dgspoc.interpreter import SCRIPTINFO
 
 from dgspoc.interpreter import SetupStatement
@@ -36,17 +38,17 @@ class TestSetupStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.setup_statement.default.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.default.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.setup_statement.default.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.default.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.setup_statement.default.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.default.robotframework),
             ),
@@ -62,17 +64,17 @@ class TestSetupStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.setup_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case1.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.setup_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case1.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.setup_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case1.robotframework),
             ),
@@ -88,17 +90,17 @@ class TestSetupStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.setup_statement.case2.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case2.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.setup_statement.case2.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case2.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.setup_statement.case2.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case2.robotframework),
             ),
@@ -113,17 +115,17 @@ class TestSetupStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.setup_statement.case3.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case3.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.setup_statement.case3.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case3.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.setup_statement.case3.data,
                 Misc.skip_first_line(TESTDATA.setup_statement.case3.robotframework),
             ),
@@ -143,17 +145,17 @@ class TestConnectDataStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.connect_data_statement.case1.data,
                 TESTDATA.connect_data_statement.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.connect_data_statement.case1.data,
                 TESTDATA.connect_data_statement.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.connect_data_statement.case1.data,
                 TESTDATA.connect_data_statement.case1.robotframework,
             ),
@@ -168,17 +170,17 @@ class TestConnectDataStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.connect_data_statement.case2.data,
                 TESTDATA.connect_data_statement.case2.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.connect_data_statement.case2.data,
                 TESTDATA.connect_data_statement.case2.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.connect_data_statement.case2.data,
                 TESTDATA.connect_data_statement.case2.robotframework,
             ),
@@ -197,17 +199,17 @@ class TestUseTestcaseStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.use_testcase_statement.case1.data,
                 TESTDATA.use_testcase_statement.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.use_testcase_statement.case1.data,
                 TESTDATA.use_testcase_statement.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.use_testcase_statement.case1.data,
                 TESTDATA.use_testcase_statement.case1.robotframework,
             ),
@@ -223,17 +225,17 @@ class TestUseTestcaseStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.use_testcase_statement.case2.data,
                 TESTDATA.use_testcase_statement.case2.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.use_testcase_statement.case2.data,
                 TESTDATA.use_testcase_statement.case2.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.use_testcase_statement.case2.data,
                 TESTDATA.use_testcase_statement.case2.robotframework,
             ),
@@ -253,17 +255,17 @@ class TestConnectDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.connect_device_statement.case1.data,
                 TESTDATA.connect_device_statement.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.connect_device_statement.case1.data,
                 TESTDATA.connect_device_statement.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.connect_device_statement.case1.data,
                 TESTDATA.connect_device_statement.case1.robotframework,
             ),
@@ -282,17 +284,17 @@ class TestConnectDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.connect_device_statement.case2.data,
                 TESTDATA.connect_device_statement.case2.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.connect_device_statement.case2.data,
                 TESTDATA.connect_device_statement.case2.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.connect_device_statement.case2.data,
                 TESTDATA.connect_device_statement.case2.robotframework,
             ),
@@ -311,17 +313,17 @@ class TestConnectDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.connect_device_statement.case3.data,
                 TESTDATA.connect_device_statement.case3.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.connect_device_statement.case3.data,
                 TESTDATA.connect_device_statement.case3.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.connect_device_statement.case3.data,
                 TESTDATA.connect_device_statement.case3.robotframework,
             ),
@@ -338,17 +340,17 @@ class TestConnectDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.connect_device_statement.case4.data,
                 TESTDATA.connect_device_statement.case4.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.connect_device_statement.case4.data,
                 TESTDATA.connect_device_statement.case4.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.connect_device_statement.case4.data,
                 TESTDATA.connect_device_statement.case4.robotframework,
             ),
@@ -365,17 +367,17 @@ class TestConnectDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.connect_device_statement.case5.data,
                 TESTDATA.connect_device_statement.case5.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.connect_device_statement.case5.data,
                 TESTDATA.connect_device_statement.case5.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.connect_device_statement.case5.data,
                 TESTDATA.connect_device_statement.case5.robotframework,
             ),
@@ -394,17 +396,17 @@ class TestDisconnectDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.disconnect_device_statement.case1.data,
                 TESTDATA.disconnect_device_statement.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.disconnect_device_statement.case1.data,
                 TESTDATA.disconnect_device_statement.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.disconnect_device_statement.case1.data,
                 TESTDATA.disconnect_device_statement.case1.robotframework,
             ),
@@ -419,17 +421,17 @@ class TestDisconnectDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.disconnect_device_statement.case2.data,
                 TESTDATA.disconnect_device_statement.case2.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.disconnect_device_statement.case2.data,
                 TESTDATA.disconnect_device_statement.case2.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.disconnect_device_statement.case2.data,
                 TESTDATA.disconnect_device_statement.case2.robotframework,
             ),
@@ -446,17 +448,17 @@ class TestReleaseDeviceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.release_device_statement.case1.data,
                 TESTDATA.release_device_statement.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.release_device_statement.case1.data,
                 TESTDATA.release_device_statement.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.release_device_statement.case1.data,
                 TESTDATA.release_device_statement.case1.robotframework,
             ),
@@ -473,17 +475,17 @@ class TestReleaseResourceStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.release_resource_statement.case1.data,
                 TESTDATA.release_resource_statement.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.release_resource_statement.case1.data,
                 TESTDATA.release_resource_statement.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.release_resource_statement.case1.data,
                 TESTDATA.release_resource_statement.case1.robotframework,
             ),
@@ -500,17 +502,17 @@ class TestCleanupStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.cleanup_statement.default.data,
                 Misc.skip_first_line(TESTDATA.cleanup_statement.default.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.cleanup_statement.default.data,
                 Misc.skip_first_line(TESTDATA.cleanup_statement.default.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.cleanup_statement.default.data,
                 Misc.skip_first_line(TESTDATA.cleanup_statement.default.robotframework),
             ),
@@ -525,17 +527,17 @@ class TestCleanupStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.cleanup_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.cleanup_statement.case1.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.cleanup_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.cleanup_statement.case1.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.cleanup_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.cleanup_statement.case1.robotframework),
             ),
@@ -553,17 +555,17 @@ class TestTeardownStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.teardown_statement.default.data,
                 Misc.skip_first_line(TESTDATA.teardown_statement.default.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.teardown_statement.default.data,
                 Misc.skip_first_line(TESTDATA.teardown_statement.default.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.teardown_statement.default.data,
                 Misc.skip_first_line(TESTDATA.teardown_statement.default.robotframework),
             ),
@@ -578,17 +580,17 @@ class TestTeardownStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.teardown_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.teardown_statement.case1.unittest),
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.teardown_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.teardown_statement.case1.pytest),
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.teardown_statement.case1.data,
                 Misc.skip_first_line(TESTDATA.teardown_statement.case1.robotframework),
             ),
@@ -605,17 +607,17 @@ class TestWaitForStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.waitfor_statement.case1.data,
                 TESTDATA.waitfor_statement.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.waitfor_statement.case1.data,
                 TESTDATA.waitfor_statement.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.waitfor_statement.case1.data,
                 TESTDATA.waitfor_statement.case1.robotframework,
             ),
@@ -630,17 +632,17 @@ class TestWaitForStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.waitfor_statement.case2.data,
                 TESTDATA.waitfor_statement.case2.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.waitfor_statement.case2.data,
                 TESTDATA.waitfor_statement.case2.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.waitfor_statement.case2.data,
                 TESTDATA.waitfor_statement.case2.robotframework,
             ),
@@ -655,17 +657,17 @@ class TestWaitForStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.waitfor_statement.case3.data,
                 TESTDATA.waitfor_statement.case3.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.waitfor_statement.case3.data,
                 TESTDATA.waitfor_statement.case3.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.waitfor_statement.case3.data,
                 TESTDATA.waitfor_statement.case3.robotframework,
             ),
@@ -680,17 +682,17 @@ class TestWaitForStatement:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.waitfor_statement.case4.data,
                 TESTDATA.waitfor_statement.case4.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.waitfor_statement.case4.data,
                 TESTDATA.waitfor_statement.case4.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.waitfor_statement.case4.data,
                 TESTDATA.waitfor_statement.case4.robotframework,
             ),
@@ -708,17 +710,17 @@ class TestScriptBuilder:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.script_builder.default.data,
                 TESTDATA.script_builder.default.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.script_builder.default.data,
                 TESTDATA.script_builder.default.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.script_builder.default.data,
                 TESTDATA.script_builder.default.robotframework,
             ),
@@ -733,17 +735,17 @@ class TestScriptBuilder:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.script_builder.default_with_user_info.data,
                 TESTDATA.script_builder.default_with_user_info.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.script_builder.default_with_user_info.data,
                 TESTDATA.script_builder.default_with_user_info.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.script_builder.default_with_user_info.data,
                 TESTDATA.script_builder.default_with_user_info.robotframework,
             ),
@@ -767,17 +769,17 @@ class TestScriptBuilder:
         ('framework', 'user_data', 'expected_result'),
         [
             (
-                'unittest',
+                FWTYPE.UNITTEST,
                 TESTDATA.script_builder.case1.data,
                 TESTDATA.script_builder.case1.unittest,
             ),
             (
-                'pytest',
+                FWTYPE.PYTEST,
                 TESTDATA.script_builder.case1.data,
                 TESTDATA.script_builder.case1.pytest,
             ),
             (
-                'robotframework',
+                FWTYPE.ROBOTFRAMEWORK,
                 TESTDATA.script_builder.case1.data,
                 TESTDATA.script_builder.case1.robotframework,
             ),
