@@ -56,5 +56,6 @@ class WaitForStatementError(InterpreterError):
 class PerformerStatementError(InterpreterError):
     """Use to capture error for performer statement"""
 
+
 class VerificationStatementError(InterpreterError):
     """Use to capture error for verification statement"""
