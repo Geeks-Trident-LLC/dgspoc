@@ -15,6 +15,7 @@ from dgspoc.interpreter import DisconnectStatement
 from dgspoc.interpreter import ReleaseDeviceStatement
 from dgspoc.interpreter import ReleaseResourceStatement
 from dgspoc.interpreter import PerformerStatement
+from dgspoc.interpreter import VerificationStatement
 from dgspoc.interpreter import WaitForStatement
 
 from dgspoc.interpreter import ScriptBuilder
@@ -81,7 +82,7 @@ class TestSetupStatement:
             ),
         ]
     )
-    def test_setup_connect_data(self, framework,user_data, expected_result):
+    def test_setup_connect_data(self, framework, user_data, expected_result):
         node = SetupStatement(user_data, indentation=indentation,
                               framework=framework)
         snippet = node.snippet
@@ -674,7 +675,7 @@ class TestPerformerStatement:
             ),
         ]
     )
-    def test_performer_statement_case2(self, framework, user_data, expected_result):
+    def test_performer_statement_case3(self, framework, user_data, expected_result):
         node = PerformerStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
@@ -699,8 +700,60 @@ class TestPerformerStatement:
             ),
         ]
     )
-    def test_performer_statement_case2(self, framework, user_data, expected_result):
+    def test_performer_statement_case4(self, framework, user_data, expected_result):
         node = PerformerStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestVerificationStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.verification_statement.case1.data,
+                TESTDATA.verification_statement.case1.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.verification_statement.case1.data,
+                TESTDATA.verification_statement.case1.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.verification_statement.case1.data,
+                TESTDATA.verification_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_verification_statement_case1(self, framework, user_data, expected_result):
+        node = VerificationStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.verification_statement.case2.data,
+                TESTDATA.verification_statement.case2.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.verification_statement.case2.data,
+                TESTDATA.verification_statement.case2.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.verification_statement.case2.data,
+                TESTDATA.verification_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_verification_statement_case2(self, framework, user_data, expected_result):
+        node = VerificationStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
 
