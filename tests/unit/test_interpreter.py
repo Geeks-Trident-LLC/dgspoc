@@ -8,6 +8,7 @@ from dgspoc.interpreter import SCRIPTINFO
 from dgspoc.interpreter import SetupStatement
 from dgspoc.interpreter import CleanupStatement
 from dgspoc.interpreter import TeardownStatement
+from dgspoc.interpreter import SectionStatement
 from dgspoc.interpreter import ConnectDataStatement
 from dgspoc.interpreter import UseTestCaseStatement
 from dgspoc.interpreter import ConnectDeviceStatement
@@ -601,6 +602,84 @@ class TestTeardownStatement:
     )
     def test_teardown_with_disconnect_and_release(self, framework, user_data, expected_result):
         node = CleanupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestSectionStatement:
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.section_statement.default.data,
+                Misc.skip_first_line(TESTDATA.section_statement.default.unittest),
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.section_statement.default.data,
+                Misc.skip_first_line(TESTDATA.section_statement.default.pytest),
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.section_statement.default.data,
+                Misc.skip_first_line(TESTDATA.section_statement.default.robotframework),
+            ),
+        ]
+    )
+    def test_default_section_statement(self, framework, user_data, expected_result):
+        node = SectionStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.section_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.section_statement.case1.unittest),
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.section_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.section_statement.case1.pytest),
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.section_statement.case1.data,
+                Misc.skip_first_line(TESTDATA.section_statement.case1.robotframework),
+            ),
+        ]
+    )
+    def test_section_statement_case1(self, framework, user_data, expected_result):
+        node = SectionStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.section_statement.case2.data,
+                Misc.skip_first_line(TESTDATA.section_statement.case2.unittest),
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.section_statement.case2.data,
+                Misc.skip_first_line(TESTDATA.section_statement.case2.pytest),
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.section_statement.case2.data,
+                Misc.skip_first_line(TESTDATA.section_statement.case2.robotframework),
+            ),
+        ]
+    )
+    def test_section_statement_case2(self, framework, user_data, expected_result):
+        node = SectionStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
 
