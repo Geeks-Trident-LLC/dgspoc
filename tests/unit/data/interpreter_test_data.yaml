@@ -389,6 +389,50 @@ performer_statement:
       filter   ${output}   convertor=json
       ...   select_statement=SELECT version WHERE version gt 1.2.3
 
+verification_statement:
+
+  case1:
+    data: device1 EXECUTE show version USING_TEMPLATE tmpl.show.version SELECT version WHERE version gt 1.2.3 MUST BE True
+    unittest: |-
+      output= ta.execute(device1, cmdline='show version')
+      result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
+                         select_statement='SELECT version WHERE version gt 1.2.3')
+      total_count = len(result)
+      self.assertTrue(total_count == 1)
+    pytest: |-
+      output= ta.execute(device1, cmdline='show version')
+      result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
+                         select_statement='SELECT version WHERE version gt 1.2.3')
+      total_count = len(result)
+      assert total_count == 1
+    robotframework: |-
+      {output}=   execute   ${device1}   cmdline=show version
+      ${result}=   filter   ${output}   convertor=template   template_ref=tmpl.show.version
+      ...   select_statement=SELECT version WHERE version gt 1.2.3
+      ${total_count}=  get length   ${result}
+      should be true   ${total_count} == 1
+
+  case2:
+    data: device1 EXECUTE show version USING_TEMPLATE tmpl.show.version SELECT version WHERE version gt 1.2.3 MUST BE EQUAL_TO 1
+    unittest: |-
+      output= ta.execute(device1, cmdline='show version')
+      result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
+                         select_statement='SELECT version WHERE version gt 1.2.3')
+      total_count = len(result)
+      self.assertTrue(total_count == 1)
+    pytest: |-
+      output= ta.execute(device1, cmdline='show version')
+      result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
+                         select_statement='SELECT version WHERE version gt 1.2.3')
+      total_count = len(result)
+      assert total_count == 1
+    robotframework: |-
+      {output}=   execute   ${device1}   cmdline=show version
+      ${result}=   filter   ${output}   convertor=template   template_ref=tmpl.show.version
+      ...   select_statement=SELECT version WHERE version gt 1.2.3
+      ${total_count}=  get length   ${result}
+      should be true   ${total_count} == 1
+
 waitfor_statement:
 
   case1:
