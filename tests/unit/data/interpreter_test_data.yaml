@@ -336,6 +336,84 @@ teardown_statement:
         release device   ${device1}
         release resource   ${test_resource}
 
+section_statement:
+
+  default:
+    data: section
+    unittest: |-
+      ############ skip this line ############
+        def test_step(self):
+          print('Dummy for section')
+          self.assertTrue(True == True)
+    pytest: |-
+      ############ skip this line ############
+        def test_step(self):
+          print('Dummy for section')
+          assert True == True
+    robotframework: |-
+      ############ skip this line ############
+      test_step
+        log   Dummy for section
+        should be true   True == True
+
+  case1:
+    data: |-
+      section:
+        device1 execute show version
+    unittest: |-
+      ############ skip this line ############
+        def test_step(self):
+          ta.execute(device1, cmdline='show version')
+    pytest: |-
+      ############ skip this line ############
+        def test_step(self):
+          ta.execute(device1, cmdline='show version')
+    robotframework: |-
+      ############ skip this line ############
+      test_step
+        execute   ${device1}   cmdline=show version
+
+  case2:
+    data: |-
+      section:
+        device1 execute show version
+        loop 2 times
+          device1 execute show device info
+          wait for 5 seconds
+        device1 execute show module info
+
+    unittest: |-
+      ############ skip this line ############
+        def test_step(self):
+          ta.execute(device1, cmdline='show version')
+          ntimes = 2
+          indexes = range(1, times + 1)
+          for index in indexes:
+            ta.execute(device1, cmdline='show device info')
+            ta.wait_for(5)
+          ta.execute(device1, cmdline='show module info')
+    pytest: |-
+      ############ skip this line ############
+        def test_step(self):
+          ta.execute(device1, cmdline='show version')
+          ntimes = 2
+          indexes = range(1, times + 1)
+          for index in indexes:
+            ta.execute(device1, cmdline='show device info')
+            ta.wait_for(5)
+          ta.execute(device1, cmdline='show module info')
+    robotframework: |-
+      ############ skip this line ############
+      test_step
+        execute   ${device1}   cmdline=show version
+        ${ntimes}=   set variable   2
+        @{indexes}=   evaluate   range(1, ${ntimes} + 1)
+        FOR   ${index}   IN   @{indexes}
+          execute   ${device1}   cmdline=show device info
+          wait for   5
+        END
+        execute   ${device1}   cmdline=show module info
+
 loop_statement:
 
   case1:
