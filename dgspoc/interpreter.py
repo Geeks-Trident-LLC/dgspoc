@@ -92,13 +92,16 @@ class ScriptInfo(DotObject):
             return 'TestClass'
 
     def get_method_name(self, value):
-        node = self.get(self.testcase)
-        if node:
-            for method_name, val in node.items():
-                if val == value:
-                    return method_name
-            else:
-                return 'test_step'
+        if 'testcases' in self:
+            node = self.testcases.get(self.testcase)
+            if node:
+                for method_name, val in node.items():
+                    if val == value:
+                        return method_name
+                else:
+                    return 'test_step'
+        else:
+            return 'test_step'
 
     def reset_devices_vars(self):
         self.devices_vars = dict()
