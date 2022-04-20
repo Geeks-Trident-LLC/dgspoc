@@ -2,10 +2,24 @@
 user describing request"""
 
 import re
-import functools
 
 from dgspoc.utils import DotObject
-from dgspoc.utils import Misc
+
+
+class CheckStatement:
+
+    @classmethod
+    def is_execute_cmdline(cls, data):
+        pattern = r'(?i) *[{]?([a-z0-9]\S*)(, ?([a-z0-9]\S*))*[}]? +exec(utes?)? +'
+        match = re.match(pattern, data)
+        return bool(match)
+
+    @classmethod
+    def is_performer_statement(cls, data):
+        pattern = (r'(?i) *[{]?([a-z0-9]\S*)(, ?([a-z0-9]\S*))*[}]? +'
+                   r'(exec(utes?)?|conf(ig(ures?)?)?|reloads?) +')
+        match = re.match(pattern, data)
+        return bool(match)
 
 
 class ParsedOperation:
@@ -84,7 +98,7 @@ class ParsedOperation:
         node = DotObject(match.groupdict())
 
         self.parse_devices_names(node.devices_names)
-        self.is_parsed and self.parse_operation_type(node.operation_type)
+        self.is_parsed and self.parse_operation_type(node.operation_type)   # noqa
 
         if self.is_parsed and self.is_valid_operation:
             if self.is_execution:
@@ -180,7 +194,7 @@ class ExecuteOperation:
 
         self._remaining_data = re.sub(pattern, '', data)
 
-        node = DotObject(match)
+        node = DotObject(match.groupdict())
         if node.val1:
             self.condition = '=='
             self.expected_condition = 1 if node.val1.lower() == 'true' else 0
@@ -191,7 +205,7 @@ class ExecuteOperation:
                 GT='>', GREATER_THAN='>',
                 GE='>=', GREATER_THAN_OR_EQUAL_TO='>=', EQUAL_TO_OR_GREATER_THAN='>=',
                 LT='<', LESS_THAN='<',
-                LE='<=', LESS_THAN_OR_EQUAL_TO='<=',EQUAL_TO_OR_LESS_THAN='<='
+                LE='<=', LESS_THAN_OR_EQUAL_TO='<=', EQUAL_TO_OR_LESS_THAN='<='
             )
 
             op = node.op.upper()
@@ -238,7 +252,7 @@ class ConfigOperation:
 
         self.error = ''
 
-        self.parsed()
+        self.parse()
 
     @property
     def is_parsed(self):

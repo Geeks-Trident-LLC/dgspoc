@@ -27,6 +27,7 @@ from dgspoc.exceptions import ReleaseDeviceStatementError
 from dgspoc.exceptions import ReleaseResourceStatementError
 from dgspoc.exceptions import WaitForStatementError
 from dgspoc.exceptions import PerformerStatementError
+from dgspoc.exceptions import VerificationStatementError
 
 
 class ScriptInfo(DotObject):
@@ -1075,6 +1076,10 @@ class PerformerStatement(Statement):
         return stmt
 
     def parse(self):
+        if not parser.CheckStatement.is_performer_statement(self.statement_data):
+            self._is_parsed = False
+            return
+
         result = parser.ParsedOperation(self.statement_data)
         self.result = result
         self._is_parsed = result.is_parsed
@@ -1089,14 +1094,83 @@ class VerificationStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
+        self.result = None
         self.parse()
 
     @property
     def snippet(self):
-        return 'IncompleteTask: need to implement VerificationStatement.snippet'
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+
+        result = self.result
+
+        if self.is_robotframework:
+            for device_name in result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+
+                fmt = '{output}=   execute   ${%s}   cmdline=%s'
+                lst.append(fmt % (var_name, result.operation_ref))
+                if result.is_template:
+                    fmt = ('${result}=   filter   ${output}   convertor=%s   template_ref=%s\n'
+                           '...   select_statement=%s')
+                    stmt = fmt % (result.convertor, result.convertor_arg,
+                                  result.select_statement)
+                    lst.append(stmt)
+                else:
+                    fmt = ('${result}=   filter   ${output}   convertor=%s\n'
+                           '...   select_statement=%s')
+                    stmt = fmt % (result.convertor, result.select_statement)
+                    lst.append(stmt)
+
+                lst.append('${total_count}=  get length   ${result}')
+                lst.append('should be true   ${total_count} == %s' % result.expected_condition)
+
+        else:
+            for device_name in self.result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+
+                fmt = 'output= ta.execute(%s, cmdline=%r)'
+                lst.append(fmt % (var_name, result.operation_ref))
+                if result.is_template:
+                    fmt = ('result = ta.filter(output, convertor=%r, template_ref=%r,\n'
+                           '                   select_statement=%r)')
+                    stmt = fmt % (result.convertor, result.convertor_arg,
+                                  result.select_statement)
+                    lst.append(stmt)
+                else:
+                    fmt = ('result = ta.filter(output, convertor=%r,\n'
+                           '                   select_statement=%r)')
+                    stmt = fmt % (result.convertor, result.select_statement)
+                    lst.append(stmt)
+
+                lst.append('total_count = len(result)')
+                if self.is_unittest:
+                    fmt = 'self.assertTrue(total_count == %s)'
+                    lst.append(fmt % result.expected_condition)
+                else:
+                    lst.append('assert total_count == %s' % result.expected_condition)
+
+        stmt = self.indent_data('\n'.join(lst), self.level)
+        return stmt
 
     def parse(self):
-        """IncompleteTask: need to implement VerificationStatement.parse"""
+        if not parser.CheckStatement.is_execute_cmdline(self.statement_data):
+            self._is_parsed = False
+            return
+
+        result = parser.ParsedOperation(self.statement_data)
+        self.result = result
+        self._is_parsed = result.is_parsed
+        self.update_level_from_parent()
+
+        if result.error:
+            raise PerformerStatementError(result.error)
+
+        if not self.result.is_verification:
+            fmt = 'Invalid verification statement format\n %s'
+            raise VerificationStatementError(fmt % self.statement_data)
 
 
 class WaitForStatement(Statement):
