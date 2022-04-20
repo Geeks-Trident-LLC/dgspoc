@@ -84,9 +84,12 @@ class ScriptInfo(DotObject):
         self.update(yaml.safe_load(data))
 
     def get_class_name(self):
-        node = self.get(self.testcase)
-        cls_name = node.get('class_name', 'TestClass') if node else 'TestClass'
-        return cls_name
+        if 'testcases' in self:
+            node = self.testcases.get(self.testcase)
+            cls_name = node.get('class_name', 'TestClass') if node else 'TestClass'
+            return cls_name
+        else:
+            return 'TestClass'
 
     def get_method_name(self, value):
         node = self.get(self.testcase)
@@ -637,6 +640,7 @@ class UseTestCaseStatement(Statement):
         variables = SCRIPTINFO.get('variables', dict())
         SCRIPTINFO.variables = variables
         SCRIPTINFO.variables.test_data_var = self.var_name
+        SCRIPTINFO.testcase = test_name
         self.var_name = var_name
         self.test_name = test_name
 
