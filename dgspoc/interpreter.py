@@ -15,7 +15,9 @@ from dgspoc.utils import Text
 
 from dgspoc.constant import FWTYPE
 
-from dgspoc import parser
+# from dgspoc import parser
+from dgspoc.parser import ParsedOperation
+from dgspoc.parser import CheckStatement
 
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
@@ -1076,11 +1078,11 @@ class PerformerStatement(Statement):
         return stmt
 
     def parse(self):
-        if not parser.CheckStatement.is_performer_statement(self.statement_data):
+        if not CheckStatement.is_performer_statement(self.statement_data):
             self._is_parsed = False
             return
 
-        result = parser.ParsedOperation(self.statement_data)
+        result = ParsedOperation(self.statement_data)
         self.result = result
         self._is_parsed = result.is_parsed
         self.update_level_from_parent()
@@ -1156,11 +1158,11 @@ class VerificationStatement(Statement):
         return stmt
 
     def parse(self):
-        if not parser.CheckStatement.is_execute_cmdline(self.statement_data):
+        if not CheckStatement.is_execute_cmdline(self.statement_data):
             self._is_parsed = False
             return
 
-        result = parser.ParsedOperation(self.statement_data)
+        result = ParsedOperation(self.statement_data)
         self.result = result
         self._is_parsed = result.is_parsed
         self.update_level_from_parent()
