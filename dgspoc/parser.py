@@ -60,7 +60,7 @@ class CheckStatement:
 
     @classmethod
     def is_connect_data_statement(cls, data):
-        match = re.match(r'(?i) *connects? +data +')
+        match = re.match(r'(?i) *connects? +data +', data)
         return bool(match)
 
     @classmethod
@@ -70,7 +70,7 @@ class CheckStatement:
 
     @classmethod
     def is_use_testcase_statement(cls, data):
-        match = re.match(r'(?i) *uses? +testcase +')
+        match = re.match(r'(?i) *uses? +testcase +', data)
         return bool(match)
 
     @classmethod
