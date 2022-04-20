@@ -30,19 +30,19 @@ class CheckStatement:
 
     @classmethod
     def is_regular_iterative_statement(cls, data):
-        pattern = r'(?i) *loop +[0-9]+ +times *$'
+        pattern = r'(?i) *loop +[0-9]+ +times? *$'
         match = re.match(pattern, data)
         return bool(match)
 
     @classmethod
     def is_until_iterative_statement(cls, data):
-        pattern = r'(?i) *loop +[0-9]+ +times +until *$'
+        pattern = r'(?i) *loop +[0-9]+ +times? +until *$'
         match = re.match(pattern, data)
         return bool(match)
 
     @classmethod
     def is_to_last_iterative_statement(cls, data):
-        pattern = r'(?i) *loop +[0-9]+ +times +to + last *$'
+        pattern = r'(?i) *loop +[0-9]+ +times? +to +last *$'
         match = re.match(pattern, data)
         return bool(match)
 
@@ -55,37 +55,37 @@ class CheckStatement:
 
     @classmethod
     def is_pausing_statement(cls, data):
-        match = re.match(r'(?i) *(sleep|(wait +for)) +', data)
+        match = re.match(r'(?i) *(sleeps?|(wait +for)) +', data)
         return bool(match)
 
     @classmethod
     def is_connect_data_statement(cls, data):
-        match = re.match(r'(?i) *connect +data +')
+        match = re.match(r'(?i) *connects? +data +')
         return bool(match)
 
     @classmethod
     def is_connect_device_statement(cls, data):
-        match = re.match(r'(?i) *connect +device +', data)
+        match = re.match(r'(?i) *connects? +device +', data)
         return bool(match)
 
     @classmethod
     def is_use_testcase_statement(cls, data):
-        match = re.match(r'(?i) *use +testcase +')
+        match = re.match(r'(?i) *uses? +testcase +')
         return bool(match)
 
     @classmethod
     def is_disconnect_device_statement(cls, data):
-        match = re.match(r'(?i) *disconnect( +device)? +', data)
+        match = re.match(r'(?i) *disconnects?( +device)? +', data)
         return bool(match)
 
     @classmethod
     def is_release_device_statement(cls, data):
-        match = re.match(r'(?i) *release +device +', data)
+        match = re.match(r'(?i) *releases? +device +', data)
         return bool(match)
 
     @classmethod
     def is_release_data_statement(cls, data):
-        match = re.match(r'(?i) *release +data +', data)
+        match = re.match(r'(?i) *releases? +data +', data)
         return bool(match)
 
 

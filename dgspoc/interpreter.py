@@ -7,6 +7,7 @@ import operator
 import yaml
 
 from textwrap import indent
+from textwrap import dedent
 
 from dgspoc.utils import DotObject
 from dgspoc.utils import Misc
@@ -495,7 +496,7 @@ class SetupStatement(Statement):
 
         other.prev = node
         # node.next = other
-        if node.name == 'setup':
+        if isinstance(node, self.__class__):
             other.parent = node
             other.update_level_from_parent()
         else:
@@ -972,7 +973,7 @@ class CleanupStatement(Statement):
 
         other.prev = node
         # node.next = other
-        if node.name == 'cleanup' or node.name == 'teardown':
+        if isinstance(node, self.__class__):
             other.parent = node
             other.update_level_from_parent()
         else:
@@ -1005,14 +1006,226 @@ class LoopStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
+        self.ntimes = 0
         self.parse()
 
     @property
+    def is_regular_iterative(self):
+        result = CheckStatement.is_regular_iterative_statement(self.statement_data)
+        return result
+
+    @property
+    def is_util_iterative(self):
+        result = CheckStatement.is_until_iterative_statement(self.statement_data)
+        return result
+
+    @property
+    def is_to_last_iterative(self):
+        result = CheckStatement.is_to_last_iterative_statement(self.statement_data)
+        return result
+
+    @property
+    def is_iterative_statement(self):
+        result = self.is_regular_iterative
+        result |= self.is_util_iterative
+        result |= self.is_to_last_iterative
+        return result
+
+    @property
     def snippet(self):
-        return 'IncompleteTask: need to implement LoopStatement.snippet'
+        if self.is_regular_iterative:
+            stmt = self.regular_iterative_snippet
+            return stmt
+        elif self.is_util_iterative:
+            stmt = self.until_iterative_snippet
+            return stmt
+        else:
+            stmt = self.to_last_iterative_snippet
+            return stmt
+
+    @property
+    def regular_iterative_snippet(self):
+        if not self.is_parsed:
+            return ''
+        if self.ntimes <= 0:
+            return ''
+
+        lst = []
+        if self.is_robotframework:
+            lst.append('${ntimes}=   set variable   %s' % self.ntimes)
+            lst.append('@{indexes}=   evaluate   range(1, ${ntimes} + 1)')
+            lst.append('FOR   ${index}   IN   @{indexes}')
+            for child in self.children:
+                if child.name == 'verification':
+                    msg = 'Failed at iteration ${index}/${ntimes}'
+                    child_snippet = child.render_assertion_message(msg)
+                    lst.append(child_snippet)
+                else:
+                    lst.append(child.snippet)
+            lst.append('END')
+        else:
+            lst.append('ntimes = %s' % self.ntimes)
+            lst.append('indexes = range(1, times + 1)')
+            lst.append('for index in indexes:')
+            for child in self.children:
+                if child.name == 'verification':
+                    msg = "'Failed at iteration {}/{}'.format(index, ntimes)"
+                    child_snippet = child.render_assertion_message(msg)
+                    lst.append(child_snippet)
+                else:
+                    lst.append(child.snippet)
+
+        stmt = self.indent_data('\n'.join(lst), self.level)
+        return stmt
+
+    @property
+    def until_iterative_snippet(self):
+        if not self.is_parsed:
+            return ''
+        if self.ntimes <= 0:
+            return ''
+
+        lst = []
+        if self.is_robotframework:
+            lst.append('${ntimes}=   set variable   %s' % self.ntimes)
+            lst.append('@{indexes}=   evaluate   range(1, ${ntimes} + 1)')
+            lst.append('${is_passed}=   set variable   ${True}')
+            lst.append('FOR   ${index}   IN   @{indexes}')
+            for child in self.children:
+                if child.name == 'verification':
+                    msg = 'Failed at iteration ${index}/${ntimes}'
+                    child_snippet = child.render_assertion_message(msg)
+                    lst.append(child_snippet)
+                else:
+                    lst.append(child.snippet)
+
+            lst.append(self.indent_data('exit for loop if   ${is_passed}', 1))
+            lst.append('END')
+        else:
+            lst.append('ntimes = %s' % self.ntimes)
+            lst.append('indexes = range(1, times + 1)')
+            lst.append('is_passed = True')
+            lst.append('for index in indexes:')
+            for child in self.children:
+                if child.name == 'verification':
+                    msg = "'Failed at iteration {}/{}'.format(index, ntimes)"
+                    child_snippet = child.render_assertion_message(msg)
+                    lst.append(child_snippet)
+                else:
+                    lst.append(child.snippet)
+
+            lst.append(self.indent_data('if is_passed:', 1))
+            lst.append(self.indent_data('break', 2))
+
+        stmt = self.indent_data('\n'.join(lst), self.level)
+        return stmt
+
+    @property
+    def to_last_iterative_snippet(self):
+        if not self.is_parsed:
+            return ''
+        if self.ntimes <= 0:
+            return ''
+
+        lst = []
+        if self.is_robotframework:
+            lst.append('${ntimes}=   set variable   %s' % self.ntimes)
+            lst.append('@{indexes}=   evaluate   range(1, ${ntimes} + 1)')
+            lst.append('${is_passed}=   set variable   ${True}')
+            lst.append('FOR   ${index}   IN   @{indexes}')
+            for child in self.children:
+                if child.name == 'verification':
+                    addition = '${is_passed}=   evaluate   ${is_passed} and ${check}'
+                    child_snippet = child.convert_assertion_to_check(addition=addition)
+                    lst.append(child_snippet)
+                else:
+                    lst.append(child.snippet)
+            lst.append(('run keyword if   ${is_passed} == False   Log   '
+                        'failed verification(s) at iteration '
+                        '${index}/${ntimes}   WARN'))
+            lst.append('END')
+            lst.append('should be true   ${is_passed}')
+        else:
+            lst.append('ntimes = %s' % self.ntimes)
+            lst.append('indexes = range(1, times + 1)')
+            lst.append('is_passed = True')
+            lst.append('for index in indexes:')
+            for child in self.children:
+                if child.name == 'verification':
+                    addition = 'is_passed = is_passed and check'
+                    child_snippet = child.convert_assertion_to_check(addition=addition)
+                    lst.append(child_snippet)
+                else:
+                    lst.append(child.snippet)
+
+            lst.append(self.indent_data('if not is_passed:', 1))
+            warned_msg = "'Warning: failed verification(s) at iteration {}/{}'.format(index, ntimes)"
+            lst.append(self.indent_data('print(%s)' % warned_msg, 2))
+
+            if self.is_unittest:
+                lst.append('self.assertTrue(is_passed)')
+            else:
+                lst.append('assert is_passed')
+
+        stmt = self.indent_data('\n'.join(lst), self.level)
+        return stmt
 
     def parse(self):
-        """IncompleteTask: need to implement LoopStatement.parse"""
+        if not self.is_iterative_statement:
+            self._is_parsed = False
+            return
+
+        pattern = r'(?i) *loop +(?P<ntimes>[0-9]+) +'
+        match = re.match(pattern, self.statement_data)
+        self.ntimes = int(match.group('ntimes'))
+
+        if self.is_next_statement_children():
+            node = self.create_child(self)
+            self.add_child(node)
+            while node and node.is_next_statement_sibling():
+                node = self.create_child(node)
+                self.add_child(node)
+            if self.children:
+                last_child = self._children[-1]
+                self._remaining_data = last_child.remaining_data
+        if not self.children:
+            kwargs = dict(framework=self.framework, indentation=self.indentation)
+            data = 'dummy_pass - Dummy iterative statement'
+            dummy_stmt = DummyStatement(data, **kwargs, parent=self)
+            self.add_child(dummy_stmt)
+
+        self.name = 'loop'
+        self._is_parsed = True
+        self.update_level_from_parent()
+
+    def create_child(self, node):
+        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        next_line = node.get_next_statement_data()
+
+        if CheckStatement.is_verification_statement(next_line):
+            other = VerificationStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_performer_statement(next_line):
+            other = PerformerStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_connect_device_statement(next_line):
+            other = ConnectDeviceStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_disconnect_device_statement(next_line):
+            other = DisconnectStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_release_device_statement(next_line):
+            other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_pausing_statement(next_line):
+            other = WaitForStatement(node.remaining_data, **kwargs)
+        else:
+            return None
+
+        other.prev = node
+        # node.next = other
+        if isinstance(node, self.__class__):
+            other.parent = node
+            other.update_level_from_parent()
+        else:
+            other.parent = node.parent
+            other.update_level_from_parent()
+        return other
 
 
 class PerformerStatement(Statement):
@@ -1085,6 +1298,7 @@ class PerformerStatement(Statement):
         result = ParsedOperation(self.statement_data)
         self.result = result
         self._is_parsed = result.is_parsed
+        self.name = self.result.name
         self.update_level_from_parent()
 
         if result.error:
@@ -1157,6 +1371,52 @@ class VerificationStatement(Statement):
         stmt = self.indent_data('\n'.join(lst), self.level)
         return stmt
 
+    def render_assertion_message(self, msg):
+        if not self.snippet:
+            return ''
+
+        lines = dedent(self.snippet).splitlines()
+        tbl = dict(unittest='%s, msg=%s)', pytest='%s, %s', robotframework='%s   %s')
+        fmt = tbl[self.framework.lower()]
+        pattern = '(?i)(should be true)|(self[.])?assert(True)?'
+
+        lst = []
+        for line in lines:
+            if re.match(pattern, line):
+                txt = line[:-1] if self.is_unittest else line
+                new_line = fmt % (txt, msg)
+                lst.append(new_line)
+            else:
+                lst.append(line)
+
+        new_snippet = self.indent_data('\n'.join(lst), self.level)
+        return new_snippet
+
+    def convert_assertion_to_check(self, addition=''):
+        if not self.snippet:
+            return ''
+
+        lines = dedent(self.snippet).splitlines()
+        pattern = ('(?i)(?P<case>(should be true)|(self[.])?assert(True)?) *'
+                   '(?P<val>[^ ].*[^ ]?) *$')
+
+        lst = []
+        for index, line in enumerate(lines):
+            match = re.match(pattern, line)
+            if match:
+                val = match.group('val').strip()
+                if self.is_robotframework:
+                    lst.append('${check}=   evaluate   %s' % val)
+                else:
+                    val = val.lstrip('(').rstrip(')')
+                    lst.append('check = %s' % val)
+                addition and lst.append(addition)
+            else:
+                lst.append(line)
+
+        new_snippet = self.indent_data('\n'.join(lst), self.level)
+        return new_snippet
+
     def parse(self):
         if not CheckStatement.is_execute_cmdline(self.statement_data):
             self._is_parsed = False
@@ -1165,6 +1425,7 @@ class VerificationStatement(Statement):
         result = ParsedOperation(self.statement_data)
         self.result = result
         self._is_parsed = result.is_parsed
+        self.name = 'verification'
         self.update_level_from_parent()
 
         if result.error:
