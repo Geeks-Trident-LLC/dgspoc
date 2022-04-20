@@ -336,6 +336,59 @@ teardown_statement:
         release device   ${device1}
         release resource   ${test_resource}
 
+performer_statement:
+
+  case1:
+    data: device1 EXECUTE show version
+    unittest: "ta.execute(device1, cmdline='show version')"
+    pytest: "ta.execute(device1, cmdline='show version')"
+    robotframework: "execute   ${device1}   cmdline=show version"
+
+  case2:
+    data: device1 EXECUTE show version USING_TEMPLATE tmpl.show.version SELECT version WHERE version gt 1.2.3
+    unittest: |-
+      output= ta.execute(device1, cmdline='show version')
+      ta.filter(output, convertor='template', template_ref='tmpl.show.version',
+                select_statement='SELECT version WHERE version gt 1.2.3')
+    pytest: |-
+      output= ta.execute(device1, cmdline='show version')
+      ta.filter(output, convertor='template', template_ref='tmpl.show.version',
+                select_statement='SELECT version WHERE version gt 1.2.3')
+    robotframework: |-
+      {output}=   execute   ${device1}   cmdline=show version
+      filter   ${output}   convertor=template   template_ref=tmpl.show.version
+      ...   select_statement=SELECT version WHERE version gt 1.2.3
+
+  case3:
+    data: device1 EXECUTE show version | cvs-format USING_CSV SELECT version WHERE version gt 1.2.3
+    unittest: |-
+      output= ta.execute(device1, cmdline='show version | cvs-format')
+      ta.filter(output, convertor='csv',
+                select_statement='SELECT version WHERE version gt 1.2.3')
+    pytest: |-
+      output= ta.execute(device1, cmdline='show version | cvs-format')
+      ta.filter(output, convertor='csv',
+                select_statement='SELECT version WHERE version gt 1.2.3')
+    robotframework: |-
+      {output}=   execute   ${device1}   cmdline=show version | cvs-format
+      filter   ${output}   convertor=csv
+      ...   select_statement=SELECT version WHERE version gt 1.2.3
+
+  case4:
+    data: device1 EXECUTE show version | json-format USING_JSON SELECT version WHERE version gt 1.2.3
+    unittest: |-
+      output= ta.execute(device1, cmdline='show version | json-format')
+      ta.filter(output, convertor='json',
+                select_statement='SELECT version WHERE version gt 1.2.3')
+    pytest: |-
+      output= ta.execute(device1, cmdline='show version | json-format')
+      ta.filter(output, convertor='json',
+                select_statement='SELECT version WHERE version gt 1.2.3')
+    robotframework: |-
+      {output}=   execute   ${device1}   cmdline=show version | json-format
+      filter   ${output}   convertor=json
+      ...   select_statement=SELECT version WHERE version gt 1.2.3
+
 waitfor_statement:
 
   case1:
