@@ -15,6 +15,8 @@ from dgspoc.utils import Text
 
 from dgspoc.constant import FWTYPE
 
+from dgspoc import parser
+
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
 from dgspoc.exceptions import ConnectDataStatementError
@@ -24,6 +26,7 @@ from dgspoc.exceptions import DisconnectDeviceStatementError
 from dgspoc.exceptions import ReleaseDeviceStatementError
 from dgspoc.exceptions import ReleaseResourceStatementError
 from dgspoc.exceptions import WaitForStatementError
+from dgspoc.exceptions import PerformerStatementError
 
 
 class ScriptInfo(DotObject):
@@ -99,6 +102,14 @@ class ScriptInfo(DotObject):
             test_resource_ref='',
             test_data_var='test_data'
         )
+
+    def get_device_var(self, device_name):
+
+        for var_name, var_val in self.devices_vars.items():
+            if var_val == device_name:
+                return var_name
+        else:
+            return 'not_found_var for %r' % device_name
 
 
 SCRIPTINFO = ScriptInfo()
@@ -1006,14 +1017,71 @@ class PerformerStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
+        self.result = None
         self.parse()
 
     @property
     def snippet(self):
-        return 'IncompleteTask: need to implement PerformerStatement.snippet'
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+
+        result = self.result
+
+        if self.is_robotframework:
+            for device_name in result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+                if result.has_select_statement:
+                    fmt = '{output}=   execute   ${%s}   cmdline=%s'
+                    lst.append(fmt % (var_name, result.operation_ref))
+                    if result.is_template:
+                        fmt = ('filter   ${output}   convertor=%s   template_ref=%s\n'
+                               '...   select_statement=%s')
+                        stmt = fmt % (result.convertor, result.convertor_arg,
+                                      result.select_statement)
+                        lst.append(stmt)
+                    else:
+                        fmt = ('filter   ${output}   convertor=%s\n'
+                               '...   select_statement=%s')
+                        stmt = fmt % (result.convertor, result.select_statement)
+                        lst.append(stmt)
+                else:
+                    fmt = 'execute   ${%s}   cmdline=%s'
+                    lst.append(fmt % (var_name, self.result.operation_ref))
+        else:
+            for device_name in self.result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+
+                if result.has_select_statement:
+                    fmt = 'output= ta.execute(%s, cmdline=%r)'
+                    lst.append(fmt % (var_name, result.operation_ref))
+                    if result.is_template:
+                        fmt = ('ta.filter(output, convertor=%r, template_ref=%r,\n'
+                               '          select_statement=%r)')
+                        stmt = fmt % (result.convertor, result.convertor_arg,
+                                      result.select_statement)
+                        lst.append(stmt)
+                    else:
+                        fmt = ('ta.filter(output, convertor=%r,\n'
+                               '          select_statement=%r)')
+                        stmt = fmt % (result.convertor, result.select_statement)
+                        lst.append(stmt)
+                else:
+                    fmt = 'ta.execute(%s, cmdline=%r)'
+                    lst.append(fmt % (var_name, result.operation_ref))
+
+        stmt = self.indent_data('\n'.join(lst), self.level)
+        return stmt
 
     def parse(self):
-        """IncompleteTask: need to implement PerformerStatement.parse"""
+        result = parser.ParsedOperation(self.statement_data)
+        self.result = result
+        self._is_parsed = result.is_parsed
+        self.update_level_from_parent()
+
+        if result.error:
+            raise PerformerStatementError(result.error)
 
 
 class VerificationStatement(Statement):

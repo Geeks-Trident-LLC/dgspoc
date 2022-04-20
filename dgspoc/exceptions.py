@@ -51,3 +51,8 @@ class ReleaseResourceStatementError(InterpreterError):
 
 class WaitForStatementError(InterpreterError):
     """Use to capture error for interpreting wait for statement"""
+
+
+class PerformerStatementError(InterpreterError):
+    """Use to capture error for performer statement"""
+

@@ -14,6 +14,7 @@ from dgspoc.interpreter import ConnectDeviceStatement
 from dgspoc.interpreter import DisconnectStatement
 from dgspoc.interpreter import ReleaseDeviceStatement
 from dgspoc.interpreter import ReleaseResourceStatement
+from dgspoc.interpreter import PerformerStatement
 from dgspoc.interpreter import WaitForStatement
 
 from dgspoc.interpreter import ScriptBuilder
@@ -598,6 +599,108 @@ class TestTeardownStatement:
     )
     def test_teardown_with_disconnect_and_release(self, framework, user_data, expected_result):
         node = CleanupStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+
+class TestPerformerStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.performer_statement.case1.data,
+                TESTDATA.performer_statement.case1.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.performer_statement.case1.data,
+                TESTDATA.performer_statement.case1.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.performer_statement.case1.data,
+                TESTDATA.performer_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_performer_statement_case1(self, framework, user_data, expected_result):
+        node = PerformerStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.performer_statement.case2.data,
+                TESTDATA.performer_statement.case2.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.performer_statement.case2.data,
+                TESTDATA.performer_statement.case2.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.performer_statement.case2.data,
+                TESTDATA.performer_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_performer_statement_case2(self, framework, user_data, expected_result):
+        node = PerformerStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.performer_statement.case3.data,
+                TESTDATA.performer_statement.case3.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.performer_statement.case3.data,
+                TESTDATA.performer_statement.case3.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.performer_statement.case3.data,
+                TESTDATA.performer_statement.case3.robotframework,
+            ),
+        ]
+    )
+    def test_performer_statement_case2(self, framework, user_data, expected_result):
+        node = PerformerStatement(user_data, indentation=indentation, framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.performer_statement.case4.data,
+                TESTDATA.performer_statement.case4.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.performer_statement.case4.data,
+                TESTDATA.performer_statement.case4.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.performer_statement.case4.data,
+                TESTDATA.performer_statement.case4.robotframework,
+            ),
+        ]
+    )
+    def test_performer_statement_case2(self, framework, user_data, expected_result):
+        node = PerformerStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
 
