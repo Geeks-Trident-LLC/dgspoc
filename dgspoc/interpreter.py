@@ -998,14 +998,89 @@ class SectionStatement(Statement):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
 
+        self.description = ''
         self.parse()
 
     @property
     def snippet(self):
-        return 'IncompleteTask: need to implement SectionStatement.snippet'
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+
+        method_name = SCRIPTINFO.get_method_name(self.description)
+        if not method_name.lower().startswith('test'):
+            method_name = 'test_%s' % method_name
+
+        if self.is_unittest or self.is_pytest:
+            method_name = method_name.replace(' ', '_')
+
+        fmt = '%s' if self.is_robotframework else 'def %s(self):'
+        lst.append(fmt % method_name)
+
+        for child in self.children:
+            lst.append(child.snippet)
+
+        level = 0 if self.is_robotframework else 1
+        script = self.indent_data('\n'.join(lst), level)
+        return script
 
     def parse(self):
-        """IncompleteTask: Need to implement SectionStatement.parse"""
+        if not self.is_section_statement:
+            self._is_parsed = False
+            return
+
+        pattern = r'(?i) *section([^a-z0-9]+)?(?P<description>\w+.+)?'
+        match = re.match(pattern, self.statement_data)
+        self.description = match.group('description') if match else 'test_default'
+
+        self.name = 'section'
+        self._is_parsed = True
+        if self.is_next_statement_children():
+            node = self.create_child(self)
+            self.add_child(node)
+            while node and node.is_next_statement_sibling():
+                node = self.create_child(node)
+                self.add_child(node)
+            if self.children:
+                last_child = self._children[-1]
+                self._remaining_data = last_child.remaining_data
+        if not self.children:
+            kwargs = dict(framework=self.framework, indentation=self.indentation)
+            data = 'dummy_pass - Dummy for section'
+            dummy_stmt = DummyStatement(data, **kwargs, parent=self)
+            self.add_child(dummy_stmt)
+
+    def create_child(self, node):
+        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        next_line = node.get_next_statement_data()
+
+        if CheckStatement.is_verification_statement(next_line):
+            other = VerificationStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_performer_statement(next_line):
+            other = PerformerStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_connect_device_statement(next_line):
+            other = ConnectDeviceStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_disconnect_device_statement(next_line):
+            other = DisconnectStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_release_device_statement(next_line):
+            other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_pausing_statement(next_line):
+            other = WaitForStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_iterative_statement(next_line):
+            other = LoopStatement(node.remaining_data, **kwargs)
+        else:
+            return None
+
+        other.prev = node
+        # node.next = other
+        if isinstance(node, self.__class__):
+            other.parent = node
+            other.update_level_from_parent()
+        else:
+            other.parent = node.parent
+            other.update_level_from_parent()
+        return other
 
 
 class LoopStatement(Statement):
