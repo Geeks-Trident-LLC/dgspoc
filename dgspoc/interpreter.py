@@ -227,9 +227,77 @@ class Statement:
         return chk
 
     @property
-    def is_parent_setup_or_teardown_for_unittest(self):
-        chk = self.is_unittest and self.is_parent_setup_or_teardown_statement
-        return chk
+    def is_ancestor_setup_or_teardown_for_unittest(self):
+        if not self.is_unittest or not self.parent:
+            return False
+
+        node = self.parent
+
+        while isinstance(node, Statement):
+            if node.is_setup_or_teardown_statement:
+                return True
+            node = node.parent
+        return False
+
+    @property
+    def is_ancestor_base_statement(self):
+        if not self.parent:
+            return False
+
+        chk_lst = (SetupStatement, SectionStatement, TeardownStatement)
+
+        node = self.parent
+
+        while isinstance(node, Statement):
+            if isinstance(node, chk_lst):
+                return True
+            node = node.parent
+        return False
+
+    @property
+    def is_ancestor_section_statement(self):
+        if not self.parent:
+            return False
+
+        node = self.parent
+
+        while isinstance(node, Statement):
+            if isinstance(node, SectionStatement):
+                return True
+            node = node.parent
+        return False
+
+    @property
+    def is_ancestor_setup_statement(self):
+        if not self.parent:
+            return False
+
+        if isinstance(self.parent, SetupStatement):
+            return True
+
+        node = self.parent
+
+        while isinstance(node, Statement):
+            if isinstance(node, SetupStatement):
+                return True
+            node = node.parent
+        return False
+
+    @property
+    def is_ancestor_teardown_statement(self):
+        if not self.parent:
+            return False
+
+        if isinstance(self.parent, TeardownStatement):
+            return True
+
+        node = self.parent
+
+        while isinstance(node, Statement):
+            if isinstance(node, TeardownStatement):
+                return True
+            node = node.parent
+        return False
 
     @property
     def is_section_statement(self):
@@ -249,6 +317,42 @@ class Statement:
         lst = data if Misc.is_list(data) else [data]
         is_matched = any(bool(re.match(pat, str(item), re.I)) for item in lst)
         return is_matched
+
+    def substitute_new_format(self, fmt):
+        replacing = '{_replace_}'
+
+        is_ancestor_setup_or_teardown = self.is_ancestor_setup_statement
+        is_ancestor_setup_or_teardown |= self.is_ancestor_teardown_statement
+        is_ancestor_base_statement = self.is_ancestor_base_statement
+
+        if self.is_unittest or self.is_pytest:
+            replaced = ''
+            if is_ancestor_base_statement:
+                if self.is_unittest and is_ancestor_setup_or_teardown:
+                    replaced = 'cls'
+                else:
+                    replaced = 'self'
+
+            lst = fmt.split(replacing)
+            if len(lst) == 1:
+                return fmt
+
+            for index, item in enumerate(lst[1:], 1):
+                if replaced == '' and item.startswith('.'):
+                    lst[index] = item[1:]
+            new_fmt = replaced.join(lst)
+            return new_fmt
+        else:
+            if self.parent:
+                return fmt
+            else:
+                lines = fmt.splitlines()
+                last_line = lines[-1] if lines else ''
+                if re.search('(?i)set +global +variable ', last_line):
+                    new_fmt = '\n'.join(lines[:-1])
+                    return new_fmt
+                else:
+                    return fmt
 
     def prepare(self):
         if self.is_empty:
@@ -532,22 +636,16 @@ class ConnectDataStatement(Statement):
         if not self.is_parsed:
             return ''
 
+        kwargs = dict(v1=self.var_name, v2=self.test_resource_ref)
         if self.is_robotframework:
-            if self.parent:
-                fmt = "${%s}=   connect data   filename=%s\nset global variable   ${%s}"
-                stmt = fmt % (self.var_name, self.test_resource_ref, self.var_name)
-            else:
-                fmt = "${%s}=   connect data   filename=%s"
-                stmt = fmt % (self.var_name, self.test_resource_ref)
+            fmt = ("${%(v1)s}=   connect data   filename=%(v2)s\nset global "
+                   "variable   ${%(v1)s}")
+            new_fmt = self.substitute_new_format(fmt)
+            stmt = new_fmt % kwargs
         else:
-            if self.is_parent_setup_or_teardown_for_unittest:
-                fmt = "cls.%s = ta.connect_data(filename=%r)"
-            else:
-                if self.parent:
-                    fmt = "self.%s = ta.connect_data(filename=%r)"
-                else:
-                    fmt = "%s = ta.connect_data(filename=%r)"
-            stmt = fmt % (self.var_name, self.test_resource_ref)
+            fmt = "{_replace_}.%(v1)s = ta.connect_data(filename=%(v2)r)"
+            new_fmt = self.substitute_new_format(fmt)
+            stmt = new_fmt % kwargs
 
         level = self.parent.level + 1 if self.parent else self.level
         stmt = self.indent_data(stmt, level)
@@ -620,22 +718,17 @@ class UseTestCaseStatement(Statement):
 
         test_resource_var = SCRIPTINFO.variables.get('test_resource_var', 'test_resource')
 
+        kwargs = dict(v1=self.var_name, v2=test_resource_var, v3=self.test_name)
         if self.is_robotframework:
-            if self.parent:
-                fmt = "${%s}=  use testcase   ${%s}  testcase=%s\nset global variable   ${%s}"
-                stmt = fmt % (self.var_name, test_resource_var, self.test_name, self.var_name)
-            else:
-                fmt = "${%s}=  use testcase   ${%s}  testcase=%s"
-                stmt = fmt % (self.var_name, test_resource_var, self.test_name)
+            fmt = ("${%(v1)s}=  use testcase   ${%(v2)s}  testcase=%(v3)s\n"
+                   "set global variable   ${%(v1)s}")
+            new_fmt = self.substitute_new_format(fmt)
+            stmt = new_fmt % kwargs
         else:
-            if self.is_parent_setup_or_teardown_for_unittest:
-                fmt = "cls.%s = ta.use_testcase(cls.%s, testcase=%r)"
-            else:
-                if self.parent:
-                    fmt = "self.%s = ta.use_testcase(self.%s, testcase=%r)"
-                else:
-                    fmt = "%s = ta.use_testcase(%s, testcase=%r)"
-            stmt = fmt % (self.var_name, test_resource_var, self.test_name)
+            fmt = ("{_replace_}.%(v1)s = ta.use_testcase({_replace_}.%(v2)s, "
+                   "testcase=%(v3)r)")
+            new_fmt = self.substitute_new_format(fmt)
+            stmt = new_fmt % kwargs
 
         level = self.parent.level + 1 if self.parent else self.level
         stmt = self.indent_data(stmt, level)
@@ -698,23 +791,17 @@ class ConnectDeviceStatement(Statement):
 
         lst = []
         for var_name, device_name in self.devices_vars.items():
+            kwargs = dict(v1=var_name, v2=test_resource_var, v3=device_name)
             if self.is_robotframework:
-                if self.parent:
-                    fmt = "${%s}=   connect device   ${%s}   name=%s\nset global variable   ${%s}"
-                    stmt = fmt % (var_name, test_resource_var, device_name, var_name)
-                else:
-                    fmt = "${%s}=   connect device   ${%s}   name=%s"
-                    stmt = fmt % (var_name, test_resource_var, device_name)
-
+                fmt = ("${%(v1)s}=   connect device   ${%(v2)s}   "
+                       "name=%(v3)s\nset global variable   ${%(v1)s}")
+                new_fmt = self.substitute_new_format(fmt)
+                stmt = new_fmt % kwargs
             else:
-                if self.is_parent_setup_or_teardown_for_unittest:
-                    fmt = "cls.%s = ta.connect_device(cls.%s, name=%r)"
-                else:
-                    if self.parent:
-                        fmt = "self.%s = ta.connect_device(self.%s, name=%r)"
-                    else:
-                        fmt = "%s = ta.connect_device(%s, name=%r)"
-                stmt = fmt % (var_name, test_resource_var, device_name)
+                fmt = ("{_replace_}.%(v1)s = ta.connect_device({_replace_}."
+                       "%(v2)s, name=%(v3)r)")
+                new_fmt = self.substitute_new_format(fmt)
+                stmt = new_fmt % kwargs
             lst.append(stmt)
 
         level = self.parent.level + 1 if self.parent else self.level
@@ -794,16 +881,13 @@ class DisconnectStatement(Statement):
 
         lst = []
         for var_name in self.vars_lst:
+            kwargs = dict(v1=var_name)
             if self.is_robotframework:
-                stmt = "disconnect device   ${%s}" % var_name
+                stmt = "disconnect device   ${%(v1)s}" % kwargs
             else:
-                if self.is_parent_setup_or_teardown_for_unittest:
-                    stmt = "ta.disconnect_device(cls.%s)" % var_name
-                else:
-                    if self.parent:
-                        stmt = "ta.disconnect_device(self.%s)" % var_name
-                    else:
-                        stmt = "ta.disconnect_device(%s)" % var_name
+                fmt = "ta.disconnect_device({_replace_}.%(v1)s)"
+                new_fmt = self.substitute_new_format(fmt)
+                stmt = new_fmt % kwargs
             lst.append(stmt)
 
         level = self.parent.level + 1 if self.parent else self.level
@@ -864,16 +948,13 @@ class ReleaseDeviceStatement(Statement):
 
         lst = []
         for var_name in self.vars_lst:
+            kwargs = dict(v1=var_name)
             if self.is_robotframework:
-                stmt = "release device   ${%s}" % var_name
+                stmt = "release device   ${%(v1)s}" % kwargs
             else:
-                if self.is_parent_setup_or_teardown_for_unittest:
-                    stmt = "ta.release_device(cls.%s)" % var_name
-                else:
-                    if self.parent:
-                        stmt = "ta.release_device(self.%s)" % var_name
-                    else:
-                        stmt = "ta.release_device(%s)" % var_name
+                fmt = "ta.release_device({_replace_}.%(v1)s)"
+                new_fmt = self.substitute_new_format(fmt)
+                stmt = new_fmt % kwargs
             lst.append(stmt)
 
         level = self.parent.level + 1 if self.parent else self.level
@@ -932,16 +1013,13 @@ class ReleaseResourceStatement(Statement):
             failure = fmt.format(self.statement_data)
             raise ReleaseResourceStatementError(failure)
 
+        kwargs = dict(v1=self.var_name)
         if self.is_robotframework:
-            stmt = "release resource   ${%s}" % self.var_name
+            stmt = "release resource   ${%(v1)s}" % kwargs
         else:
-            if self.is_parent_setup_or_teardown_for_unittest:
-                stmt = "ta.release_resource(cls.%s)" % self.var_name
-            else:
-                if self.parent:
-                    stmt = "ta.release_resource(self.%s)" % self.var_name
-                else:
-                    stmt = "ta.release_resource(%s)" % self.var_name
+            fmt = "ta.release_resource({_replace_}.%(v1)s)"
+            new_fmt = self.substitute_new_format(fmt)
+            stmt = new_fmt % kwargs
 
         level = self.parent.level + 1 if self.parent else self.level
         release_resource_statement = self.indent_data(stmt, level)
@@ -1404,8 +1482,9 @@ class PerformerStatement(Statement):
                 var_name = SCRIPTINFO.get_device_var(device_name)
 
                 if result.has_select_statement:
-                    fmt = 'output= ta.execute(%s, cmdline=%r)'
-                    lst.append(fmt % (var_name, result.operation_ref))
+                    fmt = 'output = ta.execute({_replace_}.%s, cmdline=%r)'
+                    new_fmt = self.substitute_new_format(fmt)
+                    lst.append(new_fmt % (var_name, result.operation_ref))
                     if result.is_template:
                         fmt = ('ta.filter(output, convertor=%r, template_ref=%r,\n'
                                '          select_statement=%r)')
@@ -1418,8 +1497,9 @@ class PerformerStatement(Statement):
                         stmt = fmt % (result.convertor, result.select_statement)
                         lst.append(stmt)
                 else:
-                    fmt = 'ta.execute(%s, cmdline=%r)'
-                    lst.append(fmt % (var_name, result.operation_ref))
+                    fmt = 'ta.execute({_replace_}.%s, cmdline=%r)'
+                    new_fmt = self.substitute_new_format(fmt)
+                    lst.append(new_fmt % (var_name, result.operation_ref))
 
         stmt = self.indent_data('\n'.join(lst), self.level)
         return stmt
@@ -1481,8 +1561,9 @@ class VerificationStatement(Statement):
             for device_name in self.result.devices_names:
                 var_name = SCRIPTINFO.get_device_var(device_name)
 
-                fmt = 'output= ta.execute(%s, cmdline=%r)'
-                lst.append(fmt % (var_name, result.operation_ref))
+                fmt = 'output = ta.execute({_replace_}.%s, cmdline=%r)'
+                new_fmt = self.substitute_new_format(fmt)
+                lst.append(new_fmt % (var_name, result.operation_ref))
                 if result.is_template:
                     fmt = ('result = ta.filter(output, convertor=%r, template_ref=%r,\n'
                            '                   select_statement=%r)')
