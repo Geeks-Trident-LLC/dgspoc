@@ -922,3 +922,34 @@ script_builder:
         disconnect device   ${device1}
         release device   ${device1}
         release resource   ${test_resource}
+
+  case2:
+    data: |-
+      setup
+        connect data test_resource.yaml
+        use testcase test1
+        connect device device1
+      
+      section: precondition
+        device1 execute show version using_template tmpl.show.version select version where version >= version(1.0.0) must be true
+        device1 execute show device info
+      
+      section: case1
+        device1 execute show module info
+        device1 configure turn off module 1
+        device1 execute show module info using_template tmpl.show.module.info select name, status where name == module-1 and status == off must be true
+    
+      section: case2
+        device1 execute show module info
+        device1 configure turn on module 1
+        device1 execute show module info using_template tmpl.show.module.info select name, status where name == module-1 and status == on must be true
+      
+      teardown
+        disconnect device1
+        release device device1
+        release resource test_resource.yaml
+    unittest: |-
+
+    pytest: |-
+
+    robotframework: |-
