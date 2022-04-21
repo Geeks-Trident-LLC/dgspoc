@@ -212,20 +212,10 @@ class Statement:
         return is_matched
 
     @property
-    def is_cleanup_statement(self):
-        pattern = r'cleanup *$'
-        is_matched = self.is_matched_statement(pattern)
-        return is_matched
-
-    @property
     def is_teardown_statement(self):
         pattern = r'teardown *$'
         is_matched = self.is_matched_statement(pattern)
         return is_matched
-
-    @property
-    def is_cleanup_or_teardown_statement(self):
-        return self.is_cleanup_statement or self.is_teardown_statement
 
     @property
     def is_section_statement(self):
@@ -237,7 +227,7 @@ class Statement:
     def is_base_statement(self):
         is_base_stmt = self.is_setup_statement
         is_base_stmt |= self.is_section_statement
-        is_base_stmt |= self.is_cleanup_or_teardown_statement
+        is_base_stmt |= self.is_teardown_statement
         return is_base_stmt
 
     def is_matched_statement(self, pat, data=None):
@@ -263,7 +253,7 @@ class Statement:
                             self.set_level(level=0)
                         else:
                             if self.parent:
-                                chk_lst = ['setup', 'cleanup', 'teardown', 'section']
+                                chk_lst = ['setup', 'teardown', 'section']
                                 if self.parent.name in chk_lst:
                                     self.set_level(level=1)
                                 else:
@@ -393,7 +383,6 @@ class Statement:
     def try_to_get_base_statement(self):
         if self.is_base_statement:
             tbl = dict(setup=SetupStatement,
-                       cleanup=CleanupStatement,
                        teardown=TeardownStatement)
             key = self.statement_data.lower().strip()
             cls = tbl.get(key, SectionStatement)
@@ -915,7 +904,7 @@ class ReleaseResourceStatement(Statement):
         self._is_parsed = True
 
 
-class CleanupStatement(Statement):
+class TeardownStatement(Statement):
     def __init__(self, data, parent=None, framework='', indentation=4):
         super().__init__(data, parent=parent, framework=framework,
                          indentation=indentation)
@@ -928,14 +917,13 @@ class CleanupStatement(Statement):
             return ''
 
         lst = []
-        txt = 'tearDown' if self.name == 'teardown' else 'cleanUp'
 
         if self.is_unittest:
-            lst.append('def %s(self):' % txt)
+            lst.append('def tearDown(self):')
         elif self.is_pytest:
-            lst.append('def %s_class(self):' % txt.lower())
+            lst.append('def teardown_class(self):')
         else:   # i.e ROBOTFRAMEWORK
-            lst.append(txt.lower())
+            lst.append('teardown')
 
         for child in self.children:
             lst.append(child.snippet)
@@ -945,7 +933,7 @@ class CleanupStatement(Statement):
         return script
 
     def parse(self):
-        if self.is_cleanup_or_teardown_statement:
+        if self.is_teardown_statement:
             self.name = self.statement_data.strip().lower()
             self._is_parsed = True
             if self.is_next_statement_children():
@@ -987,10 +975,6 @@ class CleanupStatement(Statement):
             other.parent = node.parent
             other.update_level_from_parent()
         return other
-
-
-class TeardownStatement(CleanupStatement):
-    """Teardown Statement class"""
 
 
 class SectionStatement(Statement):
@@ -1572,13 +1556,13 @@ class ScriptBuilder:
         self.company = str(company).strip() or self.username
 
         self.setup_statement = None
-        self.cleanup_statement = None
+        self.teardown_statement = None
         self.section_statements = []
         self.build()
 
     @property
     def testscript(self):
-        if self.setup_statement and self.cleanup_statement:
+        if self.setup_statement and self.teardown_statement:
             if self.framework == FWTYPE.UNITTEST:
                 script = self.unittest_script
                 return script
@@ -1603,7 +1587,7 @@ class ScriptBuilder:
             'class {}(unittest.Testcase):'.format(cls_name),
             self.setup_statement.snippet,
             '',
-            self.cleanup_statement.snippet,
+            self.teardown_statement.snippet,
         ]
 
         for stmt in self.section_statements:
@@ -1625,7 +1609,7 @@ class ScriptBuilder:
             'class {}:'.format(cls_name),
             self.setup_statement.snippet,
             '',
-            self.cleanup_statement.snippet,
+            self.teardown_statement.snippet,
         ]
 
         for stmt in self.section_statements:
@@ -1645,7 +1629,7 @@ class ScriptBuilder:
             'library         collections',
             'library         describegetsystempoc',
             'test setup      setup',
-            'test teardown   {}'.format(self.cleanup_statement.name),
+            'test teardown   {}'.format(self.teardown_statement.name),
         ]
 
         if self.section_statements:
@@ -1659,7 +1643,7 @@ class ScriptBuilder:
         lst.append('\n*** Keywords ***')
         lst.append(self.setup_statement.snippet)
         lst.append('')
-        lst.append(self.cleanup_statement.snippet)
+        lst.append(self.teardown_statement.snippet)
 
         for stmt in self.section_statements:
             lst.append('')
@@ -1702,9 +1686,9 @@ class ScriptBuilder:
                 self.setup_statement = stmt
             else:
                 self.warn_duplicate_statement(stmt)
-        elif stmt.is_cleanup_or_teardown_statement:
-            if not self.cleanup_statement:
-                self.cleanup_statement = stmt
+        elif stmt.is_teardown_statement:
+            if not self.teardown_statement:
+                self.teardown_statement = stmt
             else:
                 self.warn_duplicate_statement(stmt)
         elif stmt.is_section_statement:
