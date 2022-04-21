@@ -227,6 +227,11 @@ class Statement:
         return chk
 
     @property
+    def is_parent_setup_or_teardown_for_unittest(self):
+        chk = self.is_unittest and self.is_parent_setup_or_teardown_statement
+        return chk
+
+    @property
     def is_section_statement(self):
         pattern = r'section'
         is_matched = self.is_matched_statement(pattern)
@@ -531,7 +536,13 @@ class ConnectDataStatement(Statement):
             fmt = "${%s}=   connect data   filename=%s\nset global variable   ${%s}"
             stmt = fmt % (self.var_name, self.test_resource_ref, self.var_name)
         else:
-            fmt = "self.%s = ta.connect_data(filename=%r)"
+            if self.is_parent_setup_or_teardown_for_unittest:
+                fmt = "cls.%s = ta.connect_data(filename=%r)"
+            else:
+                if self.parent:
+                    fmt = "self.%s = ta.connect_data(filename=%r)"
+                else:
+                    fmt = "%s = ta.connect_data(filename=%r)"
             stmt = fmt % (self.var_name, self.test_resource_ref)
 
         level = self.parent.level + 1 if self.parent else self.level
