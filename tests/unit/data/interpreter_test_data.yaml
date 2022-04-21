@@ -11,7 +11,8 @@ setup_statement:
     data: setup
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           print('Dummy Setup')
           assert True == True
     pytest: |-
@@ -31,7 +32,8 @@ setup_statement:
         connect data test_resource.yaml
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           self.test_resource = ta.connect_data(filename='test_resource.yaml')
     pytest: |-
       ############ skip this line ############
@@ -50,7 +52,8 @@ setup_statement:
         use testcase test1
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           self.test_resource = ta.connect_data(filename='test_resource.yaml')
           self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
     pytest: |-
@@ -74,7 +77,8 @@ setup_statement:
         connect device device1
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           self.test_resource = ta.connect_data(filename='test_resource.yaml')
           self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
           self.device1 = ta.connect_device(self.test_resource, name='device1')
@@ -253,7 +257,8 @@ teardown_statement:
     data: teardown
     unittest: |-
       ############ skip this line ############
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           print('Dummy Teardown')
           assert True == True
     pytest: |-
@@ -275,7 +280,8 @@ teardown_statement:
         release resource test_resource.yaml
     unittest: |-
       ############ skip this line ############
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           ta.disconnect_device(self.device1)
           ta.release_device(self.device1)
           ta.release_resource(self.test_resource)
@@ -683,11 +689,13 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           print('Dummy Setup')
           assert True == True
       
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           print('Dummy Teardown')
           assert True == True
     pytest: |-
@@ -745,11 +753,13 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           print('Dummy Setup')
           assert True == True
       
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           print('Dummy Teardown')
           assert True == True
     pytest: |-
@@ -819,12 +829,14 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           self.test_resource = ta.connect_data(filename='test_resource.yaml')
           self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
           self.device1 = ta.connect_device(self.test_resource, name='device1')
       
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           ta.disconnect_device(self.device1)
           ta.release_device(self.device1)
           ta.release_resource(self.test_resource)
@@ -917,12 +929,14 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           self.test_resource = ta.connect_data(filename='test_resource.yaml')
           self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
           self.device1 = ta.connect_device(self.test_resource, name='device1')
       
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           ta.disconnect_device(self.device1)
           ta.release_device(self.device1)
           ta.release_resource(self.test_resource)

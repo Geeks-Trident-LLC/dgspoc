@@ -455,7 +455,8 @@ class SetupStatement(Statement):
         lst = []
 
         if self.is_unittest:
-            lst.append('def setUp(self):')
+            lst.append('@classmethod')
+            lst.append('def setUpClass(cls):')
         elif self.is_pytest:
             lst.append('def setup_class(self):')
         else:   # i.e ROBOTFRAMEWORK
@@ -932,7 +933,8 @@ class TeardownStatement(Statement):
         lst = []
 
         if self.is_unittest:
-            lst.append('def tearDown(self):')
+            lst.append('@classmethod')
+            lst.append('def tearDownClass(cls):')
         elif self.is_pytest:
             lst.append('def teardown_class(self):')
         else:   # i.e ROBOTFRAMEWORK
