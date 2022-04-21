@@ -287,17 +287,20 @@ section_statement:
     data: section
     unittest: |-
       ############ skip this line ############
-        def test_step(self):
+        def test_default(self):
+          """test default"""
           print('Dummy for section')
           self.assertTrue(True == True)
     pytest: |-
       ############ skip this line ############
-        def test_step(self):
+        def test_default(self):
+          """test default"""
           print('Dummy for section')
           assert True == True
     robotframework: |-
       ############ skip this line ############
-      test_step
+      test default
+        [Documentation]    test default
         log   Dummy for section
         should be true   True == True
 
@@ -307,15 +310,18 @@ section_statement:
         device1 execute show version
     unittest: |-
       ############ skip this line ############
-        def test_step(self):
+        def test_default(self):
+          """test default"""
           ta.execute(self.device1, cmdline='show version')
     pytest: |-
       ############ skip this line ############
-        def test_step(self):
+        def test_default(self):
+          """test default"""
           ta.execute(self.device1, cmdline='show version')
     robotframework: |-
       ############ skip this line ############
-      test_step
+      test default
+        [Documentation]    test default
         execute   ${device1}   cmdline=show version
 
   case2:
@@ -329,7 +335,8 @@ section_statement:
 
     unittest: |-
       ############ skip this line ############
-        def test_step(self):
+        def test_default(self):
+          """test default"""
           ta.execute(self.device1, cmdline='show version')
           ntimes = 2
           indexes = range(1, times + 1)
@@ -339,7 +346,8 @@ section_statement:
           ta.execute(self.device1, cmdline='show module info')
     pytest: |-
       ############ skip this line ############
-        def test_step(self):
+        def test_default(self):
+          """test default"""
           ta.execute(self.device1, cmdline='show version')
           ntimes = 2
           indexes = range(1, times + 1)
@@ -349,7 +357,8 @@ section_statement:
           ta.execute(self.device1, cmdline='show module info')
     robotframework: |-
       ############ skip this line ############
-      test_step
+      test default
+        [Documentation]    test default
         execute   ${device1}   cmdline=show version
         ${ntimes}=   set variable   2
         @{indexes}=   evaluate   range(1, ${ntimes} + 1)
@@ -1031,7 +1040,7 @@ script_builder:
       test teardown   teardown
       
       *** Test Cases ***
-      test_precondition
+      test precondition
         [Documentation]    precondition
         {output}=   execute   ${device1}   cmdline=show version
         ${result}=   filter   ${output}   convertor=template   template_ref=tmpl.show.version
@@ -1040,7 +1049,7 @@ script_builder:
         should be true   ${total_count} == 1
         execute   ${device1}   cmdline=show device info
       
-      test_case1
+      test case1
         [Documentation]    case1
         execute   ${device1}   cmdline=show module info
         execute   ${device1}   cmdline=turn off module 1
@@ -1050,7 +1059,7 @@ script_builder:
         ${total_count}=  get length   ${result}
         should be true   ${total_count} == 1
       
-      test_case2
+      test case2
         [Documentation]    case2
         execute   ${device1}   cmdline=show module info
         execute   ${device1}   cmdline=turn on module 1

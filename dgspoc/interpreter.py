@@ -5,6 +5,7 @@ user describing problem"""
 import re
 import operator
 import yaml
+import time
 
 from textwrap import indent
 from textwrap import dedent
@@ -91,18 +92,6 @@ class ScriptInfo(DotObject):
             return cls_name
         else:
             return 'TestClass'
-
-    def get_method_name(self, value):
-        if 'testcases' in self:
-            node = self.testcases.get(self.testcase)
-            if node:
-                if 'script_builder' in node:
-                    for method_name, val in node.get('script_builder').items():
-                        if val == value:
-                            return method_name
-                return 'test_step'
-        else:
-            return 'test_step'
 
     def reset_devices_vars(self):
         self.devices_vars = dict()
@@ -1130,7 +1119,12 @@ class SectionStatement(Statement):
                          indentation=indentation)
 
         self.description = ''
+        self._method_name = ''
         self.parse()
+
+    @property
+    def method_name(self):
+        return self._method_name
 
     @property
     def snippet(self):
@@ -1139,15 +1133,8 @@ class SectionStatement(Statement):
 
         lst = []
 
-        method_name = SCRIPTINFO.get_method_name(self.description)
-        if not method_name.lower().startswith('test'):
-            method_name = 'test_%s' % method_name
-
-        if self.is_unittest or self.is_pytest:
-            method_name = method_name.replace(' ', '_')
-
         fmt = '%s' if self.is_robotframework else 'def %s(self):'
-        lst.append(fmt % method_name)
+        lst.append(fmt % self.method_name)
 
         if self.description and self.description.strip():
             if self.is_robotframework:
@@ -1178,7 +1165,8 @@ class SectionStatement(Statement):
 
         pattern = r'(?i) *section([^a-z0-9]+)?(?P<description>\w+.+)?'
         match = re.match(pattern, self.statement_data)
-        self.description = match.group('description') if match else 'test_default'
+        description = match.group('description') if match else 'test_default'
+        self.parse_description(description)
 
         self.name = 'section'
         self._is_parsed = True
@@ -1196,6 +1184,31 @@ class SectionStatement(Statement):
             data = 'dummy_pass - Dummy for section'
             dummy_stmt = DummyStatement(data, **kwargs, parent=self)
             self.add_child(dummy_stmt)
+
+    def parse_description(self, description):
+        if not description or description == 'test_default':
+            self.description = 'test default'
+            self._method_name = 'test default' if self.is_robotframework else 'test_default'
+        else:
+            description = ' '.join(str(description).splitlines()).strip()
+            pattern = r'(?i)(?P<desc>.+)( +as +(?P<ref>[a-z]\w*( +\w+)?))?$'
+            match = re.match(pattern, description)
+            desc, ref = match.group('desc'), match.group('ref')
+            ref = ref or desc
+            ref = re.sub('(?i)[^a-z0-9]+', '_', ref).strip('_')
+
+            self.description = desc
+
+            if not ref.startswith('test'):
+                ref = 'test_%s' % ref
+
+            if self.is_robotframework:
+                self._method_name = ref.replace('_', ' ')
+            else:
+                if len(ref) > 70:
+                    ref = '%s_%.3f' % (ref[:50], time.time())
+                    ref = ref.replace('.', '_')
+                self._method_name = ref
 
     def create_child(self, node):
         kwargs = dict(framework=self.framework, indentation=self.indentation)
