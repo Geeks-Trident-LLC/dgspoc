@@ -533,8 +533,12 @@ class ConnectDataStatement(Statement):
             return ''
 
         if self.is_robotframework:
-            fmt = "${%s}=   connect data   filename=%s\nset global variable   ${%s}"
-            stmt = fmt % (self.var_name, self.test_resource_ref, self.var_name)
+            if self.parent:
+                fmt = "${%s}=   connect data   filename=%s\nset global variable   ${%s}"
+                stmt = fmt % (self.var_name, self.test_resource_ref, self.var_name)
+            else:
+                fmt = "${%s}=   connect data   filename=%s"
+                stmt = fmt % (self.var_name, self.test_resource_ref)
         else:
             if self.is_parent_setup_or_teardown_for_unittest:
                 fmt = "cls.%s = ta.connect_data(filename=%r)"
@@ -617,10 +621,20 @@ class UseTestCaseStatement(Statement):
         test_resource_var = SCRIPTINFO.variables.get('test_resource_var', 'test_resource')
 
         if self.is_robotframework:
-            fmt = "${%s}=  use testcase   ${%s}  testcase=%s\nset global variable   ${%s}"
-            stmt = fmt % (self.var_name, test_resource_var, self.test_name, self.var_name)
+            if self.parent:
+                fmt = "${%s}=  use testcase   ${%s}  testcase=%s\nset global variable   ${%s}"
+                stmt = fmt % (self.var_name, test_resource_var, self.test_name, self.var_name)
+            else:
+                fmt = "${%s}=  use testcase   ${%s}  testcase=%s"
+                stmt = fmt % (self.var_name, test_resource_var, self.test_name)
         else:
-            fmt = "self.%s = ta.use_testcase(self.%s, testcase=%r)"
+            if self.is_parent_setup_or_teardown_for_unittest:
+                fmt = "cls.%s = ta.use_testcase(cls.%s, testcase=%r)"
+            else:
+                if self.parent:
+                    fmt = "self.%s = ta.use_testcase(self.%s, testcase=%r)"
+                else:
+                    fmt = "%s = ta.use_testcase(self.%s, testcase=%r)"
             stmt = fmt % (self.var_name, test_resource_var, self.test_name)
 
         level = self.parent.level + 1 if self.parent else self.level

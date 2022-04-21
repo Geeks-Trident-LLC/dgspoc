@@ -55,7 +55,7 @@ setup_statement:
         @classmethod
         def setUpClass(cls):
           cls.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
     pytest: |-
       ############ skip this line ############
         def setup_class(self):
@@ -80,7 +80,7 @@ setup_statement:
         @classmethod
         def setUpClass(cls):
           cls.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
           self.device1 = ta.connect_device(self.test_resource, name='device1')
     pytest: |-
       ############ skip this line ############
@@ -106,7 +106,6 @@ connect_data_statement:
     pytest: test_resource = ta.connect_data(filename='test_resource.yaml')
     robotframework: |-
       ${test_resource}=   connect data   filename=test_resource.yaml
-      set global variable   ${test_resource}
 
   case2:
     data: connect data test_resource.yaml as my_test_resource_var
@@ -114,25 +113,22 @@ connect_data_statement:
     pytest: my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
     robotframework: |-
       ${my_test_resource_var}=   connect data   filename=test_resource.yaml
-      set global variable   ${my_test_resource_var}
 
 use_testcase_statement:
 
   case1:
     data: use testcase test1
-    unittest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
-    pytest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+    unittest: test_data = ta.use_testcase(self.test_resource, testcase='test1')
+    pytest: test_data = ta.use_testcase(self.test_resource, testcase='test1')
     robotframework: |-
       ${test_data}=  use testcase   ${test_resource}  testcase=test1
-      set global variable   ${test_data}
 
   case2:
     data:  use testcase test1 as test_data_var
-    unittest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
-    pytest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
+    unittest: test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
+    pytest: test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
     robotframework: |-
       ${test_data_var}=  use testcase   ${test_resource}  testcase=test1
-      set global variable   ${test_data_var}
 
 connect_device_statement:
 
@@ -832,7 +828,7 @@ script_builder:
         @classmethod
         def setUpClass(cls):
           cls.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
           self.device1 = ta.connect_device(self.test_resource, name='device1')
       
         @classmethod
@@ -932,7 +928,7 @@ script_builder:
         @classmethod
         def setUpClass(cls):
           cls.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
           self.device1 = ta.connect_device(self.test_resource, name='device1')
       
         @classmethod
