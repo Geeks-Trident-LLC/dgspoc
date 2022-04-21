@@ -634,7 +634,7 @@ class UseTestCaseStatement(Statement):
                 if self.parent:
                     fmt = "self.%s = ta.use_testcase(self.%s, testcase=%r)"
                 else:
-                    fmt = "%s = ta.use_testcase(self.%s, testcase=%r)"
+                    fmt = "%s = ta.use_testcase(%s, testcase=%r)"
             stmt = fmt % (self.var_name, test_resource_var, self.test_name)
 
         level = self.parent.level + 1 if self.parent else self.level
@@ -699,11 +699,21 @@ class ConnectDeviceStatement(Statement):
         lst = []
         for var_name, device_name in self.devices_vars.items():
             if self.is_robotframework:
-                fmt = "${%s}=   connect device   ${%s}   name=%s\nset global variable   ${%s}"
-                stmt = fmt % (var_name, test_resource_var, device_name, var_name)
+                if self.parent:
+                    fmt = "${%s}=   connect device   ${%s}   name=%s\nset global variable   ${%s}"
+                    stmt = fmt % (var_name, test_resource_var, device_name, var_name)
+                else:
+                    fmt = "${%s}=   connect device   ${%s}   name=%s"
+                    stmt = fmt % (var_name, test_resource_var, device_name)
 
             else:
-                fmt = "self.%s = ta.connect_device(self.%s, name=%r)"
+                if self.is_parent_setup_or_teardown_for_unittest:
+                    fmt = "cls.%s = ta.connect_device(cls.%s, name=%r)"
+                else:
+                    if self.parent:
+                        fmt = "self.%s = ta.connect_device(self.%s, name=%r)"
+                    else:
+                        fmt = "%s = ta.connect_device(%s, name=%r)"
                 stmt = fmt % (var_name, test_resource_var, device_name)
             lst.append(stmt)
 
