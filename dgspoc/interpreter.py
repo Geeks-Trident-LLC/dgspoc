@@ -935,7 +935,13 @@ class ReleaseResourceStatement(Statement):
         if self.is_robotframework:
             stmt = "release resource   ${%s}" % self.var_name
         else:
-            stmt = "ta.release_resource(self.%s)" % self.var_name
+            if self.is_parent_setup_or_teardown_for_unittest:
+                stmt = "ta.release_resource(cls.%s)" % self.var_name
+            else:
+                if self.parent:
+                    stmt = "ta.release_resource(self.%s)" % self.var_name
+                else:
+                    stmt = "ta.release_resource(%s)" % self.var_name
 
         level = self.parent.level + 1 if self.parent else self.level
         release_resource_statement = self.indent_data(stmt, level)
