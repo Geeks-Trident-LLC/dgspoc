@@ -203,15 +203,15 @@ disconnect_device_statement:
 
   case1:
     data: disconnect device device1
-    unittest: ta.disconnect_device(self.device1)
-    pytest: ta.disconnect_device(self.device1)
+    unittest: ta.disconnect_device(device1)
+    pytest: ta.disconnect_device(device1)
     robotframework: |-
       disconnect device   ${device1}
 
   case2:
     data: disconnect device1
-    unittest: ta.disconnect_device(self.device1)
-    pytest: ta.disconnect_device(self.device1)
+    unittest: ta.disconnect_device(device1)
+    pytest: ta.disconnect_device(device1)
     robotframework: |-
       disconnect device   ${device1}
 
@@ -265,7 +265,7 @@ teardown_statement:
       ############ skip this line ############
         @classmethod
         def tearDownClass(cls):
-          ta.disconnect_device(self.device1)
+          ta.disconnect_device(cls.device1)
           ta.release_device(self.device1)
           ta.release_resource(self.test_resource)
     pytest: |-
@@ -820,7 +820,7 @@ script_builder:
       
         @classmethod
         def tearDownClass(cls):
-          ta.disconnect_device(self.device1)
+          ta.disconnect_device(cls.device1)
           ta.release_device(self.device1)
           ta.release_resource(self.test_resource)
     pytest: |-
@@ -920,7 +920,7 @@ script_builder:
       
         @classmethod
         def tearDownClass(cls):
-          ta.disconnect_device(self.device1)
+          ta.disconnect_device(cls.device1)
           ta.release_device(self.device1)
           ta.release_resource(self.test_resource)
       
