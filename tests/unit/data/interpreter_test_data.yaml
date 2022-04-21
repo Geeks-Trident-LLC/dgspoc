@@ -219,8 +219,8 @@ release_device_statement:
 
   case1:
     data: release device device1
-    unittest: ta.release_device(self.device1)
-    pytest: ta.release_device(self.device1)
+    unittest: ta.release_device(device1)
+    pytest: ta.release_device(device1)
     robotframework: |-
       release device   ${device1}
 
@@ -266,7 +266,7 @@ teardown_statement:
         @classmethod
         def tearDownClass(cls):
           ta.disconnect_device(cls.device1)
-          ta.release_device(self.device1)
+          ta.release_device(cls.device1)
           ta.release_resource(self.test_resource)
     pytest: |-
       ############ skip this line ############
@@ -821,7 +821,7 @@ script_builder:
         @classmethod
         def tearDownClass(cls):
           ta.disconnect_device(cls.device1)
-          ta.release_device(self.device1)
+          ta.release_device(cls.device1)
           ta.release_resource(self.test_resource)
     pytest: |-
       ################################################################################
@@ -921,7 +921,7 @@ script_builder:
         @classmethod
         def tearDownClass(cls):
           ta.disconnect_device(cls.device1)
-          ta.release_device(self.device1)
+          ta.release_device(cls.device1)
           ta.release_resource(self.test_resource)
       
         def test_precondition(self):

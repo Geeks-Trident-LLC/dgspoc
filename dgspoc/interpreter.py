@@ -867,7 +867,13 @@ class ReleaseDeviceStatement(Statement):
             if self.is_robotframework:
                 stmt = "release device   ${%s}" % var_name
             else:
-                stmt = "ta.release_device(self.%s)" % var_name
+                if self.is_parent_setup_or_teardown_for_unittest:
+                    stmt = "ta.release_device(cls.%s)" % var_name
+                else:
+                    if self.parent:
+                        stmt = "ta.release_device(self.%s)" % var_name
+                    else:
+                        stmt = "ta.release_device(%s)" % var_name
             lst.append(stmt)
 
         level = self.parent.level + 1 if self.parent else self.level
