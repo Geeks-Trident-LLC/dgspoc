@@ -95,11 +95,11 @@ class ScriptInfo(DotObject):
         if 'testcases' in self:
             node = self.testcases.get(self.testcase)
             if node:
-                for method_name, val in node.items():
-                    if val == value:
-                        return method_name
-                else:
-                    return 'test_step'
+                if 'script_builder' in node:
+                    for method_name, val in node.get('script_builder').items():
+                        if val == value:
+                            return method_name
+                return 'test_step'
         else:
             return 'test_step'
 
@@ -1653,7 +1653,8 @@ class ScriptBuilder:
             lst.append('\n*** Test Cases ***')
             lst.append(cls_name)
             for stmt in self.section_statements:
-                lst.append(stmt.name)
+                func_name = SCRIPTINFO.get_method_name(stmt.description)
+                lst.append(stmt.indent_data(func_name, 1))
 
         lst.append('\n*** Keywords ***')
         lst.append(self.setup_statement.snippet)
