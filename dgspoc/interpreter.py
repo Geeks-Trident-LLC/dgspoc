@@ -8,6 +8,7 @@ import yaml
 
 from textwrap import indent
 from textwrap import dedent
+from textwrap import wrap
 
 from dgspoc.utils import DotObject
 from dgspoc.utils import Misc
@@ -1147,6 +1148,21 @@ class SectionStatement(Statement):
 
         fmt = '%s' if self.is_robotframework else 'def %s(self):'
         lst.append(fmt % method_name)
+
+        if self.description and self.description.strip():
+            if self.is_robotframework:
+                lst1 = wrap(self.description, width=56)
+                for index, item in enumerate(lst1):
+                    prefix = '[Documentation]' if index == 0 else '...'
+                    lst1[index] = '{:18} {}'.format(prefix, item)
+
+                method_doc = '\n'.join(lst1)
+                lst.append(self.indent_data(method_doc, 1))
+                pass
+            else:
+                method_doc = '"""%s"""' % self.description
+                method_doc = '\n'.join(wrap(method_doc, width=70))
+                lst.append(self.indent_data(method_doc, 1))
 
         for child in self.children:
             lst.append(child.snippet)

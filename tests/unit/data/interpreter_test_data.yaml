@@ -934,6 +934,7 @@ script_builder:
           ta.release_resource(cls.test_resource)
       
         def test_precondition(self):
+          """precondition"""
           output = ta.execute(self.device1, cmdline='show version')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                              select_statement='select version where version >= version(1.0.0)')
@@ -942,6 +943,7 @@ script_builder:
           ta.execute(self.device1, cmdline='show device info')
       
         def test_case1(self):
+          """case1"""
           ta.execute(self.device1, cmdline='show module info')
           ta.execute(self.device1, cmdline='turn off module 1')
           output = ta.execute(self.device1, cmdline='show module info')
@@ -951,6 +953,7 @@ script_builder:
           self.assertTrue(total_count == 1)
       
         def test_case2(self):
+          """case2"""
           ta.execute(self.device1, cmdline='show module info')
           ta.execute(self.device1, cmdline='turn on module 1')
           output = ta.execute(self.device1, cmdline='show module info')
@@ -985,6 +988,7 @@ script_builder:
           ta.release_resource(self.test_resource)
       
         def test_precondition(self):
+          """precondition"""
           output = ta.execute(self.device1, cmdline='show version')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                              select_statement='select version where version >= version(1.0.0)')
@@ -993,6 +997,7 @@ script_builder:
           ta.execute(self.device1, cmdline='show device info')
       
         def test_case1(self):
+          """case1"""
           ta.execute(self.device1, cmdline='show module info')
           ta.execute(self.device1, cmdline='turn off module 1')
           output = ta.execute(self.device1, cmdline='show module info')
@@ -1002,6 +1007,7 @@ script_builder:
           assert total_count == 1
       
         def test_case2(self):
+          """case2"""
           ta.execute(self.device1, cmdline='show module info')
           ta.execute(self.device1, cmdline='turn on module 1')
           output = ta.execute(self.device1, cmdline='show module info')
@@ -1026,6 +1032,7 @@ script_builder:
       
       *** Test Cases ***
       test_precondition
+        [Documentation]    precondition
         {output}=   execute   ${device1}   cmdline=show version
         ${result}=   filter   ${output}   convertor=template   template_ref=tmpl.show.version
         ...   select_statement=select version where version >= version(1.0.0)
@@ -1034,6 +1041,7 @@ script_builder:
         execute   ${device1}   cmdline=show device info
       
       test_case1
+        [Documentation]    case1
         execute   ${device1}   cmdline=show module info
         execute   ${device1}   cmdline=turn off module 1
         {output}=   execute   ${device1}   cmdline=show module info
@@ -1043,6 +1051,7 @@ script_builder:
         should be true   ${total_count} == 1
       
       test_case2
+        [Documentation]    case2
         execute   ${device1}   cmdline=show module info
         execute   ${device1}   cmdline=turn on module 1
         {output}=   execute   ${device1}   cmdline=show module info
