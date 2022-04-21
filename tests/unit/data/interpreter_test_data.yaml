@@ -942,7 +942,7 @@ script_builder:
           ta.release_device(cls.device1)
           ta.release_resource(cls.test_resource)
       
-        def test_precondition(self):
+        def test_001_precondition(self):
           """precondition"""
           output = ta.execute(self.device1, cmdline='show version')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
@@ -951,7 +951,7 @@ script_builder:
           self.assertTrue(total_count == 1)
           ta.execute(self.device1, cmdline='show device info')
       
-        def test_case1(self):
+        def test_002_case1(self):
           """case1"""
           ta.execute(self.device1, cmdline='show module info')
           ta.execute(self.device1, cmdline='turn off module 1')
@@ -961,7 +961,7 @@ script_builder:
           total_count = len(result)
           self.assertTrue(total_count == 1)
       
-        def test_case2(self):
+        def test_003_case2(self):
           """case2"""
           ta.execute(self.device1, cmdline='show module info')
           ta.execute(self.device1, cmdline='turn on module 1')

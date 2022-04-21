@@ -1768,9 +1768,11 @@ class ScriptBuilder:
             self.teardown_statement.snippet,
         ]
 
-        for stmt in self.section_statements:
+        for index, stmt in enumerate(self.section_statements, 1):
             lst.append('')
-            lst.append(stmt.snippet)
+            replaced = 'def test_%03i_' % index
+            if stmt.snippet:
+                lst.append(stmt.snippet.replace('def test_', replaced))
 
         lst.append('')
         lst.append("if __name__ == '__main__':")
