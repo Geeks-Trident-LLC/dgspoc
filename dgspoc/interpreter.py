@@ -1787,21 +1787,17 @@ class ScriptBuilder:
         ]
 
         if self.section_statements:
-            cls_name = SCRIPTINFO.get_class_name()
             lst.append('\n*** Test Cases ***')
-            lst.append(cls_name)
             for stmt in self.section_statements:
-                func_name = SCRIPTINFO.get_method_name(stmt.description)
-                lst.append(stmt.indent_data(func_name, 1))
+                lst.append(stmt.snippet)
+                lst.append('')
 
-        lst.append('\n*** Keywords ***')
+        not self.section_statements and lst.append('')
+
+        lst.append('*** Keywords ***')
         lst.append(self.setup_statement.snippet)
         lst.append('')
         lst.append(self.teardown_statement.snippet)
-
-        for stmt in self.section_statements:
-            lst.append('')
-            lst.append(stmt.snippet)
 
         script = '\n'.join(lst)
         return script
