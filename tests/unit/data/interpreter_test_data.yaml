@@ -246,50 +246,6 @@ release_resource_statement:
     robotframework: |-
       release resource   ${test_resource}
 
-cleanup_statement:
-
-  default:
-    data: cleanup
-    unittest: |-
-      ############ skip this line ############
-        def cleanUp(self):
-          print('Dummy Cleanup')
-          self.assertTrue(True == True)
-    pytest: |-
-      ############ skip this line ############
-        def cleanup_class(self):
-          print('Dummy Cleanup')
-          assert True == True
-    robotframework: |-
-      ############ skip this line ############
-      cleanup
-        log   Dummy Cleanup
-        should be true   True == True
-
-  case1:
-    data: |-
-      cleanup
-        disconnect device device1
-        release device device1
-        release resource test_resource.yaml
-    unittest: |-
-      ############ skip this line ############
-        def cleanUp(self):
-          ta.disconnect_device(self.device1)
-          ta.release_device(self.device1)
-          ta.release_resource(self.test_resource)
-    pytest: |-
-      ############ skip this line ############
-        def cleanup_class(self):
-          ta.disconnect_device(self.device1)
-          ta.release_device(self.device1)
-          ta.release_resource(self.test_resource)
-    robotframework: |-
-      ############ skip this line ############
-      cleanup
-        disconnect device   ${device1}
-        release device   ${device1}
-        release resource   ${test_resource}
 
 teardown_statement:
 
