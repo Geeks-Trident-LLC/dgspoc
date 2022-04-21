@@ -11,9 +11,10 @@ setup_statement:
     data: setup
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           print('Dummy Setup')
-          self.assertTrue(True == True)
+          assert True == True
     pytest: |-
       ############ skip this line ############
         def setup_class(self):
@@ -31,8 +32,9 @@ setup_statement:
         connect data test_resource.yaml
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
-          self.test_resource = ta.connect_data(filename='test_resource.yaml')
+        @classmethod
+        def setUpClass(cls):
+          cls.test_resource = ta.connect_data(filename='test_resource.yaml')
     pytest: |-
       ############ skip this line ############
         def setup_class(self):
@@ -50,9 +52,10 @@ setup_statement:
         use testcase test1
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
-          self.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+        @classmethod
+        def setUpClass(cls):
+          cls.test_resource = ta.connect_data(filename='test_resource.yaml')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
     pytest: |-
       ############ skip this line ############
         def setup_class(self):
@@ -74,10 +77,11 @@ setup_statement:
         connect device device1
     unittest: |-
       ############ skip this line ############
-        def setUp(self):
-          self.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
-          self.device1 = ta.connect_device(self.test_resource, name='device1')
+        @classmethod
+        def setUpClass(cls):
+          cls.test_resource = ta.connect_data(filename='test_resource.yaml')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
+          cls.device1 = ta.connect_device(cls.test_resource, name='device1')
     pytest: |-
       ############ skip this line ############
         def setup_class(self):
@@ -98,133 +102,116 @@ connect_data_statement:
 
   case1:
     data: connect data test_resource.yaml
-    unittest: self.test_resource = ta.connect_data(filename='test_resource.yaml')
-    pytest: self.test_resource = ta.connect_data(filename='test_resource.yaml')
+    unittest: test_resource = ta.connect_data(filename='test_resource.yaml')
+    pytest: test_resource = ta.connect_data(filename='test_resource.yaml')
     robotframework: |-
       ${test_resource}=   connect data   filename=test_resource.yaml
-      set global variable   ${test_resource}
 
   case2:
     data: connect data test_resource.yaml as my_test_resource_var
-    unittest: self.my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
-    pytest: self.my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
+    unittest: my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
+    pytest: my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
     robotframework: |-
       ${my_test_resource_var}=   connect data   filename=test_resource.yaml
-      set global variable   ${my_test_resource_var}
 
 use_testcase_statement:
 
   case1:
     data: use testcase test1
-    unittest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
-    pytest: self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
+    unittest: test_data = ta.use_testcase(test_resource, testcase='test1')
+    pytest: test_data = ta.use_testcase(test_resource, testcase='test1')
     robotframework: |-
       ${test_data}=  use testcase   ${test_resource}  testcase=test1
-      set global variable   ${test_data}
 
   case2:
     data:  use testcase test1 as test_data_var
-    unittest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
-    pytest: self.test_data_var = ta.use_testcase(self.test_resource, testcase='test1')
+    unittest: test_data_var = ta.use_testcase(test_resource, testcase='test1')
+    pytest: test_data_var = ta.use_testcase(test_resource, testcase='test1')
     robotframework: |-
       ${test_data_var}=  use testcase   ${test_resource}  testcase=test1
-      set global variable   ${test_data_var}
 
 connect_device_statement:
 
   case1:
     data: connect device device1
-    unittest: self.device1 = ta.connect_device(self.test_resource, name='device1')
-    pytest: self.device1 = ta.connect_device(self.test_resource, name='device1')
+    unittest: device1 = ta.connect_device(test_resource, name='device1')
+    pytest: device1 = ta.connect_device(test_resource, name='device1')
     robotframework: |-
       ${device1}=   connect device   ${test_resource}   name=device1
-      set global variable   ${device1}
 
   case2:
     data: connect device device1, device5, device8
     unittest: |-
-      self.device1 = ta.connect_device(self.test_resource, name='device1')
-      self.device2 = ta.connect_device(self.test_resource, name='device5')
-      self.device3 = ta.connect_device(self.test_resource, name='device8')
+      device1 = ta.connect_device(test_resource, name='device1')
+      device2 = ta.connect_device(test_resource, name='device5')
+      device3 = ta.connect_device(test_resource, name='device8')
     pytest: |-
-      self.device1 = ta.connect_device(self.test_resource, name='device1')
-      self.device2 = ta.connect_device(self.test_resource, name='device5')
-      self.device3 = ta.connect_device(self.test_resource, name='device8')
+      device1 = ta.connect_device(test_resource, name='device1')
+      device2 = ta.connect_device(test_resource, name='device5')
+      device3 = ta.connect_device(test_resource, name='device8')
     robotframework: |-
       ${device1}=   connect device   ${test_resource}   name=device1
-      set global variable   ${device1}
       ${device2}=   connect device   ${test_resource}   name=device5
-      set global variable   ${device2}
       ${device3}=   connect device   ${test_resource}   name=device8
-      set global variable   ${device3}
 
   case3:
     data: connect device device1 as first_device, device5 as second_device, device8 as third_device
     unittest: |-
-      self.first_device = ta.connect_device(self.test_resource, name='device1')
-      self.second_device = ta.connect_device(self.test_resource, name='device5')
-      self.third_device = ta.connect_device(self.test_resource, name='device8')
+      first_device = ta.connect_device(test_resource, name='device1')
+      second_device = ta.connect_device(test_resource, name='device5')
+      third_device = ta.connect_device(test_resource, name='device8')
     pytest: |-
-      self.first_device = ta.connect_device(self.test_resource, name='device1')
-      self.second_device = ta.connect_device(self.test_resource, name='device5')
-      self.third_device = ta.connect_device(self.test_resource, name='device8')
+      first_device = ta.connect_device(test_resource, name='device1')
+      second_device = ta.connect_device(test_resource, name='device5')
+      third_device = ta.connect_device(test_resource, name='device8')
     robotframework: |-
       ${first_device}=   connect device   ${test_resource}   name=device1
-      set global variable   ${first_device}
       ${second_device}=   connect device   ${test_resource}   name=device5
-      set global variable   ${second_device}
       ${third_device}=   connect device   ${test_resource}   name=device8
-      set global variable   ${third_device}
 
   case4:
     data: connect device device1, device5 as peer_device, device8
     unittest: |-
-      self.device1 = ta.connect_device(self.test_resource, name='device1')
-      self.peer_device = ta.connect_device(self.test_resource, name='device5')
-      self.device2 = ta.connect_device(self.test_resource, name='device8')
+      device1 = ta.connect_device(test_resource, name='device1')
+      peer_device = ta.connect_device(test_resource, name='device5')
+      device2 = ta.connect_device(test_resource, name='device8')
     pytest: |-
-      self.device1 = ta.connect_device(self.test_resource, name='device1')
-      self.peer_device = ta.connect_device(self.test_resource, name='device5')
-      self.device2 = ta.connect_device(self.test_resource, name='device8')
+      device1 = ta.connect_device(test_resource, name='device1')
+      peer_device = ta.connect_device(test_resource, name='device5')
+      device2 = ta.connect_device(test_resource, name='device8')
     robotframework: |-
       ${device1}=   connect device   ${test_resource}   name=device1
-      set global variable   ${device1}
       ${peer_device}=   connect device   ${test_resource}   name=device5
-      set global variable   ${peer_device}
       ${device2}=   connect device   ${test_resource}   name=device8
-      set global variable   ${device2}
 
   case5:
     data: connect device {device1, device5 as peer_device, device8}
     unittest: |-
-      self.device1 = ta.connect_device(self.test_resource, name='device1')
-      self.peer_device = ta.connect_device(self.test_resource, name='device5')
-      self.device2 = ta.connect_device(self.test_resource, name='device8')
+      device1 = ta.connect_device(test_resource, name='device1')
+      peer_device = ta.connect_device(test_resource, name='device5')
+      device2 = ta.connect_device(test_resource, name='device8')
     pytest: |-
-      self.device1 = ta.connect_device(self.test_resource, name='device1')
-      self.peer_device = ta.connect_device(self.test_resource, name='device5')
-      self.device2 = ta.connect_device(self.test_resource, name='device8')
+      device1 = ta.connect_device(test_resource, name='device1')
+      peer_device = ta.connect_device(test_resource, name='device5')
+      device2 = ta.connect_device(test_resource, name='device8')
     robotframework: |-
       ${device1}=   connect device   ${test_resource}   name=device1
-      set global variable   ${device1}
       ${peer_device}=   connect device   ${test_resource}   name=device5
-      set global variable   ${peer_device}
       ${device2}=   connect device   ${test_resource}   name=device8
-      set global variable   ${device2}
 
 disconnect_device_statement:
 
   case1:
     data: disconnect device device1
-    unittest: ta.disconnect_device(self.device1)
-    pytest: ta.disconnect_device(self.device1)
+    unittest: ta.disconnect_device(device1)
+    pytest: ta.disconnect_device(device1)
     robotframework: |-
       disconnect device   ${device1}
 
   case2:
     data: disconnect device1
-    unittest: ta.disconnect_device(self.device1)
-    pytest: ta.disconnect_device(self.device1)
+    unittest: ta.disconnect_device(device1)
+    pytest: ta.disconnect_device(device1)
     robotframework: |-
       disconnect device   ${device1}
 
@@ -232,8 +219,8 @@ release_device_statement:
 
   case1:
     data: release device device1
-    unittest: ta.release_device(self.device1)
-    pytest: ta.release_device(self.device1)
+    unittest: ta.release_device(device1)
+    pytest: ta.release_device(device1)
     robotframework: |-
       release device   ${device1}
 
@@ -241,55 +228,11 @@ release_resource_statement:
 
   case1:
     data: release resource test_resource.yaml
-    unittest: ta.release_resource(self.test_resource)
-    pytest: ta.release_resource(self.test_resource)
+    unittest: ta.release_resource(test_resource)
+    pytest: ta.release_resource(test_resource)
     robotframework: |-
       release resource   ${test_resource}
 
-cleanup_statement:
-
-  default:
-    data: cleanup
-    unittest: |-
-      ############ skip this line ############
-        def cleanUp(self):
-          print('Dummy Cleanup')
-          self.assertTrue(True == True)
-    pytest: |-
-      ############ skip this line ############
-        def cleanup_class(self):
-          print('Dummy Cleanup')
-          assert True == True
-    robotframework: |-
-      ############ skip this line ############
-      cleanup
-        log   Dummy Cleanup
-        should be true   True == True
-
-  case1:
-    data: |-
-      cleanup
-        disconnect device device1
-        release device device1
-        release resource test_resource.yaml
-    unittest: |-
-      ############ skip this line ############
-        def cleanUp(self):
-          ta.disconnect_device(self.device1)
-          ta.release_device(self.device1)
-          ta.release_resource(self.test_resource)
-    pytest: |-
-      ############ skip this line ############
-        def cleanup_class(self):
-          ta.disconnect_device(self.device1)
-          ta.release_device(self.device1)
-          ta.release_resource(self.test_resource)
-    robotframework: |-
-      ############ skip this line ############
-      cleanup
-        disconnect device   ${device1}
-        release device   ${device1}
-        release resource   ${test_resource}
 
 teardown_statement:
 
@@ -297,9 +240,10 @@ teardown_statement:
     data: teardown
     unittest: |-
       ############ skip this line ############
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           print('Dummy Teardown')
-          self.assertTrue(True == True)
+          assert True == True
     pytest: |-
       ############ skip this line ############
         def teardown_class(self):
@@ -319,10 +263,11 @@ teardown_statement:
         release resource test_resource.yaml
     unittest: |-
       ############ skip this line ############
-        def tearDown(self):
-          ta.disconnect_device(self.device1)
-          ta.release_device(self.device1)
-          ta.release_resource(self.test_resource)
+        @classmethod
+        def tearDownClass(cls):
+          ta.disconnect_device(cls.device1)
+          ta.release_device(cls.device1)
+          ta.release_resource(cls.test_resource)
     pytest: |-
       ############ skip this line ############
         def teardown_class(self):
@@ -363,11 +308,11 @@ section_statement:
     unittest: |-
       ############ skip this line ############
         def test_step(self):
-          ta.execute(device1, cmdline='show version')
+          ta.execute(self.device1, cmdline='show version')
     pytest: |-
       ############ skip this line ############
         def test_step(self):
-          ta.execute(device1, cmdline='show version')
+          ta.execute(self.device1, cmdline='show version')
     robotframework: |-
       ############ skip this line ############
       test_step
@@ -385,23 +330,23 @@ section_statement:
     unittest: |-
       ############ skip this line ############
         def test_step(self):
-          ta.execute(device1, cmdline='show version')
+          ta.execute(self.device1, cmdline='show version')
           ntimes = 2
           indexes = range(1, times + 1)
           for index in indexes:
-            ta.execute(device1, cmdline='show device info')
+            ta.execute(self.device1, cmdline='show device info')
             ta.wait_for(5)
-          ta.execute(device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='show module info')
     pytest: |-
       ############ skip this line ############
         def test_step(self):
-          ta.execute(device1, cmdline='show version')
+          ta.execute(self.device1, cmdline='show version')
           ntimes = 2
           indexes = range(1, times + 1)
           for index in indexes:
-            ta.execute(device1, cmdline='show device info')
+            ta.execute(self.device1, cmdline='show device info')
             ta.wait_for(5)
-          ta.execute(device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='show module info')
     robotframework: |-
       ############ skip this line ############
       test_step
@@ -455,7 +400,7 @@ loop_statement:
       indexes = range(1, times + 1)
       for index in indexes:
         ta.execute(device1, cmdline='show info')
-        output= ta.execute(device1, cmdline='show version')
+        output = ta.execute(device1, cmdline='show version')
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
@@ -466,7 +411,7 @@ loop_statement:
       indexes = range(1, times + 1)
       for index in indexes:
         ta.execute(device1, cmdline='show info')
-        output= ta.execute(device1, cmdline='show version')
+        output = ta.execute(device1, cmdline='show version')
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
@@ -497,7 +442,7 @@ loop_statement:
       is_passed = True
       for index in indexes:
         ta.execute(device1, cmdline='show info')
-        output= ta.execute(device1, cmdline='show version')
+        output = ta.execute(device1, cmdline='show version')
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
@@ -511,7 +456,7 @@ loop_statement:
       is_passed = True
       for index in indexes:
         ta.execute(device1, cmdline='show info')
-        output= ta.execute(device1, cmdline='show version')
+        output = ta.execute(device1, cmdline='show version')
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
@@ -546,7 +491,7 @@ loop_statement:
       is_passed = True
       for index in indexes:
         ta.execute(device1, cmdline='show info')
-        output= ta.execute(device1, cmdline='show version')
+        output = ta.execute(device1, cmdline='show version')
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
@@ -562,7 +507,7 @@ loop_statement:
       is_passed = True
       for index in indexes:
         ta.execute(device1, cmdline='show info')
-        output= ta.execute(device1, cmdline='show version')
+        output = ta.execute(device1, cmdline='show version')
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
@@ -600,11 +545,11 @@ performer_statement:
   case2:
     data: device1 EXECUTE show version USING_TEMPLATE tmpl.show.version SELECT version WHERE version gt version(1.2.3)
     unittest: |-
-      output= ta.execute(device1, cmdline='show version')
+      output = ta.execute(device1, cmdline='show version')
       ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                 select_statement='SELECT version WHERE version gt version(1.2.3)')
     pytest: |-
-      output= ta.execute(device1, cmdline='show version')
+      output = ta.execute(device1, cmdline='show version')
       ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                 select_statement='SELECT version WHERE version gt version(1.2.3)')
     robotframework: |-
@@ -615,11 +560,11 @@ performer_statement:
   case3:
     data: device1 EXECUTE show version | cvs-format USING_CSV SELECT version WHERE version gt version(1.2.3)
     unittest: |-
-      output= ta.execute(device1, cmdline='show version | cvs-format')
+      output = ta.execute(device1, cmdline='show version | cvs-format')
       ta.filter(output, convertor='csv',
                 select_statement='SELECT version WHERE version gt version(1.2.3)')
     pytest: |-
-      output= ta.execute(device1, cmdline='show version | cvs-format')
+      output = ta.execute(device1, cmdline='show version | cvs-format')
       ta.filter(output, convertor='csv',
                 select_statement='SELECT version WHERE version gt version(1.2.3)')
     robotframework: |-
@@ -630,11 +575,11 @@ performer_statement:
   case4:
     data: device1 EXECUTE show version | json-format USING_JSON SELECT version WHERE version gt version(1.2.3)
     unittest: |-
-      output= ta.execute(device1, cmdline='show version | json-format')
+      output = ta.execute(device1, cmdline='show version | json-format')
       ta.filter(output, convertor='json',
                 select_statement='SELECT version WHERE version gt version(1.2.3)')
     pytest: |-
-      output= ta.execute(device1, cmdline='show version | json-format')
+      output = ta.execute(device1, cmdline='show version | json-format')
       ta.filter(output, convertor='json',
                 select_statement='SELECT version WHERE version gt version(1.2.3)')
     robotframework: |-
@@ -647,13 +592,13 @@ verification_statement:
   case1:
     data: device1 EXECUTE show version USING_TEMPLATE tmpl.show.version SELECT version WHERE version gt version(1.2.3) MUST BE True
     unittest: |-
-      output= ta.execute(device1, cmdline='show version')
+      output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
       self.assertTrue(total_count == 1)
     pytest: |-
-      output= ta.execute(device1, cmdline='show version')
+      output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
@@ -668,13 +613,13 @@ verification_statement:
   case2:
     data: device1 EXECUTE show version USING_TEMPLATE tmpl.show.version SELECT version WHERE version gt version(1.2.3) MUST BE EQUAL_TO 1
     unittest: |-
-      output= ta.execute(device1, cmdline='show version')
+      output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
       self.assertTrue(total_count == 1)
     pytest: |-
-      output= ta.execute(device1, cmdline='show version')
+      output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
@@ -727,13 +672,15 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           print('Dummy Setup')
-          self.assertTrue(True == True)
+          assert True == True
       
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           print('Dummy Teardown')
-          self.assertTrue(True == True)
+          assert True == True
     pytest: |-
       ################################################################################
       # pytest script is generated by Describe-Get-System Proof of Concept
@@ -789,13 +736,15 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
+        @classmethod
+        def setUpClass(cls):
           print('Dummy Setup')
-          self.assertTrue(True == True)
+          assert True == True
       
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
           print('Dummy Teardown')
-          self.assertTrue(True == True)
+          assert True == True
     pytest: |-
       ################################################################################
       # pytest script is generated by Describe-Get-System Proof of Concept
@@ -863,15 +812,17 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
-          self.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
-          self.device1 = ta.connect_device(self.test_resource, name='device1')
+        @classmethod
+        def setUpClass(cls):
+          cls.test_resource = ta.connect_data(filename='test_resource.yaml')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
+          cls.device1 = ta.connect_device(cls.test_resource, name='device1')
       
-        def tearDown(self):
-          ta.disconnect_device(self.device1)
-          ta.release_device(self.device1)
-          ta.release_resource(self.test_resource)
+        @classmethod
+        def tearDownClass(cls):
+          ta.disconnect_device(cls.device1)
+          ta.release_device(cls.device1)
+          ta.release_resource(cls.test_resource)
     pytest: |-
       ################################################################################
       # pytest script is generated by Describe-Get-System Proof of Concept
@@ -961,37 +912,39 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
-        def setUp(self):
-          self.test_resource = ta.connect_data(filename='test_resource.yaml')
-          self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
-          self.device1 = ta.connect_device(self.test_resource, name='device1')
+        @classmethod
+        def setUpClass(cls):
+          cls.test_resource = ta.connect_data(filename='test_resource.yaml')
+          cls.test_data = ta.use_testcase(cls.test_resource, testcase='test1')
+          cls.device1 = ta.connect_device(cls.test_resource, name='device1')
       
-        def tearDown(self):
-          ta.disconnect_device(self.device1)
-          ta.release_device(self.device1)
-          ta.release_resource(self.test_resource)
+        @classmethod
+        def tearDownClass(cls):
+          ta.disconnect_device(cls.device1)
+          ta.release_device(cls.device1)
+          ta.release_resource(cls.test_resource)
       
         def test_precondition(self):
-          output= ta.execute(device1, cmdline='show version')
+          output = ta.execute(self.device1, cmdline='show version')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                              select_statement='select version where version >= version(1.0.0)')
           total_count = len(result)
           self.assertTrue(total_count == 1)
-          ta.execute(device1, cmdline='show device info')
+          ta.execute(self.device1, cmdline='show device info')
       
         def test_case1(self):
-          ta.execute(device1, cmdline='show module info')
-          ta.execute(device1, cmdline='turn off module 1')
-          output= ta.execute(device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='turn off module 1')
+          output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == off')
           total_count = len(result)
           self.assertTrue(total_count == 1)
       
         def test_case2(self):
-          ta.execute(device1, cmdline='show module info')
-          ta.execute(device1, cmdline='turn on module 1')
-          output= ta.execute(device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='turn on module 1')
+          output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == on')
           total_count = len(result)
@@ -1020,26 +973,26 @@ script_builder:
           ta.release_resource(self.test_resource)
       
         def test_precondition(self):
-          output= ta.execute(device1, cmdline='show version')
+          output = ta.execute(self.device1, cmdline='show version')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                              select_statement='select version where version >= version(1.0.0)')
           total_count = len(result)
           assert total_count == 1
-          ta.execute(device1, cmdline='show device info')
+          ta.execute(self.device1, cmdline='show device info')
       
         def test_case1(self):
-          ta.execute(device1, cmdline='show module info')
-          ta.execute(device1, cmdline='turn off module 1')
-          output= ta.execute(device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='turn off module 1')
+          output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == off')
           total_count = len(result)
           assert total_count == 1
       
         def test_case2(self):
-          ta.execute(device1, cmdline='show module info')
-          ta.execute(device1, cmdline='turn on module 1')
-          output= ta.execute(device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='show module info')
+          ta.execute(self.device1, cmdline='turn on module 1')
+          output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == on')
           total_count = len(result)
