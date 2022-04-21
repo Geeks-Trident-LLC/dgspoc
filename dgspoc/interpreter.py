@@ -218,6 +218,15 @@ class Statement:
         return is_matched
 
     @property
+    def is_setup_or_teardown_statement(self):
+        return self.is_setup_statement or self.is_teardown_statement
+
+    @property
+    def is_parent_setup_or_teardown_statement(self):
+        chk = isinstance(self.parent, (SetupStatement, TeardownStatement))
+        return chk
+
+    @property
     def is_section_statement(self):
         pattern = r'section'
         is_matched = self.is_matched_statement(pattern)
@@ -364,8 +373,12 @@ class Statement:
             eresult = int(eresult)
 
         if self.is_unittest:
-            fmt1 = 'self.assertTrue(True == %s)'
-            fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
+            if self.is_parent_setup_or_teardown_statement:
+                fmt1 = 'assert True == %s'
+                fmt2 = 'total_count = len(result)\nassert total_count == %s'
+            else:
+                fmt1 = 'self.assertTrue(True == %s)'
+                fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
         elif self.is_pytest:
             fmt1 = 'assert True == %s'
             fmt2 = 'total_count = len(result)\nassert total_count == %s'
