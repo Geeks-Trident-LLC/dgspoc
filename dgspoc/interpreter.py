@@ -1743,7 +1743,12 @@ class ScriptBuilder:
             lst.append('')
             lst.append(stmt.snippet)
 
+        lst.append('')
+        lst.append("if __name__ == '__main__':")
+        lst.append(indent('unittest.main()', ' ' * self.indentation))
+
         script = '\n'.join(lst)
+
         return script
 
     @property
