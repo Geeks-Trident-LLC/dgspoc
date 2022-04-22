@@ -1797,9 +1797,21 @@ class ScriptBuilder:
             self.teardown_statement.snippet,
         ]
 
+        method_names = []
+
         for stmt in self.section_statements:
             lst.append('')
-            lst.append(stmt.snippet)
+            snippet = stmt.snippet
+            method_name = stmt.method_name
+            if snippet:
+                if method_name not in method_names:
+                    method_names.append(method_name)
+                else:
+                    replacing = 'def %s(:' % method_name
+                    replaced = 'def %s_%.3f(:' % (method_name, time.time())
+                    replaced = replaced.replace('.', '_')
+                    snippet = snippet.replace(replacing, replaced)
+                lst.append(snippet)
 
         script = '\n'.join(lst)
         return script
