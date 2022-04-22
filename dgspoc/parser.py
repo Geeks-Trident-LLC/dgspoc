@@ -88,6 +88,11 @@ class CheckStatement:
         match = re.match(r'(?i) *releases? +data +', data)
         return bool(match)
 
+    @classmethod
+    def is_dummy_statement(cls, data):
+        match = re.match(r' *dummy[_. -]*(pass|fail)', data)
+        return bool(match)
+
 
 class ParsedOperation:
     def __init__(self, data):
