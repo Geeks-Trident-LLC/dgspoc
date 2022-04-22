@@ -1230,6 +1230,8 @@ class SectionStatement(Statement):
             other = WaitForStatement(node.remaining_data, **kwargs)
         elif CheckStatement.is_iterative_statement(next_line):
             other = LoopStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_dummy_statement(next_line):
+            other = DummyStatement(node.remaining_data, **kwargs)
         else:
             return None
 
