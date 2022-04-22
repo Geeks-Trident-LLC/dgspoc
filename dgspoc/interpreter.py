@@ -1819,15 +1819,6 @@ class ScriptBuilder:
     @property
     def testscript(self):
         if self.setup_statement and self.teardown_statement:
-            # if self.framework == FWTYPE.UNITTEST:
-            #     script = self.unittest_script
-            #     return script
-            # elif self.framework == FWTYPE.PYTEST:
-            #     script = self.pytest_script
-            #     return script
-            # else:
-            #     script = self.robotframework_script
-            #     return script
             lst = [self.import_library_code,
                    '',
                    self.setup_teardown_code,
@@ -1948,93 +1939,6 @@ class ScriptBuilder:
 
         sections_code_txt = '\n'.join(lst)
         return sections_code_txt
-
-    @property
-    def unittest_script(self):
-        cls_name = SCRIPTINFO.get_class_name()
-        lst = [
-            self.intro_code,
-            '',
-            'import unittest',
-            'import dgspoc as ta',
-            '\n',
-            'class {}(unittest.Testcase):'.format(cls_name),
-            self.setup_statement.snippet,
-            '',
-            self.teardown_statement.snippet,
-        ]
-
-        for index, stmt in enumerate(self.section_statements, 1):
-            lst.append('')
-            snippet = stmt.snippet
-            replaced = 'def test_%03i_' % index
-            if snippet:
-                lst.append(snippet.replace('def test_', replaced, 1))
-
-        lst.append('')
-        lst.append("if __name__ == '__main__':")
-        lst.append(indent('unittest.main()', ' ' * self.indentation))
-
-        script = '\n'.join(lst)
-
-        return script
-
-    @property
-    def pytest_script(self):
-        cls_name = SCRIPTINFO.get_class_name()
-        lst = [
-            self.intro_code,
-            '',
-            '# import pytest',
-            'import dgspoc as ta',
-            '\n',
-            'class {}:'.format(cls_name),
-            self.setup_statement.snippet,
-            '',
-            self.teardown_statement.snippet,
-        ]
-
-        for index, stmt in enumerate(self.section_statements, 1):
-            lst.append('')
-            snippet = stmt.snippet
-            replaced = 'def test_%03i_' % index
-            if snippet:
-                lst.append(snippet.replace('def test_', replaced, 1))
-
-        script = '\n'.join(lst)
-        return script
-
-    @property
-    def robotframework_script(self):
-        lst = [
-            self.intro_code,
-            '',
-            '*** Settings ***',
-            'library         builtin',
-            'library         collections',
-            'library         describegetsystempoc',
-            'test setup      setup',
-            'test teardown   {}'.format(self.teardown_statement.name),
-        ]
-
-        if self.section_statements:
-            lst.append('\n*** Test Cases ***')
-            for index, stmt in enumerate(self.section_statements, 1):
-                snippet = stmt.snippet
-                replaced = 'test %03i ' % index
-                if snippet:
-                    lst.append(snippet.replace('test ', replaced, 1))
-                    lst.append('')
-
-        not self.section_statements and lst.append('')
-
-        lst.append('*** Keywords ***')
-        lst.append(self.setup_statement.snippet)
-        lst.append('')
-        lst.append(self.teardown_statement.snippet)
-
-        script = '\n'.join(lst)
-        return script
 
     def build(self):
         data = self.data
