@@ -1100,6 +1100,8 @@ class TeardownStatement(Statement):
             other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
         elif node.is_matched_statement('(?i) +release +resource', next_line):
             other = ReleaseResourceStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_dummy_statement(next_line):
+            other = DummyStatement(node.remaining_data, **kwargs)
         else:
             return None
 
