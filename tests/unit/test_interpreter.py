@@ -5,6 +5,7 @@ from dgspoc.constant import FWTYPE
 
 from dgspoc.interpreter import SCRIPTINFO
 
+from dgspoc.interpreter import DummyStatement
 from dgspoc.interpreter import SetupStatement
 from dgspoc.interpreter import TeardownStatement
 from dgspoc.interpreter import SectionStatement
@@ -34,6 +35,86 @@ SCRIPTINFO.enable_testing()
 
 indentation = TESTDATA.indentation
 user_info = TESTDATA.user_info
+
+
+class TestDummyStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.dummy_statement.case1.data,
+                TESTDATA.dummy_statement.case1.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.dummy_statement.case1.data,
+                TESTDATA.dummy_statement.case1.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.dummy_statement.case1.data,
+                TESTDATA.dummy_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_dummy_statement_case1(self, framework, user_data, expected_result):
+        node = DummyStatement(user_data, indentation=indentation,
+                              framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.dummy_statement.case2.data,
+                TESTDATA.dummy_statement.case2.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.dummy_statement.case2.data,
+                TESTDATA.dummy_statement.case2.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.dummy_statement.case2.data,
+                TESTDATA.dummy_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_dummy_statement_case2(self, framework, user_data, expected_result):
+        node = DummyStatement(user_data, indentation=indentation,
+                              framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.dummy_statement.case3.data,
+                TESTDATA.dummy_statement.case3.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.dummy_statement.case3.data,
+                TESTDATA.dummy_statement.case3.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.dummy_statement.case3.data,
+                TESTDATA.dummy_statement.case3.robotframework,
+            ),
+        ]
+    )
+    def test_dummy_statement_case3(self, framework, user_data, expected_result):
+        node = DummyStatement(user_data, indentation=indentation,
+                              framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
 
 
 class TestSetupStatement:

@@ -5,6 +5,44 @@ user_info:
   email: user1@abc_xyz.com
   company: ABC XYZ Inc.
 
+dummy_statement:
+
+  case1:
+    data: "dummy_pass: hello dgspoc dummy"
+    unittest: |-
+      print('hello dgspoc dummy')
+      assert True == True
+    pytest: |-
+      print('hello dgspoc dummy')
+      assert True == True
+    robotframework: |-
+      log   hello dgspoc dummy
+      should be true   True == True
+
+  case2:
+    data: dummy fail - hello dgspoc dummy
+    unittest: |-
+      print('hello dgspoc dummy')
+      assert True == False
+    pytest: |-
+      print('hello dgspoc dummy')
+      assert True == False
+    robotframework: |-
+      log   hello dgspoc dummy
+      should be true   True == False
+
+  case3:
+    data: dummy pass - message with mulitple    spaces
+    unittest: |-
+      print('message with mulitple    spaces')
+      assert True == True
+    pytest: |-
+      print('message with mulitple    spaces')
+      assert True == True
+    robotframework: |-
+      log   message with mulitple${SPACE * 4}spaces
+      should be true   True == True
+
 setup_statement:
 
   default:
