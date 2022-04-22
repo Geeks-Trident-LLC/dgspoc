@@ -1190,7 +1190,7 @@ class SectionStatement(Statement):
             self._method_name = 'test default' if self.is_robotframework else 'test_default'
         else:
             description = ' '.join(str(description).splitlines()).strip()
-            pattern = r'(?i)(?P<desc>.+)( +as +(?P<ref>[a-z]\w*( +\w+)?))?$'
+            pattern = r'(?i)(?P<desc>.+?)( +as +(?P<ref>[a-z]\w*( +\w+)?))?$'
             match = re.match(pattern, description)
             desc, ref = match.group('desc'), match.group('ref')
             ref = ref or desc
