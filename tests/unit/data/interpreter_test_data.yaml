@@ -383,7 +383,7 @@ loop_statement:
       indexes = range(1, times + 1)
       for index in indexes:
         print('Dummy iterative statement')
-        self.assertTrue(True == True)
+        assert True == True
     pytest: |-
       ntimes = 1
       indexes = range(1, times + 1)
@@ -413,7 +413,7 @@ loop_statement:
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
-        self.assertTrue(total_count == 1, msg='Failed at iteration {}/{}'.format(index, ntimes))
+        assert total_count == 1, 'Failed at iteration {}/{}'.format(index, ntimes)
         ta.execute(device1, cmdline='show device module')
     pytest: |-
       ntimes = 3
@@ -455,7 +455,7 @@ loop_statement:
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
-        self.assertTrue(total_count == 1, msg='Failed at iteration {}/{}'.format(index, ntimes))
+        assert total_count == 1, 'Failed at iteration {}/{}'.format(index, ntimes)
         ta.execute(device1, cmdline='show device module')
         if is_passed:
           break
@@ -509,7 +509,7 @@ loop_statement:
         ta.execute(device1, cmdline='show device module')
         if not is_passed:
           print('Warning: failed verification(s) at iteration {}/{}'.format(index, ntimes))
-      self.assertTrue(is_passed)
+      assert is_passed
     pytest: |-
       ntimes = 3
       indexes = range(1, times + 1)
@@ -605,7 +605,7 @@ verification_statement:
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
-      self.assertTrue(total_count == 1)
+      assert total_count == 1
     pytest: |-
       output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
@@ -626,7 +626,7 @@ verification_statement:
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
-      self.assertTrue(total_count == 1)
+      assert total_count == 1
     pytest: |-
       output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',

@@ -470,20 +470,36 @@ class Statement:
         if Misc.is_boolean(eresult):
             eresult = int(eresult)
 
-        if self.is_unittest:
-            if self.is_parent_setup_or_teardown_statement:
-                fmt1 = 'assert True == %s'
-                fmt2 = 'total_count = len(result)\nassert total_count == %s'
-            else:
-                fmt1 = 'self.assertTrue(True == %s)'
-                fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
-        elif self.is_pytest:
-            fmt1 = 'assert True == %s'
-            fmt2 = 'total_count = len(result)\nassert total_count == %s'
-        else:   # i.e ROBOTFRAMEWORK
+        if self.is_robotframework:
             fmt1 = 'should be true   True == %s'
             fmt2 = ('${total_count}=   get length ${result}\nshould be '
                     'true   ${result} == %s')
+        else:
+            if self.is_unittest and self.is_ancestor_section_statement:
+                fmt1 = 'self.assertTrue(True == %s)'
+                fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
+            else:
+                fmt1 = 'assert True == %s'
+                fmt2 = 'total_count = len(result)\nassert total_count == %s'
+
+        # if self.is_unittest:
+        #     if self.is_ancestor_base_statement:
+        #         if self.is_ancestor_section_statement:
+        #             fmt1 = 'self.assertTrue(True == %s)'
+        #             fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
+        #         else:
+        #             fmt1 = 'assert True == %s'
+        #             fmt2 = 'total_count = len(result)\nassert total_count == %s'
+        #     else:
+        #         fmt1 = 'assert True == %s'
+        #         fmt2 = 'total_count = len(result)\nassert total_count == %s'
+        # elif self.is_pytest:
+        #     fmt1 = 'assert True == %s'
+        #     fmt2 = 'total_count = len(result)\nassert total_count == %s'
+        # else:   # i.e ROBOTFRAMEWORK
+        #     fmt1 = 'should be true   True == %s'
+        #     fmt2 = ('${total_count}=   get length ${result}\nshould be '
+        #             'true   ${result} == %s')
 
         fmt = fmt1 if assert_only else fmt2
         eresult = expected_result if assert_only else eresult
@@ -1407,7 +1423,7 @@ class LoopStatement(Statement):
             warned_msg = "'Warning: failed verification(s) at iteration {}/{}'.format(index, ntimes)"
             lst.append(self.indent_data('print(%s)' % warned_msg, 2))
 
-            if self.is_unittest:
+            if self.is_unittest and self.is_ancestor_section_statement:
                 lst.append('self.assertTrue(is_passed)')
             else:
                 lst.append('assert is_passed')
@@ -1612,7 +1628,7 @@ class VerificationStatement(Statement):
                     lst.append(stmt)
 
                 lst.append('total_count = len(result)')
-                if self.is_unittest:
+                if self.is_unittest and self.is_ancestor_section_statement:
                     fmt = 'self.assertTrue(total_count == %s)'
                     lst.append(fmt % result.expected_condition)
                 else:
@@ -1626,14 +1642,20 @@ class VerificationStatement(Statement):
             return ''
 
         lines = dedent(self.snippet).splitlines()
-        tbl = dict(unittest='%s, msg=%s)', pytest='%s, %s', robotframework='%s   %s')
-        fmt = tbl[self.framework.lower()]
-        pattern = '(?i)(should be true)|(self[.])?assert(True)?'
+        pattern = '(?i)(?P<case1>should be true)|(?P<case2>self[.])?assert(True)?'
 
         lst = []
         for line in lines:
-            if re.match(pattern, line):
-                txt = line[:-1] if self.is_unittest else line
+            match = re.match(pattern, line)
+            if match:
+                txt = line
+                if match.group('case1'):
+                    fmt = '%s   %s'
+                elif match.group('case2'):
+                    fmt = '%s, msg=%s)'
+                    txt = line[-1]
+                else:
+                    fmt = '%s, %s'
                 new_line = fmt % (txt, msg)
                 lst.append(new_line)
             else:
