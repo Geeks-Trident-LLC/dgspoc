@@ -1829,11 +1829,23 @@ class ScriptBuilder:
             'test teardown   {}'.format(self.teardown_statement.name),
         ]
 
+        method_names = []
+
         if self.section_statements:
             lst.append('\n*** Test Cases ***')
             for stmt in self.section_statements:
-                lst.append(stmt.snippet)
-                lst.append('')
+                snippet = stmt.snippet
+                method_name = stmt.method_name
+                if snippet:
+                    if method_name not in method_names:
+                        method_names.append(method_name)
+                    else:
+                        postfix = (' %.3f' % time.time()).replace('.', '_')
+                        lines = snippet.splitlines()
+                        lines[0] = lines[0] + postfix
+                        snippet = '\n'.join(lines)
+                    lst.append(snippet)
+                    lst.append('')
 
         not self.section_statements and lst.append('')
 
