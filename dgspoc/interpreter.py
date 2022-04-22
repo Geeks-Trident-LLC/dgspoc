@@ -5,7 +5,6 @@ user describing problem"""
 import re
 import operator
 import yaml
-import time
 
 from textwrap import indent
 from textwrap import dedent
@@ -1199,15 +1198,14 @@ class SectionStatement(Statement):
 
             self.description = desc
 
-            if not ref.startswith('test'):
+            if not ref.lower().startswith('test'):
                 ref = 'test_%s' % ref
 
             if self.is_robotframework:
                 self._method_name = ref.replace('_', ' ')
             else:
-                if len(ref) > 70:
-                    ref = '%s_%.3f' % (ref[:50], time.time())
-                    ref = ref.replace('.', '_')
+                if len(ref) > 60:
+                    ref = wrap(ref.replace('_', ' '), width=60)[0].replace(' ', '_')
                 self._method_name = ref
 
     def create_child(self, node):
@@ -1770,9 +1768,10 @@ class ScriptBuilder:
 
         for index, stmt in enumerate(self.section_statements, 1):
             lst.append('')
+            snippet = stmt.snippet
             replaced = 'def test_%03i_' % index
-            if stmt.snippet:
-                lst.append(stmt.snippet.replace('def test_', replaced))
+            if snippet:
+                lst.append(snippet.replace('def test_', replaced, 1))
 
         lst.append('')
         lst.append("if __name__ == '__main__':")
@@ -1799,19 +1798,12 @@ class ScriptBuilder:
 
         method_names = []
 
-        for stmt in self.section_statements:
+        for index, stmt in enumerate(self.section_statements, 1):
             lst.append('')
             snippet = stmt.snippet
-            method_name = stmt.method_name
+            replaced = 'def test_%03i_' % index
             if snippet:
-                if method_name not in method_names:
-                    method_names.append(method_name)
-                else:
-                    replacing = 'def %s(:' % method_name
-                    replaced = 'def %s_%.3f(:' % (method_name, time.time())
-                    replaced = replaced.replace('.', '_')
-                    snippet = snippet.replace(replacing, replaced)
-                lst.append(snippet)
+                lst.append(snippet.replace('def test_', replaced, 1))
 
         script = '\n'.join(lst)
         return script
@@ -1833,18 +1825,11 @@ class ScriptBuilder:
 
         if self.section_statements:
             lst.append('\n*** Test Cases ***')
-            for stmt in self.section_statements:
+            for index, stmt in enumerate(self.section_statements, 1):
                 snippet = stmt.snippet
-                method_name = stmt.method_name
+                replaced = 'test %03i ' % index
                 if snippet:
-                    if method_name not in method_names:
-                        method_names.append(method_name)
-                    else:
-                        postfix = (' %.3f' % time.time()).replace('.', '_')
-                        lines = snippet.splitlines()
-                        lines[0] = lines[0] + postfix
-                        snippet = '\n'.join(lines)
-                    lst.append(snippet)
+                    lst.append(snippet.replace('test ', replaced, 1))
                     lst.append('')
 
         not self.section_statements and lst.append('')
