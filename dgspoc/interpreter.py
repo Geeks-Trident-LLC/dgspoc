@@ -33,6 +33,8 @@ from dgspoc.exceptions import WaitForStatementError
 from dgspoc.exceptions import PerformerStatementError
 from dgspoc.exceptions import VerificationStatementError
 
+from dgspoc.exceptions import ScriptBuilderError
+
 
 class ScriptInfo(DotObject):
     def __init__(self, *args, testcase='', **kwargs):
@@ -1835,7 +1837,13 @@ class ScriptBuilder:
 
             return script + '\n'
         else:
-            pass
+            if self.setup_statement:
+                failure = 'CANT build script without Setup statement'
+            elif self.teardown_statement:
+                failure = 'CANT build test script without Teardown statement'
+            else:
+                failure = 'CANT build script without Setup and Teardown statements'
+            raise ScriptBuilderError(failure)
 
     @property
     def get_logger_function(self):

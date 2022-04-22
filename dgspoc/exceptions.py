@@ -59,3 +59,6 @@ class PerformerStatementError(InterpreterError):
 
 class VerificationStatementError(InterpreterError):
     """Use to capture error for verification statement"""
+
+class ScriptBuilderError(InterpreterError):
+    """Use to capture error for building test script"""
