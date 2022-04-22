@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='dgspoc',
-    version='0.2.5',
+    version='0.2.6',
     license='BSD-3-Clause',
     license_files=['LICENSE'],
     description='The proof of concept for Describe-Get-System.',
