@@ -5,6 +5,7 @@ from dgspoc.constant import FWTYPE
 
 from dgspoc.interpreter import SCRIPTINFO
 
+from dgspoc.interpreter import DummyStatement
 from dgspoc.interpreter import SetupStatement
 from dgspoc.interpreter import TeardownStatement
 from dgspoc.interpreter import SectionStatement
@@ -34,6 +35,86 @@ SCRIPTINFO.enable_testing()
 
 indentation = TESTDATA.indentation
 user_info = TESTDATA.user_info
+
+
+class TestDummyStatement:
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.dummy_statement.case1.data,
+                TESTDATA.dummy_statement.case1.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.dummy_statement.case1.data,
+                TESTDATA.dummy_statement.case1.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.dummy_statement.case1.data,
+                TESTDATA.dummy_statement.case1.robotframework,
+            ),
+        ]
+    )
+    def test_dummy_statement_case1(self, framework, user_data, expected_result):
+        node = DummyStatement(user_data, indentation=indentation,
+                              framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.dummy_statement.case2.data,
+                TESTDATA.dummy_statement.case2.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.dummy_statement.case2.data,
+                TESTDATA.dummy_statement.case2.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.dummy_statement.case2.data,
+                TESTDATA.dummy_statement.case2.robotframework,
+            ),
+        ]
+    )
+    def test_dummy_statement_case2(self, framework, user_data, expected_result):
+        node = DummyStatement(user_data, indentation=indentation,
+                              framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.dummy_statement.case3.data,
+                TESTDATA.dummy_statement.case3.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.dummy_statement.case3.data,
+                TESTDATA.dummy_statement.case3.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.dummy_statement.case3.data,
+                TESTDATA.dummy_statement.case3.robotframework,
+            ),
+        ]
+    )
+    def test_dummy_statement_case3(self, framework, user_data, expected_result):
+        node = DummyStatement(user_data, indentation=indentation,
+                              framework=framework)
+        snippet = node.snippet
+        assert snippet == expected_result
 
 
 class TestSetupStatement:
@@ -1038,7 +1119,7 @@ class TestScriptBuilder:
     )
     def test_default_script_builder(self, framework, user_data, expected_result):
         node = ScriptBuilder(user_data, indentation=indentation, framework=framework)
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1072,7 +1153,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1108,7 +1189,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1145,7 +1226,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1180,7 +1261,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1215,7 +1296,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1250,5 +1331,41 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
+        assert test_script == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.script_builder.case6.data,
+                TESTDATA.script_builder.case6.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.script_builder.case6.data,
+                TESTDATA.script_builder.case6.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.script_builder.case6.data,
+                TESTDATA.script_builder.case6.robotframework,
+            ),
+        ]
+    )
+    def test_building_script_case6(self, framework, user_data, expected_result):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.reset_devices_vars()
+        SCRIPTINFO.load_testing_data()
+        node = ScriptBuilder(
+            user_data,
+            indentation=indentation,
+            framework=framework,
+            username=user_info.username,
+            email=user_info.email,
+            company=user_info.company,
+            is_logger=True
+        )
+        test_script = node.testscript.strip()
         assert test_script == expected_result

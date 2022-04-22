@@ -5,6 +5,44 @@ user_info:
   email: user1@abc_xyz.com
   company: ABC XYZ Inc.
 
+dummy_statement:
+
+  case1:
+    data: "dummy_pass: hello dgspoc dummy"
+    unittest: |-
+      print('hello dgspoc dummy')
+      assert True == True
+    pytest: |-
+      print('hello dgspoc dummy')
+      assert True == True
+    robotframework: |-
+      log   hello dgspoc dummy
+      should be true   True == True
+
+  case2:
+    data: dummy fail - hello dgspoc dummy
+    unittest: |-
+      print('hello dgspoc dummy')
+      assert True == False
+    pytest: |-
+      print('hello dgspoc dummy')
+      assert True == False
+    robotframework: |-
+      log   hello dgspoc dummy
+      should be true   True == False
+
+  case3:
+    data: dummy pass - message with mulitple    spaces
+    unittest: |-
+      print('message with mulitple    spaces')
+      assert True == True
+    pytest: |-
+      print('message with mulitple    spaces')
+      assert True == True
+    robotframework: |-
+      log   message with mulitple${SPACE * 4}spaces
+      should be true   True == True
+
 setup_statement:
 
   default:
@@ -383,7 +421,7 @@ loop_statement:
       indexes = range(1, times + 1)
       for index in indexes:
         print('Dummy iterative statement')
-        self.assertTrue(True == True)
+        assert True == True
     pytest: |-
       ntimes = 1
       indexes = range(1, times + 1)
@@ -413,7 +451,7 @@ loop_statement:
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
-        self.assertTrue(total_count == 1, msg='Failed at iteration {}/{}'.format(index, ntimes))
+        assert total_count == 1, 'Failed at iteration {}/{}'.format(index, ntimes)
         ta.execute(device1, cmdline='show device module')
     pytest: |-
       ntimes = 3
@@ -455,7 +493,7 @@ loop_statement:
         result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                            select_statement='SELECT version WHERE version >= version(1.0.0)')
         total_count = len(result)
-        self.assertTrue(total_count == 1, msg='Failed at iteration {}/{}'.format(index, ntimes))
+        assert total_count == 1, 'Failed at iteration {}/{}'.format(index, ntimes)
         ta.execute(device1, cmdline='show device module')
         if is_passed:
           break
@@ -509,7 +547,7 @@ loop_statement:
         ta.execute(device1, cmdline='show device module')
         if not is_passed:
           print('Warning: failed verification(s) at iteration {}/{}'.format(index, ntimes))
-      self.assertTrue(is_passed)
+      assert is_passed
     pytest: |-
       ntimes = 3
       indexes = range(1, times + 1)
@@ -605,7 +643,7 @@ verification_statement:
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
-      self.assertTrue(total_count == 1)
+      assert total_count == 1
     pytest: |-
       output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
@@ -626,7 +664,7 @@ verification_statement:
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
                          select_statement='SELECT version WHERE version gt version(1.2.3)')
       total_count = len(result)
-      self.assertTrue(total_count == 1)
+      assert total_count == 1
     pytest: |-
       output = ta.execute(device1, cmdline='show version')
       result = ta.filter(output, convertor='template', template_ref='tmpl.show.version',
@@ -681,6 +719,7 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
+
         @classmethod
         def setUpClass(cls):
           print('Dummy Setup')
@@ -703,6 +742,7 @@ script_builder:
       
       
       class TestClass:
+
         def setup_class(self):
           print('Dummy Setup')
           assert True == True
@@ -748,6 +788,7 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
+
         @classmethod
         def setUpClass(cls):
           print('Dummy Setup')
@@ -773,6 +814,7 @@ script_builder:
       
       
       class TestClass:
+
         def setup_class(self):
           print('Dummy Setup')
           assert True == True
@@ -827,6 +869,7 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
+      
         @classmethod
         def setUpClass(cls):
           cls.test_resource = ta.connect_data(filename='test_resource.yaml')
@@ -854,6 +897,7 @@ script_builder:
       
       
       class TestClass:
+      
         def setup_class(self):
           self.test_resource = ta.connect_data(filename='test_resource.yaml')
           self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
@@ -930,6 +974,7 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
+      
         @classmethod
         def setUpClass(cls):
           cls.test_resource = ta.connect_data(filename='test_resource.yaml')
@@ -973,6 +1018,7 @@ script_builder:
       
       if __name__ == '__main__':
         unittest.main()
+
     pytest: |-
       ################################################################################
       # pytest script is generated by Describe-Get-System Proof of Concept
@@ -986,6 +1032,7 @@ script_builder:
       
       
       class TestClass:
+      
         def setup_class(self):
           self.test_resource = ta.connect_data(filename='test_resource.yaml')
           self.test_data = ta.use_testcase(self.test_resource, testcase='test1')
@@ -1024,6 +1071,7 @@ script_builder:
                              select_statement='select name, status where name == module-1 and status == on')
           total_count = len(result)
           assert total_count == 1
+
     robotframework: |-
       ################################################################################
       # robotframework script is generated by Describe-Get-System Proof of Concept
@@ -1038,6 +1086,20 @@ script_builder:
       library         describegetsystempoc
       test setup      setup
       test teardown   teardown
+      
+      *** Keywords ***
+      setup
+        ${test_resource}=   connect data   filename=test_resource.yaml
+        set global variable   ${test_resource}
+        ${test_data}=  use testcase   ${test_resource}  testcase=test1
+        set global variable   ${test_data}
+        ${device1}=   connect device   ${test_resource}   name=device1
+        set global variable   ${device1}
+      
+      teardown
+        disconnect device   ${device1}
+        release device   ${device1}
+        release resource   ${test_resource}
       
       *** Test Cases ***
       test 001 precondition
@@ -1068,20 +1130,6 @@ script_builder:
         ...   select_statement=select name, status where name == module-1 and status == on
         ${total_count}=  get length   ${result}
         should be true   ${total_count} == 1
-      
-      *** Keywords ***
-      setup
-        ${test_resource}=   connect data   filename=test_resource.yaml
-        set global variable   ${test_resource}
-        ${test_data}=  use testcase   ${test_resource}  testcase=test1
-        set global variable   ${test_data}
-        ${device1}=   connect device   ${test_resource}   name=device1
-        set global variable   ${device1}
-      
-      teardown
-        disconnect device   ${device1}
-        release device   ${device1}
-        release resource   ${test_resource}
 
   case3:
     data: |-
@@ -1101,6 +1149,7 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
+      
         @classmethod
         def setUpClass(cls):
           print('Dummy Setup')
@@ -1119,6 +1168,7 @@ script_builder:
       
       if __name__ == '__main__':
         unittest.main()
+
     pytest: |-
       ################################################################################
       # pytest script is generated by Describe-Get-System Proof of Concept
@@ -1132,6 +1182,7 @@ script_builder:
       
       
       class TestClass:
+      
         def setup_class(self):
           print('Dummy Setup')
           assert True == True
@@ -1145,6 +1196,7 @@ script_builder:
           cde mno blab blab"""
           print('Dummy for section')
           assert True == True
+
     robotframework: |-
       ################################################################################
       # robotframework script is generated by Describe-Get-System Proof of Concept
@@ -1160,13 +1212,6 @@ script_builder:
       test setup      setup
       test teardown   teardown
       
-      *** Test Cases ***
-      test 001 very long section name and it needs to test on component abc xyz cde mno blab blab
-        [Documentation]    very long section name and it needs to test on component
-        ...                abc xyz cde mno blab blab
-        log   Dummy for section
-        should be true   True == True
-      
       *** Keywords ***
       setup
         log   Dummy Setup
@@ -1174,6 +1219,13 @@ script_builder:
       
       teardown
         log   Dummy Teardown
+        should be true   True == True
+      
+      *** Test Cases ***
+      test 001 very long section name and it needs to test on component abc xyz cde mno blab blab
+        [Documentation]    very long section name and it needs to test on component
+        ...                abc xyz cde mno blab blab
+        log   Dummy for section
         should be true   True == True
 
   case4:
@@ -1194,6 +1246,7 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
+      
         @classmethod
         def setUpClass(cls):
           print('Dummy Setup')
@@ -1211,6 +1264,7 @@ script_builder:
       
       if __name__ == '__main__':
         unittest.main()
+
     pytest: |-
       ################################################################################
       # pytest script is generated by Describe-Get-System Proof of Concept
@@ -1224,6 +1278,7 @@ script_builder:
       
       
       class TestClass:
+      
         def setup_class(self):
           print('Dummy Setup')
           assert True == True
@@ -1236,6 +1291,7 @@ script_builder:
           """configure module off and verify"""
           print('Dummy for section')
           assert True == True
+
     robotframework: |-
       ################################################################################
       # robotframework script is generated by Describe-Get-System Proof of Concept
@@ -1251,12 +1307,6 @@ script_builder:
       test setup      setup
       test teardown   teardown
       
-      *** Test Cases ***
-      test 001 module verification
-        [Documentation]    configure module off and verify
-        log   Dummy for section
-        should be true   True == True
-      
       *** Keywords ***
       setup
         log   Dummy Setup
@@ -1264,6 +1314,12 @@ script_builder:
       
       teardown
         log   Dummy Teardown
+        should be true   True == True
+      
+      *** Test Cases ***
+      test 001 module verification
+        [Documentation]    configure module off and verify
+        log   Dummy for section
         should be true   True == True
 
   case5:
@@ -1287,6 +1343,7 @@ script_builder:
       
       
       class TestClass(unittest.Testcase):
+      
         @classmethod
         def setUpClass(cls):
           print('Dummy Setup')
@@ -1309,6 +1366,7 @@ script_builder:
       
       if __name__ == '__main__':
         unittest.main()
+
     pytest: |-
       ################################################################################
       # pytest script is generated by Describe-Get-System Proof of Concept
@@ -1322,6 +1380,7 @@ script_builder:
       
       
       class TestClass:
+      
         def setup_class(self):
           print('Dummy Setup')
           assert True == True
@@ -1355,6 +1414,15 @@ script_builder:
       test setup      setup
       test teardown   teardown
       
+      *** Keywords ***
+      setup
+        log   Dummy Setup
+        should be true   True == True
+      
+      teardown
+        log   Dummy Teardown
+        should be true   True == True
+      
       *** Test Cases ***
       test 001 duplicate section description wont conflict or overwrite
         [Documentation]    duplicate section description wont conflict or overwrite
@@ -1365,6 +1433,123 @@ script_builder:
         [Documentation]    duplicate section description wont conflict or overwrite
         log   Hello Describe-Get-System
         should be true   True == True
+
+  case6:
+    data: |-
+      setup
+      section
+      teardown
+    unittest: |-
+      ################################################################################
+      # unittest script is generated by Describe-Get-System Proof of Concept
+      # Created by  : user1
+      # Email       : user1@abc_xyz.com
+      # Company     : ABC XYZ Inc.
+      ################################################################################
+      
+      import unittest
+      import dgspoc as ta
+      
+      
+      def get_logger(name='TATestScript'):
+        """This logger function has basic logging configure
+        ===================================================
+        Please replace your get logger function
+        """
+        import logging
+        logging.basicConfig(
+          level=logging.INFO,
+          format="%(asctime)s [%(levelname)s] %(message)s",
+          handlers=[
+            logging.FileHandler('%s.log' % name.lower()),
+            logging.StreamHandler()
+          ]
+        )
+        logger = logging.get_logger(name)
+        return logger
+      
+      
+      class TestClass(unittest.Testcase):
+        logger = get_logger()
+      
+        @classmethod
+        def setUpClass(cls):
+          cls.logger.info('Dummy Setup')
+          assert True == True
+      
+        @classmethod
+        def tearDownClass(cls):
+          cls.logger.info('Dummy Teardown')
+          assert True == True
+      
+        def test_001_default(self):
+          """test default"""
+          self.logger.info('Dummy for section')
+          self.assertTrue(True == True)
+      
+      if __name__ == '__main__':
+        unittest.main()
+
+    pytest: |-
+      ################################################################################
+      # pytest script is generated by Describe-Get-System Proof of Concept
+      # Created by  : user1
+      # Email       : user1@abc_xyz.com
+      # Company     : ABC XYZ Inc.
+      ################################################################################
+      
+      # import pytest
+      import dgspoc as ta
+      
+      
+      def get_logger(name='TATestScript'):
+        """This logger function has basic logging configure
+        ===================================================
+        Please replace your get logger function
+        """
+        import logging
+        logging.basicConfig(
+          level=logging.INFO,
+          format="%(asctime)s [%(levelname)s] %(message)s",
+          handlers=[
+            logging.FileHandler('%s.log' % name.lower()),
+            logging.StreamHandler()
+          ]
+        )
+        logger = logging.get_logger(name)
+        return logger
+      
+      
+      class TestClass:
+        logger = get_logger()
+      
+        def setup_class(self):
+          cls.logger.info('Dummy Setup')
+          assert True == True
+      
+        def teardown_class(self):
+          cls.logger.info('Dummy Teardown')
+          assert True == True
+      
+        def test_001_default(self):
+          """test default"""
+          self.logger.info('Dummy for section')
+          assert True == True
+
+    robotframework: |-
+      ################################################################################
+      # robotframework script is generated by Describe-Get-System Proof of Concept
+      # Created by  : user1
+      # Email       : user1@abc_xyz.com
+      # Company     : ABC XYZ Inc.
+      ################################################################################
+      
+      *** Settings ***
+      library         builtin
+      library         collections
+      library         describegetsystempoc
+      test setup      setup
+      test teardown   teardown
       
       *** Keywords ***
       setup
@@ -1373,4 +1558,10 @@ script_builder:
       
       teardown
         log   Dummy Teardown
+        should be true   True == True
+      
+      *** Test Cases ***
+      test 001 default
+        [Documentation]    test default
+        log   Dummy for section
         should be true   True == True
