@@ -84,14 +84,74 @@ class CheckStatement:
         return bool(match)
 
     @classmethod
-    def is_release_data_statement(cls, data):
-        match = re.match(r'(?i) *releases? +data +', data)
+    def is_release_resource_statement(cls, data):
+        match = re.match(r'(?i) *releases? +resource +', data)
         return bool(match)
 
     @classmethod
     def is_dummy_statement(cls, data):
-        match = re.match(r' *dummy[_. -]*(pass|fail)', data)
+        match = re.match(r'(?i) *dummy[_. -]*(pass|fail)', data)
         return bool(match)
+
+    @classmethod
+    def is_child_execute_cmdline(cls, data):
+        chk = cls.is_execute_cmdline(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_performer_statement(cls, data):
+        chk = cls.is_performer_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_verification_statement(cls, data):
+        chk = cls.is_verification_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_iterative_statement(cls, data):
+        chk = cls.is_iterative_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_pausing_statement(cls, data):
+        chk = cls.is_pausing_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_connect_data_statement(cls, data):
+        chk = cls.is_connect_data_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_connect_device_statement(cls, data):
+        chk = cls.is_connect_device_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_use_testcase_statement(cls, data):
+        chk = cls.is_use_testcase_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_disconnect_device_statement(cls, data):
+        chk = cls.is_disconnect_device_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_release_device_statement(cls, data):
+        chk = cls.is_release_device_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_release_resource_statement(cls, data):
+        chk = cls.is_release_resource_statement(data) and data.startswith(' ')
+        return chk
+
+    @classmethod
+    def is_child_dummy_statement(cls, data):
+        chk = cls.is_dummy_statement(data) and data.startswith(' ')
+        return chk
 
 
 class ParsedOperation:

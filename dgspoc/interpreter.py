@@ -592,13 +592,13 @@ class SetupStatement(Statement):
         kwargs = dict(framework=self.framework, indentation=self.indentation)
         next_line = node.get_next_statement_data()
 
-        if node.is_matched_statement('(?i) +connect +data', next_line):
+        if CheckStatement.is_child_connect_data_statement(next_line):
             other = ConnectDataStatement(node.remaining_data, **kwargs)
-        elif node.is_matched_statement('(?i) +use +testcase', next_line):
+        elif CheckStatement.is_child_use_testcase_statement(next_line):
             other = UseTestCaseStatement(node.remaining_data, **kwargs)
-        elif node.is_matched_statement('(?i) +connect +device', next_line):
+        elif CheckStatement.is_child_connect_device_statement(next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_dummy_statement(next_line):
+        elif CheckStatement.is_child_dummy_statement(next_line):
             other = DummyStatement(node.remaining_data, **kwargs)
         else:
             return None
@@ -1094,13 +1094,13 @@ class TeardownStatement(Statement):
         kwargs = dict(framework=self.framework, indentation=self.indentation)
         next_line = node.get_next_statement_data()
 
-        if node.is_matched_statement('(?i) +disconnect( +device)? ', next_line):
+        if CheckStatement.is_child_disconnect_device_statement(next_line):
             other = DisconnectStatement(node.remaining_data, **kwargs)
-        elif node.is_matched_statement('(?i) +release +device', next_line):
+        elif CheckStatement.is_child_release_device_statement(next_line):
             other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
-        elif node.is_matched_statement('(?i) +release +resource', next_line):
+        elif CheckStatement.is_child_release_resource_statement(next_line):
             other = ReleaseResourceStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_dummy_statement(next_line):
+        elif CheckStatement.is_child_dummy_statement(next_line):
             other = DummyStatement(node.remaining_data, **kwargs)
         else:
             return None
@@ -1216,21 +1216,21 @@ class SectionStatement(Statement):
         kwargs = dict(framework=self.framework, indentation=self.indentation)
         next_line = node.get_next_statement_data()
 
-        if CheckStatement.is_verification_statement(next_line):
+        if CheckStatement.is_child_verification_statement(next_line):
             other = VerificationStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_performer_statement(next_line):
+        elif CheckStatement.is_child_performer_statement(next_line):
             other = PerformerStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_connect_device_statement(next_line):
+        elif CheckStatement.is_child_connect_device_statement(next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_disconnect_device_statement(next_line):
+        elif CheckStatement.is_child_disconnect_device_statement(next_line):
             other = DisconnectStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_release_device_statement(next_line):
+        elif CheckStatement.is_child_release_device_statement(next_line):
             other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_pausing_statement(next_line):
+        elif CheckStatement.is_child_pausing_statement(next_line):
             other = WaitForStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_iterative_statement(next_line):
+        elif CheckStatement.is_child_iterative_statement(next_line):
             other = LoopStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_dummy_statement(next_line):
+        elif CheckStatement.is_child_dummy_statement(next_line):
             other = DummyStatement(node.remaining_data, **kwargs)
         else:
             return None
@@ -1447,18 +1447,20 @@ class LoopStatement(Statement):
         kwargs = dict(framework=self.framework, indentation=self.indentation)
         next_line = node.get_next_statement_data()
 
-        if CheckStatement.is_verification_statement(next_line):
+        if CheckStatement.is_child_verification_statement(next_line):
             other = VerificationStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_performer_statement(next_line):
+        elif CheckStatement.is_child_performer_statement(next_line):
             other = PerformerStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_connect_device_statement(next_line):
+        elif CheckStatement.is_child_connect_device_statement(next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_disconnect_device_statement(next_line):
+        elif CheckStatement.is_child_disconnect_device_statement(next_line):
             other = DisconnectStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_release_device_statement(next_line):
+        elif CheckStatement.is_child_release_device_statement(next_line):
             other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_pausing_statement(next_line):
+        elif CheckStatement.is_child_pausing_statement(next_line):
             other = WaitForStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_child_dummy_statement(next_line):
+            other = DummyStatement(node.remaining_data, **kwargs)
         else:
             return None
 
@@ -1802,8 +1804,6 @@ class ScriptBuilder:
             self.teardown_statement.snippet,
         ]
 
-        method_names = []
-
         for index, stmt in enumerate(self.section_statements, 1):
             lst.append('')
             snippet = stmt.snippet
@@ -1826,8 +1826,6 @@ class ScriptBuilder:
             'test setup      setup',
             'test teardown   {}'.format(self.teardown_statement.name),
         ]
-
-        method_names = []
 
         if self.section_statements:
             lst.append('\n*** Test Cases ***')
