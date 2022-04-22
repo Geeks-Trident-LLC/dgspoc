@@ -115,7 +115,10 @@ SCRIPTINFO = ScriptInfo()
 
 
 class Statement:
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
+
+        self.is_logger = is_logger
         self.data = data
         self.prev = None
         self.next = None
@@ -452,12 +455,46 @@ class Statement:
         new_data = indent(data, ' ' * lvl * self.indentation)
         return new_data
 
-    def get_display_statement(self, message=''):
+    def get_display_method(self, lvl='info'):
+        lvl = str(lvl).strip().lower()
+        chk_lst = ['debug', 'info', 'warning', 'error', 'fatal', 'critical']
+        lvl = lvl if lvl in chk_lst else 'info'
+        if self.is_logger:
+            if self.is_ancestor_base_statement:
+                if self.is_ancestor_section_statement:
+                    return 'self.logger.%s' % lvl
+                else:
+                    return 'cls.logger.%s' % lvl
+        return 'print'
+
+    def render_display_message(self, message):
         message = getattr(self, 'message', message)
-        is_logger = getattr(self, 'is_logger', False)
-        func_name = 'self.logger.info' if is_logger else 'print'
+        if not message:
+            return ''
+
+        if not self.is_robotframework:
+            return message
+
+        message = str(message)
+        lst = []
+        index = 0
+        item = None
+        for item in re.finditer(r' +', message):
+            lst.append(message[index:item.start()])
+            spacers = item.group()
+            total = len(spacers)
+            lst.append(' ' if total == 1 else '${SPACE * %s}' % total)
+            index = item.end()
+        else:
+            if item:
+                lst.append(message[item.end():])
+        return ''.join(lst) if lst else message
+
+    def get_display_statement(self, message=''):
+        message = self.render_display_message(message)
+        method_name = self.get_display_method()
         if self.is_unittest or self.is_pytest:
-            stmt = '%s(%r)' % (func_name, message)
+            stmt = '%s(%r)' % (method_name, message)
         else:   # i.e ROBOTFRAMEWORK
             stmt = 'log   %s' % message
 
@@ -482,25 +519,6 @@ class Statement:
                 fmt1 = 'assert True == %s'
                 fmt2 = 'total_count = len(result)\nassert total_count == %s'
 
-        # if self.is_unittest:
-        #     if self.is_ancestor_base_statement:
-        #         if self.is_ancestor_section_statement:
-        #             fmt1 = 'self.assertTrue(True == %s)'
-        #             fmt2 = 'total_count = len(result)\nself.assertTrue(total_count == %s)'
-        #         else:
-        #             fmt1 = 'assert True == %s'
-        #             fmt2 = 'total_count = len(result)\nassert total_count == %s'
-        #     else:
-        #         fmt1 = 'assert True == %s'
-        #         fmt2 = 'total_count = len(result)\nassert total_count == %s'
-        # elif self.is_pytest:
-        #     fmt1 = 'assert True == %s'
-        #     fmt2 = 'total_count = len(result)\nassert total_count == %s'
-        # else:   # i.e ROBOTFRAMEWORK
-        #     fmt1 = 'should be true   True == %s'
-        #     fmt2 = ('${total_count}=   get length ${result}\nshould be '
-        #             'true   ${result} == %s')
-
         fmt = fmt1 if assert_only else fmt2
         eresult = expected_result if assert_only else eresult
         level = self.parent.level + 1 if self.parent else self.level
@@ -514,7 +532,8 @@ class Statement:
             key = self.statement_data.lower().strip()
             cls = tbl.get(key, SectionStatement)
             stmt = cls(self.data, framework=self.framework,
-                       indentation=self.indentation)
+                       indentation=self.indentation,
+                       is_logger=self.is_logger)
             return stmt if isinstance(stmt, Statement) else self
 
         else:
@@ -522,9 +541,10 @@ class Statement:
 
 
 class DummyStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
         self.case = ''
         self.message = ''
         self.parse()
@@ -555,9 +575,10 @@ class DummyStatement(Statement):
 
 
 class SetupStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.parse()
 
@@ -597,7 +618,9 @@ class SetupStatement(Statement):
                     last_child = self._children[-1]
                     self._remaining_data = last_child.remaining_data
             if not self.children:
-                kwargs = dict(framework=self.framework, indentation=self.indentation)
+                kwargs = dict(framework=self.framework,
+                              indentation=self.indentation,
+                              is_logger=self.is_logger)
                 data = 'dummy_pass - Dummy Setup'
                 dummy_stmt = DummyStatement(data, **kwargs, parent=self)
                 self.add_child(dummy_stmt)
@@ -605,7 +628,9 @@ class SetupStatement(Statement):
             self._is_parsed = False
 
     def create_child(self, node):
-        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        kwargs = dict(framework=self.framework,
+                      indentation=self.indentation,
+                      is_logger=self.is_logger)
         next_line = node.get_next_statement_data()
 
         if CheckStatement.is_child_connect_data_statement(next_line):
@@ -631,9 +656,10 @@ class SetupStatement(Statement):
 
 
 class ConnectDataStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
         self.var_name = ''
         self.test_resource_ref = ''
         self.parse()
@@ -711,9 +737,10 @@ class ConnectDataStatement(Statement):
 
 
 class UseTestCaseStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
         self.var_name = ''
         self.test_name = ''
         self.parse()
@@ -777,9 +804,10 @@ class UseTestCaseStatement(Statement):
 
 
 class ConnectDeviceStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.devices_vars = dict()
         self.parse()
@@ -869,9 +897,10 @@ class ConnectDeviceStatement(Statement):
 
 
 class DisconnectStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.vars_lst = []
         self.parse()
@@ -936,9 +965,10 @@ class DisconnectStatement(Statement):
 
 
 class ReleaseDeviceStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.vars_lst = []
         self.parse()
@@ -1003,9 +1033,10 @@ class ReleaseDeviceStatement(Statement):
 
 
 class ReleaseResourceStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.var_name = ''
         self.parse()
@@ -1057,9 +1088,10 @@ class ReleaseResourceStatement(Statement):
 
 
 class TeardownStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.parse()
 
@@ -1099,7 +1131,9 @@ class TeardownStatement(Statement):
                     last_child = self._children[-1]
                     self._remaining_data = last_child.remaining_data
             if not self.children:
-                kwargs = dict(framework=self.framework, indentation=self.indentation)
+                kwargs = dict(framework=self.framework,
+                              indentation=self.indentation,
+                              is_logger=self.is_logger)
                 data = 'dummy_pass - Dummy %s' % self.name.title()
                 dummy_stmt = DummyStatement(data, **kwargs, parent=self)
                 self.add_child(dummy_stmt)
@@ -1107,7 +1141,9 @@ class TeardownStatement(Statement):
             self._is_parsed = False
 
     def create_child(self, node):
-        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        kwargs = dict(framework=self.framework,
+                      indentation=self.indentation,
+                      is_logger=self.is_logger)
         next_line = node.get_next_statement_data()
 
         if CheckStatement.is_child_disconnect_device_statement(next_line):
@@ -1133,9 +1169,10 @@ class TeardownStatement(Statement):
 
 
 class SectionStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.description = ''
         self._method_name = ''
@@ -1199,7 +1236,9 @@ class SectionStatement(Statement):
                 last_child = self._children[-1]
                 self._remaining_data = last_child.remaining_data
         if not self.children:
-            kwargs = dict(framework=self.framework, indentation=self.indentation)
+            kwargs = dict(framework=self.framework,
+                          indentation=self.indentation,
+                          is_logger=self.is_logger)
             data = 'dummy_pass - Dummy for section'
             dummy_stmt = DummyStatement(data, **kwargs, parent=self)
             self.add_child(dummy_stmt)
@@ -1229,7 +1268,9 @@ class SectionStatement(Statement):
                 self._method_name = ref
 
     def create_child(self, node):
-        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        kwargs = dict(framework=self.framework,
+                      indentation=self.indentation,
+                      is_logger=self.is_logger)
         next_line = node.get_next_statement_data()
 
         if CheckStatement.is_child_verification_statement(next_line):
@@ -1263,9 +1304,10 @@ class SectionStatement(Statement):
 
 
 class LoopStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.ntimes = 0
         self.parse()
@@ -1450,7 +1492,9 @@ class LoopStatement(Statement):
                 last_child = self._children[-1]
                 self._remaining_data = last_child.remaining_data
         if not self.children:
-            kwargs = dict(framework=self.framework, indentation=self.indentation)
+            kwargs = dict(framework=self.framework,
+                          indentation=self.indentation,
+                          is_logger=self.is_logger)
             data = 'dummy_pass - Dummy iterative statement'
             dummy_stmt = DummyStatement(data, **kwargs, parent=self)
             self.add_child(dummy_stmt)
@@ -1460,7 +1504,9 @@ class LoopStatement(Statement):
         self.update_level_from_parent()
 
     def create_child(self, node):
-        kwargs = dict(framework=self.framework, indentation=self.indentation)
+        kwargs = dict(framework=self.framework,
+                      indentation=self.indentation,
+                      is_logger=self.is_logger)
         next_line = node.get_next_statement_data()
 
         if CheckStatement.is_child_verification_statement(next_line):
@@ -1492,9 +1538,10 @@ class LoopStatement(Statement):
 
 
 class PerformerStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.result = None
         self.parse()
@@ -1571,9 +1618,10 @@ class PerformerStatement(Statement):
 
 
 class VerificationStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
 
         self.result = None
         self.parse()
@@ -1709,9 +1757,10 @@ class VerificationStatement(Statement):
 
 
 class WaitForStatement(Statement):
-    def __init__(self, data, parent=None, framework='', indentation=4):
+    def __init__(self, data, parent=None, framework='',
+                 indentation=4, is_logger=False):
         super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation)
+                         indentation=indentation, is_logger=is_logger)
         self.total_seconds = 0
         self.parse()
 
@@ -1752,11 +1801,12 @@ class WaitForStatement(Statement):
 
 
 class ScriptBuilder:
-    def __init__(self, data, framework='', indentation=4,
+    def __init__(self, data, framework='', indentation=4, is_logger=False,
                  username='', email='', company='',):
         self.data = data
         self.framework = str(framework).strip()
         self.indentation = indentation
+        self.is_logger = is_logger
         self.username = str(username).strip()
         self.email = str(email).strip()
         self.company = str(company).strip() or self.username
@@ -1769,23 +1819,141 @@ class ScriptBuilder:
     @property
     def testscript(self):
         if self.setup_statement and self.teardown_statement:
+            # if self.framework == FWTYPE.UNITTEST:
+            #     script = self.unittest_script
+            #     return script
+            # elif self.framework == FWTYPE.PYTEST:
+            #     script = self.pytest_script
+            #     return script
+            # else:
+            #     script = self.robotframework_script
+            #     return script
+            lst = [self.import_library_code,
+                   '',
+                   self.setup_teardown_code,
+                   '',
+                   self.sections_code]
+            script = '\n'.join(lst).strip()
+
             if self.framework == FWTYPE.UNITTEST:
-                script = self.unittest_script
-                return script
-            elif self.framework == FWTYPE.PYTEST:
-                script = self.pytest_script
-                return script
-            else:
-                script = self.robotframework_script
-                return script
+                addition = '\n'.join([
+                    "if __name__ == '__main__':",
+                    '%s%s' % (' ' * self.indentation, 'unittest.main()')
+                ])
+                script = '%s\n\n%s' % (script, addition)
+
+            return script + '\n'
         else:
             pass
+
+    @property
+    def get_logger_function(self):
+        func_text = dedent('''
+            def get_logger(name='TATestScript'):
+                """This logger function has basic logging configure
+                ===================================================
+                Please replace your get logger function
+                """
+                import logging
+                logging.basicConfig(
+                    level=logging.INFO,
+                    format="%(asctime)s [%(levelname)s] %(message)s",
+                    handlers=[
+                        logging.FileHandler('%s.log' % name.lower()),
+                        logging.StreamHandler()
+                    ]
+                )
+                logger = logging.get_logger(name)
+                return logger
+        ''').strip()
+
+        func_text = func_text.replace('    ', ' ' * self.indentation)
+        return func_text
+
+    @property
+    def intro_code(self):
+        fmt = '# {} script is generated by Describe-Get-System Proof of Concept'
+        user_fmt = '# Created by  : {0.username}'
+        email_fmt = '# Email       : {0.email}'
+        company_fmt = '# Company     : {0.company}'
+        date_fmt = '# Created date: {}'
+        lst = [fmt.format(self.framework.lower())]
+        self.username and lst.append(user_fmt.format(self))
+        self.email and lst.append(email_fmt.format(self))
+        self.company and lst.append(company_fmt.format(self))
+        not SCRIPTINFO.is_testing_enabled and lst.append(date_fmt)
+
+        intro = '\n'.join(['#' * 80] + lst + ['#' * 80])
+        return intro
+
+    @property
+    def import_library_code(self):
+        lst = [self.intro_code, '']
+
+        is_unittest = self.framework == FWTYPE.UNITTEST
+
+        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            lst += [
+                '*** Settings ***',
+                'library         builtin',
+                'library         collections',
+                'library         describegetsystempoc',
+                'test setup      {}'.format(self.setup_statement.name),
+                'test teardown   {}'.format(self.teardown_statement.name),
+            ]
+        else:
+            cls_name = SCRIPTINFO.get_class_name()
+            inherit = '(unittest.Testcase)' if is_unittest else ''
+            lst.append('import unittest' if is_unittest else '# import pytest')
+            lst.append('import dgspoc as ta')
+            lst.append('\n')
+            if self.is_logger:
+                lst.append(self.get_logger_function)
+                lst.append('\n')
+            lst.append('class %s%s:' % (cls_name, inherit))
+            if self.is_logger:
+                lst.append(' ' * self.indentation + 'logger = get_logger()')
+
+        import_lib_txt = '\n'.join(lst)
+        return import_lib_txt
+
+    @property
+    def setup_teardown_code(self):
+
+        lst = [self.setup_statement.snippet,
+               '',
+               self.teardown_statement.snippet]
+        if self.framework == FWTYPE.ROBOTFRAMEWORK:
+            lst.insert(0, '*** Keywords ***')
+
+        setup_teardown_txt = '\n'.join(lst)
+        return setup_teardown_txt
+
+    @property
+    def sections_code(self):
+        is_robotframework = self.framework == FWTYPE.ROBOTFRAMEWORK
+        lst = []
+        fmt = 'test %03i ' if is_robotframework else 'def test_%03i_'
+        replacing = 'test ' if is_robotframework else 'def test_'
+
+        for index, stmt in enumerate(self.section_statements, 1):
+            lst.append('')
+            if stmt.snippet:
+                lst.append(stmt.snippet.replace(replacing, fmt % index, 1))
+
+        if lst:
+            if is_robotframework:
+                lst[0] = '*** Test Cases ***'
+            not lst[0] and lst.pop(0)
+
+        sections_code_txt = '\n'.join(lst)
+        return sections_code_txt
 
     @property
     def unittest_script(self):
         cls_name = SCRIPTINFO.get_class_name()
         lst = [
-            self.script_intro,
+            self.intro_code,
             '',
             'import unittest',
             'import dgspoc as ta',
@@ -1815,7 +1983,7 @@ class ScriptBuilder:
     def pytest_script(self):
         cls_name = SCRIPTINFO.get_class_name()
         lst = [
-            self.script_intro,
+            self.intro_code,
             '',
             '# import pytest',
             'import dgspoc as ta',
@@ -1839,7 +2007,7 @@ class ScriptBuilder:
     @property
     def robotframework_script(self):
         lst = [
-            self.script_intro,
+            self.intro_code,
             '',
             '*** Settings ***',
             'library         builtin',
@@ -1868,29 +2036,14 @@ class ScriptBuilder:
         script = '\n'.join(lst)
         return script
 
-    @property
-    def script_intro(self):
-        fmt = '# {} script is generated by Describe-Get-System Proof of Concept'
-        user_fmt = '# Created by  : {0.username}'
-        email_fmt = '# Email       : {0.email}'
-        company_fmt = '# Company     : {0.company}'
-        date_fmt = '# Created date: {}'
-        lst = [fmt.format(self.framework.lower())]
-        self.username and lst.append(user_fmt.format(self))
-        self.email and lst.append(email_fmt.format(self))
-        self.company and lst.append(company_fmt.format(self))
-        not SCRIPTINFO.is_testing_enabled and lst.append(date_fmt)
-
-        intro = '\n'.join(['#' * 80] + lst + ['#' * 80])
-        return intro
-
     def build(self):
         data = self.data
         count = 2000
 
         while data.strip() and count > 0:
             stmt = Statement(data, framework=self.framework,
-                             indentation=self.indentation)
+                             indentation=self.indentation,
+                             is_logger=self.is_logger)
             stmt = stmt.try_to_get_base_statement()
             self.add_statement(stmt)
             data = stmt.remaining_data

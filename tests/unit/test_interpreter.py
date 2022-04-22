@@ -1119,7 +1119,7 @@ class TestScriptBuilder:
     )
     def test_default_script_builder(self, framework, user_data, expected_result):
         node = ScriptBuilder(user_data, indentation=indentation, framework=framework)
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1153,7 +1153,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1189,7 +1189,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1226,7 +1226,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1261,7 +1261,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1296,7 +1296,7 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
         assert test_script == expected_result
 
     @pytest.mark.parametrize(
@@ -1331,5 +1331,41 @@ class TestScriptBuilder:
             email=user_info.email,
             company=user_info.company
         )
-        test_script = node.testscript
+        test_script = node.testscript.strip()
+        assert test_script == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.script_builder.case6.data,
+                TESTDATA.script_builder.case6.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.script_builder.case6.data,
+                TESTDATA.script_builder.case6.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.script_builder.case6.data,
+                TESTDATA.script_builder.case6.robotframework,
+            ),
+        ]
+    )
+    def test_building_script_case6(self, framework, user_data, expected_result):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.reset_devices_vars()
+        SCRIPTINFO.load_testing_data()
+        node = ScriptBuilder(
+            user_data,
+            indentation=indentation,
+            framework=framework,
+            username=user_info.username,
+            email=user_info.email,
+            company=user_info.company,
+            is_logger=True
+        )
+        test_script = node.testscript.strip()
         assert test_script == expected_result
