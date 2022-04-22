@@ -5,9 +5,11 @@ user describing problem"""
 import re
 import operator
 import yaml
+import time
 
 from textwrap import indent
 from textwrap import dedent
+from textwrap import wrap
 
 from dgspoc.utils import DotObject
 from dgspoc.utils import Misc
@@ -90,18 +92,6 @@ class ScriptInfo(DotObject):
             return cls_name
         else:
             return 'TestClass'
-
-    def get_method_name(self, value):
-        if 'testcases' in self:
-            node = self.testcases.get(self.testcase)
-            if node:
-                if 'script_builder' in node:
-                    for method_name, val in node.get('script_builder').items():
-                        if val == value:
-                            return method_name
-                return 'test_step'
-        else:
-            return 'test_step'
 
     def reset_devices_vars(self):
         self.devices_vars = dict()
@@ -1129,7 +1119,12 @@ class SectionStatement(Statement):
                          indentation=indentation)
 
         self.description = ''
+        self._method_name = ''
         self.parse()
+
+    @property
+    def method_name(self):
+        return self._method_name
 
     @property
     def snippet(self):
@@ -1138,15 +1133,23 @@ class SectionStatement(Statement):
 
         lst = []
 
-        method_name = SCRIPTINFO.get_method_name(self.description)
-        if not method_name.lower().startswith('test'):
-            method_name = 'test_%s' % method_name
-
-        if self.is_unittest or self.is_pytest:
-            method_name = method_name.replace(' ', '_')
-
         fmt = '%s' if self.is_robotframework else 'def %s(self):'
-        lst.append(fmt % method_name)
+        lst.append(fmt % self.method_name)
+
+        if self.description and self.description.strip():
+            if self.is_robotframework:
+                lst1 = wrap(self.description, width=56)
+                for index, item in enumerate(lst1):
+                    prefix = '[Documentation]' if index == 0 else '...'
+                    lst1[index] = '{:18} {}'.format(prefix, item)
+
+                method_doc = '\n'.join(lst1)
+                lst.append(self.indent_data(method_doc, 1))
+                pass
+            else:
+                method_doc = '"""%s"""' % self.description
+                method_doc = '\n'.join(wrap(method_doc, width=70))
+                lst.append(self.indent_data(method_doc, 1))
 
         for child in self.children:
             lst.append(child.snippet)
@@ -1162,7 +1165,8 @@ class SectionStatement(Statement):
 
         pattern = r'(?i) *section([^a-z0-9]+)?(?P<description>\w+.+)?'
         match = re.match(pattern, self.statement_data)
-        self.description = match.group('description') if match else 'test_default'
+        description = match.group('description') if match else 'test_default'
+        self.parse_description(description)
 
         self.name = 'section'
         self._is_parsed = True
@@ -1180,6 +1184,31 @@ class SectionStatement(Statement):
             data = 'dummy_pass - Dummy for section'
             dummy_stmt = DummyStatement(data, **kwargs, parent=self)
             self.add_child(dummy_stmt)
+
+    def parse_description(self, description):
+        if not description or description == 'test_default':
+            self.description = 'test default'
+            self._method_name = 'test default' if self.is_robotframework else 'test_default'
+        else:
+            description = ' '.join(str(description).splitlines()).strip()
+            pattern = r'(?i)(?P<desc>.+)( +as +(?P<ref>[a-z]\w*( +\w+)?))?$'
+            match = re.match(pattern, description)
+            desc, ref = match.group('desc'), match.group('ref')
+            ref = ref or desc
+            ref = re.sub('(?i)[^a-z0-9]+', '_', ref).strip('_')
+
+            self.description = desc
+
+            if not ref.startswith('test'):
+                ref = 'test_%s' % ref
+
+            if self.is_robotframework:
+                self._method_name = ref.replace('_', ' ')
+            else:
+                if len(ref) > 70:
+                    ref = '%s_%.3f' % (ref[:50], time.time())
+                    ref = ref.replace('.', '_')
+                self._method_name = ref
 
     def create_child(self, node):
         kwargs = dict(framework=self.framework, indentation=self.indentation)
@@ -1739,11 +1768,18 @@ class ScriptBuilder:
             self.teardown_statement.snippet,
         ]
 
-        for stmt in self.section_statements:
+        for index, stmt in enumerate(self.section_statements, 1):
             lst.append('')
-            lst.append(stmt.snippet)
+            replaced = 'def test_%03i_' % index
+            if stmt.snippet:
+                lst.append(stmt.snippet.replace('def test_', replaced))
+
+        lst.append('')
+        lst.append("if __name__ == '__main__':")
+        lst.append(indent('unittest.main()', ' ' * self.indentation))
 
         script = '\n'.join(lst)
+
         return script
 
     @property
@@ -1761,9 +1797,21 @@ class ScriptBuilder:
             self.teardown_statement.snippet,
         ]
 
+        method_names = []
+
         for stmt in self.section_statements:
             lst.append('')
-            lst.append(stmt.snippet)
+            snippet = stmt.snippet
+            method_name = stmt.method_name
+            if snippet:
+                if method_name not in method_names:
+                    method_names.append(method_name)
+                else:
+                    replacing = 'def %s(:' % method_name
+                    replaced = 'def %s_%.3f(:' % (method_name, time.time())
+                    replaced = replaced.replace('.', '_')
+                    snippet = snippet.replace(replacing, replaced)
+                lst.append(snippet)
 
         script = '\n'.join(lst)
         return script
@@ -1781,22 +1829,30 @@ class ScriptBuilder:
             'test teardown   {}'.format(self.teardown_statement.name),
         ]
 
-        if self.section_statements:
-            cls_name = SCRIPTINFO.get_class_name()
-            lst.append('\n*** Test Cases ***')
-            lst.append(cls_name)
-            for stmt in self.section_statements:
-                func_name = SCRIPTINFO.get_method_name(stmt.description)
-                lst.append(stmt.indent_data(func_name, 1))
+        method_names = []
 
-        lst.append('\n*** Keywords ***')
+        if self.section_statements:
+            lst.append('\n*** Test Cases ***')
+            for stmt in self.section_statements:
+                snippet = stmt.snippet
+                method_name = stmt.method_name
+                if snippet:
+                    if method_name not in method_names:
+                        method_names.append(method_name)
+                    else:
+                        postfix = (' %.3f' % time.time()).replace('.', '_')
+                        lines = snippet.splitlines()
+                        lines[0] = lines[0] + postfix
+                        snippet = '\n'.join(lines)
+                    lst.append(snippet)
+                    lst.append('')
+
+        not self.section_statements and lst.append('')
+
+        lst.append('*** Keywords ***')
         lst.append(self.setup_statement.snippet)
         lst.append('')
         lst.append(self.teardown_statement.snippet)
-
-        for stmt in self.section_statements:
-            lst.append('')
-            lst.append(stmt.snippet)
 
         script = '\n'.join(lst)
         return script
