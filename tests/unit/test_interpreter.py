@@ -1217,3 +1217,38 @@ class TestScriptBuilder:
         )
         test_script = node.testscript
         assert test_script == expected_result
+
+    @pytest.mark.parametrize(
+        ('framework', 'user_data', 'expected_result'),
+        [
+            (
+                FWTYPE.UNITTEST,
+                TESTDATA.script_builder.case5.data,
+                TESTDATA.script_builder.case5.unittest,
+            ),
+            (
+                FWTYPE.PYTEST,
+                TESTDATA.script_builder.case5.data,
+                TESTDATA.script_builder.case5.pytest,
+            ),
+            (
+                FWTYPE.ROBOTFRAMEWORK,
+                TESTDATA.script_builder.case5.data,
+                TESTDATA.script_builder.case5.robotframework,
+            ),
+        ]
+    )
+    def test_building_script_case5(self, framework, user_data, expected_result):
+        SCRIPTINFO.reset_global_vars()
+        SCRIPTINFO.reset_devices_vars()
+        SCRIPTINFO.load_testing_data()
+        node = ScriptBuilder(
+            user_data,
+            indentation=indentation,
+            framework=framework,
+            username=user_info.username,
+            email=user_info.email,
+            company=user_info.company
+        )
+        test_script = node.testscript
+        assert test_script == expected_result
