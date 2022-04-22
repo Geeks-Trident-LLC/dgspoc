@@ -598,6 +598,8 @@ class SetupStatement(Statement):
             other = UseTestCaseStatement(node.remaining_data, **kwargs)
         elif node.is_matched_statement('(?i) +connect +device', next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
+        elif CheckStatement.is_dummy_statement(next_line):
+            other = DummyStatement(node.remaining_data, **kwargs)
         else:
             return None
 
