@@ -457,16 +457,16 @@ class Statement:
         new_data = indent(data, ' ' * lvl * self.indentation)
         return new_data
 
-    def get_display_method(self, lvl='info'):
-        lvl = str(lvl).strip().lower()
+    def get_display_method(self, level='info'):
+        level = str(level).strip().lower()
         chk_lst = ['debug', 'info', 'warning', 'error', 'fatal', 'critical']
-        lvl = lvl if lvl in chk_lst else 'info'
+        level = level if level in chk_lst else 'info'
         if self.is_logger:
             if self.is_ancestor_base_statement:
                 if self.is_ancestor_section_statement:
-                    return 'self.logger.%s' % lvl
+                    return 'self.logger.%s' % level
                 else:
-                    return 'cls.logger.%s' % lvl
+                    return 'cls.logger.%s' % level
         return 'print'
 
     def render_display_message(self, message):
@@ -1849,9 +1849,11 @@ class ScriptBuilder:
     def get_logger_function(self):
         func_text = dedent('''
             def get_logger(name='TATestScript'):
-                """This logger function has basic logging configure
-                ===================================================
-                Please replace your get logger function
+                """This function only creates logger instance with
+                basic logging configuration.
+                ==================================================
+                PLEASE UPDATE your get_logger function.
+                ==================================================
                 """
                 import logging
                 logging.basicConfig(
@@ -1862,7 +1864,7 @@ class ScriptBuilder:
                         logging.StreamHandler()
                     ]
                 )
-                logger = logging.get_logger(name)
+                logger = logging.getLogger(name)
                 return logger
         ''').strip()
 

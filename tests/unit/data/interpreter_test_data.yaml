@@ -1452,9 +1452,11 @@ script_builder:
       
       
       def get_logger(name='TATestScript'):
-        """This logger function has basic logging configure
-        ===================================================
-        Please replace your get logger function
+        """This function only creates logger instance with
+        basic logging configuration.
+        ==================================================
+        PLEASE UPDATE your get_logger function.
+        ==================================================
         """
         import logging
         logging.basicConfig(
@@ -1465,7 +1467,7 @@ script_builder:
             logging.StreamHandler()
           ]
         )
-        logger = logging.get_logger(name)
+        logger = logging.getLogger(name)
         return logger
       
       
@@ -1503,9 +1505,11 @@ script_builder:
       
       
       def get_logger(name='TATestScript'):
-        """This logger function has basic logging configure
-        ===================================================
-        Please replace your get logger function
+        """This function only creates logger instance with
+        basic logging configuration.
+        ==================================================
+        PLEASE UPDATE your get_logger function.
+        ==================================================
         """
         import logging
         logging.basicConfig(
@@ -1516,7 +1520,7 @@ script_builder:
             logging.StreamHandler()
           ]
         )
-        logger = logging.get_logger(name)
+        logger = logging.getLogger(name)
         return logger
       
       

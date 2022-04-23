@@ -1176,10 +1176,7 @@ class TestScriptBuilder:
             ),
         ]
     )
-    def test_building_script_case1(
-        self, framework, user_data, expected_result
-    ):
-        SCRIPTINFO.reset_global_vars()
+    def test_building_script_case1(self, framework, user_data, expected_result):
         SCRIPTINFO.reset_devices_vars()
         node = ScriptBuilder(
             user_data,
@@ -1212,12 +1209,8 @@ class TestScriptBuilder:
             ),
         ]
     )
-    def test_building_script_case2(
-        self, framework, user_data, expected_result
-    ):
-        SCRIPTINFO.reset_global_vars()
+    def test_building_script_case2(self, framework, user_data, expected_result):
         SCRIPTINFO.reset_devices_vars()
-        SCRIPTINFO.load_testing_data()
         node = ScriptBuilder(
             user_data,
             indentation=indentation,
@@ -1250,9 +1243,6 @@ class TestScriptBuilder:
         ]
     )
     def test_building_script_case3(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.reset_devices_vars()
-        SCRIPTINFO.load_testing_data()
         node = ScriptBuilder(
             user_data,
             indentation=indentation,
@@ -1285,9 +1275,6 @@ class TestScriptBuilder:
         ]
     )
     def test_building_script_case4(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.reset_devices_vars()
-        SCRIPTINFO.load_testing_data()
         node = ScriptBuilder(
             user_data,
             indentation=indentation,
@@ -1320,9 +1307,6 @@ class TestScriptBuilder:
         ]
     )
     def test_building_script_case5(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.reset_devices_vars()
-        SCRIPTINFO.load_testing_data()
         node = ScriptBuilder(
             user_data,
             indentation=indentation,
@@ -1355,9 +1339,6 @@ class TestScriptBuilder:
         ]
     )
     def test_building_script_case6(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
-        SCRIPTINFO.reset_devices_vars()
-        SCRIPTINFO.load_testing_data()
         node = ScriptBuilder(
             user_data,
             indentation=indentation,
