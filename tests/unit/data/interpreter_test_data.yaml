@@ -756,11 +756,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -831,11 +831,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -916,11 +916,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1081,11 +1081,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1206,11 +1206,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1301,11 +1301,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1408,11 +1408,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1549,11 +1549,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
