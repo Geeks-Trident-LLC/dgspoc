@@ -466,7 +466,10 @@ class Statement:
                 if self.is_ancestor_section_statement:
                     return 'self.logger.%s' % level
                 else:
-                    return 'cls.logger.%s' % level
+                    if self.is_unittest:
+                        return 'cls.logger.%s' % level
+                    else:
+                        return 'self.logger.%s' % level
         return 'print'
 
     def render_display_message(self, message):
@@ -1896,15 +1899,15 @@ class ScriptBuilder:
         if self.framework == FWTYPE.ROBOTFRAMEWORK:
             lst += [
                 '*** Settings ***',
-                'library         builtin',
-                'library         collections',
-                'library         describegetsystempoc',
-                'test setup      {}'.format(self.setup_statement.name),
-                'test teardown   {}'.format(self.teardown_statement.name),
+                'Library          BuiltIn',
+                'Library          Collections',
+                'Library          describegetsystempoc',
+                'Suite Setup      {}'.format(self.setup_statement.name),
+                'Suite Teardown   {}'.format(self.teardown_statement.name),
             ]
         else:
             cls_name = SCRIPTINFO.get_class_name()
-            inherit = '(unittest.Testcase)' if is_unittest else ''
+            inherit = '(unittest.TestCase)' if is_unittest else ''
             lst.append('import unittest' if is_unittest else '# import pytest')
             lst.append('import dgspoc as ta')
             lst.append('\n')

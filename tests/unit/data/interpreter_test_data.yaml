@@ -718,7 +718,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
 
         @classmethod
         def setUpClass(cls):
@@ -756,11 +756,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -787,7 +787,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
 
         @classmethod
         def setUpClass(cls):
@@ -831,11 +831,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -868,7 +868,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -916,11 +916,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -973,7 +973,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1081,11 +1081,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1148,7 +1148,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1206,11 +1206,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1245,7 +1245,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1301,11 +1301,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1342,7 +1342,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1408,11 +1408,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
@@ -1471,7 +1471,7 @@ script_builder:
         return logger
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
         logger = get_logger()
       
         @classmethod
@@ -1528,11 +1528,11 @@ script_builder:
         logger = get_logger()
       
         def setup_class(self):
-          cls.logger.info('Dummy Setup')
+          self.logger.info('Dummy Setup')
           assert True == True
       
         def teardown_class(self):
-          cls.logger.info('Dummy Teardown')
+          self.logger.info('Dummy Teardown')
           assert True == True
       
         def test_001_default(self):
@@ -1549,11 +1549,11 @@ script_builder:
       ################################################################################
       
       *** Settings ***
-      library         builtin
-      library         collections
-      library         describegetsystempoc
-      test setup      setup
-      test teardown   teardown
+      Library          BuiltIn
+      Library          Collections
+      Library          describegetsystempoc
+      Suite Setup      setup
+      Suite Teardown   teardown
       
       *** Keywords ***
       setup
