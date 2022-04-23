@@ -1528,11 +1528,11 @@ script_builder:
         logger = get_logger()
       
         def setup_class(self):
-          cls.logger.info('Dummy Setup')
+          self.logger.info('Dummy Setup')
           assert True == True
       
         def teardown_class(self):
-          cls.logger.info('Dummy Teardown')
+          self.logger.info('Dummy Teardown')
           assert True == True
       
         def test_001_default(self):

@@ -466,7 +466,10 @@ class Statement:
                 if self.is_ancestor_section_statement:
                     return 'self.logger.%s' % level
                 else:
-                    return 'cls.logger.%s' % level
+                    if self.is_unittest:
+                        return 'cls.logger.%s' % level
+                    else:
+                        return 'self.logger.%s' % level
         return 'print'
 
     def render_display_message(self, message):
