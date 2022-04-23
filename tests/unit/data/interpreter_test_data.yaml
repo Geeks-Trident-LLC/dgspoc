@@ -718,7 +718,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
 
         @classmethod
         def setUpClass(cls):
@@ -787,7 +787,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
 
         @classmethod
         def setUpClass(cls):
@@ -868,7 +868,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -973,7 +973,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1148,7 +1148,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1245,7 +1245,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1342,7 +1342,7 @@ script_builder:
       import dgspoc as ta
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
       
         @classmethod
         def setUpClass(cls):
@@ -1471,7 +1471,7 @@ script_builder:
         return logger
       
       
-      class TestClass(unittest.Testcase):
+      class TestClass(unittest.TestCase):
         logger = get_logger()
       
         @classmethod

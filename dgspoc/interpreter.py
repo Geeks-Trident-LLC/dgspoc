@@ -1907,7 +1907,7 @@ class ScriptBuilder:
             ]
         else:
             cls_name = SCRIPTINFO.get_class_name()
-            inherit = '(unittest.Testcase)' if is_unittest else ''
+            inherit = '(unittest.TestCase)' if is_unittest else ''
             lst.append('import unittest' if is_unittest else '# import pytest')
             lst.append('import dgspoc as ta')
             lst.append('\n')
