@@ -1553,6 +1553,18 @@ class PerformerStatement(Statement):
 
     @property
     def snippet(self):
+        if self.name == 'execution':
+            stmt = self.execution_snippet
+            return stmt
+        elif self.name == 'configuration':
+            stmt = self.configuration_snippet
+            return stmt
+        elif self.name == 'reload':
+            stmt = self.reload_snippet
+            return stmt
+
+    @property
+    def execution_snippet(self):
         if not self.is_parsed:
             return ''
 
@@ -1603,6 +1615,56 @@ class PerformerStatement(Statement):
                     fmt = 'ta.execute({_replace_}.%s, cmdline=%r)'
                     new_fmt = self.substitute_new_format(fmt)
                     lst.append(new_fmt % (var_name, result.operation_ref))
+
+        stmt = self.indent_data('\n'.join(lst), self.level)
+        return stmt
+
+    @property
+    def configuration_snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+
+        result = self.result
+
+        if self.is_robotframework:
+            for device_name in result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+                fmt = 'configure   ${%s}   cfg=%s'
+                lst.append(fmt % (var_name, self.result.operation_ref))
+        else:
+            for device_name in self.result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+
+                fmt = 'ta.configure({_replace_}.%s, cfg=%r)'
+                new_fmt = self.substitute_new_format(fmt)
+                lst.append(new_fmt % (var_name, result.operation_ref))
+
+        stmt = self.indent_data('\n'.join(lst), self.level)
+        return stmt
+
+    @property
+    def reload_snippet(self):
+        if not self.is_parsed:
+            return ''
+
+        lst = []
+
+        result = self.result
+
+        if self.is_robotframework:
+            for device_name in result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+                fmt = 'reload   ${%s}   cmdline=%s'
+                lst.append(fmt % (var_name, self.result.operation_ref))
+        else:
+            for device_name in self.result.devices_names:
+                var_name = SCRIPTINFO.get_device_var(device_name)
+
+                fmt = 'ta.reload({_replace_}.%s, cmdline=%r)'
+                new_fmt = self.substitute_new_format(fmt)
+                lst.append(new_fmt % (var_name, result.operation_ref))
 
         stmt = self.indent_data('\n'.join(lst), self.level)
         return stmt
