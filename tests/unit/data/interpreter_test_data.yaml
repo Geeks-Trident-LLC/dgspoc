@@ -999,7 +999,7 @@ script_builder:
         def test_002_case1(self):
           """case1"""
           ta.execute(self.device1, cmdline='show module info')
-          ta.execute(self.device1, cmdline='turn off module 1')
+          ta.configure(self.device1, cfg='turn off module 1')
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == off')
@@ -1009,7 +1009,7 @@ script_builder:
         def test_003_case2(self):
           """case2"""
           ta.execute(self.device1, cmdline='show module info')
-          ta.execute(self.device1, cmdline='turn on module 1')
+          ta.configure(self.device1, cfg='turn on module 1')
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == on')
@@ -1055,7 +1055,7 @@ script_builder:
         def test_002_case1(self):
           """case1"""
           ta.execute(self.device1, cmdline='show module info')
-          ta.execute(self.device1, cmdline='turn off module 1')
+          ta.configure(self.device1, cfg='turn off module 1')
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == off')
@@ -1065,7 +1065,7 @@ script_builder:
         def test_003_case2(self):
           """case2"""
           ta.execute(self.device1, cmdline='show module info')
-          ta.execute(self.device1, cmdline='turn on module 1')
+          ta.configure(self.device1, cfg='turn on module 1')
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.filter(output, convertor='template', template_ref='tmpl.show.module.info',
                              select_statement='select name, status where name == module-1 and status == on')
@@ -1114,7 +1114,7 @@ script_builder:
       test 002 case1
         [Documentation]    case1
         execute   ${device1}   cmdline=show module info
-        execute   ${device1}   cmdline=turn off module 1
+        configure   ${device1}   cfg=turn off module 1
         {output}=   execute   ${device1}   cmdline=show module info
         ${result}=   filter   ${output}   convertor=template   template_ref=tmpl.show.module.info
         ...   select_statement=select name, status where name == module-1 and status == off
@@ -1124,7 +1124,7 @@ script_builder:
       test 003 case2
         [Documentation]    case2
         execute   ${device1}   cmdline=show module info
-        execute   ${device1}   cmdline=turn on module 1
+        configure   ${device1}   cfg=turn on module 1
         {output}=   execute   ${device1}   cmdline=show module info
         ${result}=   filter   ${output}   convertor=template   template_ref=tmpl.show.module.info
         ...   select_statement=select name, status where name == module-1 and status == on
