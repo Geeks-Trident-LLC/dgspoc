@@ -62,7 +62,7 @@ class Dgs:
         Parameters
         ----------
         resource_ref (str): a file or database
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for connecting test resource
 
         Returns
         -------
@@ -95,7 +95,7 @@ class Dgs:
         ----------
         host (str): address of device
         adaptor (str): connection adaptor.
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for connecting device
 
         Returns
         -------
@@ -113,7 +113,7 @@ class Dgs:
         Parameters
         ----------
         connection (Adaptor): instance of device connection
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for disconnection device connection
 
         Returns
         -------
@@ -129,7 +129,7 @@ class Dgs:
         Parameters
         ----------
         connection (Adaptor): instance of device connection
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for releasing device connection
 
         Returns
         -------
@@ -157,7 +157,7 @@ class Dgs:
         ----------
         connection (Adaptor): instance of device connection
         cmdline (str): command lines
-        kwargs (dict): additional keyword arguments for connection
+        kwargs (dict): additional keyword arguments for command line execution
 
         Returns
         -------
@@ -174,7 +174,7 @@ class Dgs:
         ----------
         connection (Adaptor): instance of device connection
         cfg (str): configuration lines
-        kwargs (dict): additional keyword arguments for connection
+        kwargs (dict): additional keyword arguments for configuring device
 
         Returns
         -------
@@ -191,7 +191,7 @@ class Dgs:
         ----------
         connection (Adaptor): instance of device connection
         reload_command (str): reload command
-        kwargs (dict): additional keyword arguments for connection
+        kwargs (dict): additional keyword arguments for reloading device
 
         Returns
         -------
