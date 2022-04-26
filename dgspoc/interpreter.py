@@ -1963,7 +1963,7 @@ class ScriptBuilder:
                 '*** Settings ***',
                 'Library          BuiltIn',
                 'Library          Collections',
-                'Library          describegetsystempoc',
+                'Library          dgspoc.robotframeworklib',
                 'Suite Setup      {}'.format(self.setup_statement.name),
                 'Suite Teardown   {}'.format(self.teardown_statement.name),
             ]
