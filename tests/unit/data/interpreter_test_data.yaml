@@ -758,7 +758,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
@@ -833,7 +833,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
@@ -918,7 +918,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
@@ -1083,7 +1083,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
@@ -1208,7 +1208,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
@@ -1303,7 +1303,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
@@ -1410,7 +1410,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
@@ -1551,7 +1551,7 @@ script_builder:
       *** Settings ***
       Library          BuiltIn
       Library          Collections
-      Library          describegetsystempoc
+      Library          dgspoc.robotframeworklib
       Suite Setup      setup
       Suite Teardown   teardown
       
