@@ -117,3 +117,20 @@ def reload_device(connection, reload_command, **kwargs):
     """
     result = Dgs.reload_device(connection, reload_command, **kwargs)
     return result
+
+
+def convert_and_filter(text, convertor='', template_ref='', select_statement=''):
+    """generic function to convert text data struct and do filtering
+    | Parameters:
+    |     text (str): output or text data
+    |     convertor (str): cvs, json, or template
+    |     template_ref (str): template-id or template filename
+    |     select_statement (str): a select statement
+    | Returns:
+    |     list: the list of records
+    """
+    result = Dgs.convert_and_filter(
+        text, convertor=convertor, template_ref=template_ref,
+        select_statement=select_statement
+    )
+    return result

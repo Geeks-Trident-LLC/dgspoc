@@ -2,6 +2,27 @@
 from enum import IntFlag
 
 
+class IValue:
+    def __init__(self, value):
+        self.value = str(value)
+
+    def __eq__(self, other):
+        value1 = self.value.lower()
+        if isinstance(other, self.__class__):
+            value2 = other.value.lower()
+        else:
+            value2 = str(other).lower()
+
+        chk = value1.strip() == value2.strip()
+        return chk
+
+    def __repr__(self):
+        return repr(self.value)
+
+    def __str__(self):
+        return self.value
+
+
 class FrameworkValue:
     def __init__(self, value):
         self.value = str(value)
@@ -38,3 +59,9 @@ class FWTYPE:
     UNITTEST = FrameworkValue('unittest')
     PYTEST = FrameworkValue('pytest')
     ROBOTFRAMEWORK = FrameworkValue('robotframework')
+
+
+class CONVTYPE:
+    CSV = IValue('csv')
+    JSON = IValue('json')
+    TEMPLATE = IValue('template')

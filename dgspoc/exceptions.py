@@ -67,3 +67,11 @@ class ScriptBuilderError(InterpreterError):
 
 class DurationArgumentError(InterpreterError):
     """Use to capture error for wait_for function"""
+
+
+class ConvertorTypeError(InterpreterError):
+    """Use to capture convertor argument for filter method"""
+
+
+class TemplateReferenceError(InterpreterError):
+    """Use to capture template reference for filter method"""
