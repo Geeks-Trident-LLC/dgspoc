@@ -28,7 +28,8 @@ class TestResourceCls:
     def release(self):
         if self.error:
             print(self.error)
-        return self.status
+            return False
+        return True
 
     def use_testcase(self, testcase):
         testcases = self.get('testcases')
@@ -36,27 +37,7 @@ class TestResourceCls:
             self.curr_resource = DotObject(testcases.get(testcase))
             return True
         else:
-            pass
-
-    def update_kwargs(self, host, kwargs):
-        if 'username' in kwargs and 'password' in kwargs:
-            return
-
-        if self.curr_resource:
-            devices = self.curr_resource.get('devices', DotObject())
-        else:
-            devices = self.get('devices', DotObject())
-
-        for addr, device in devices.items():
-            name = device.get('name', '')
-            if name == host or addr == host:
-                if not kwargs.get('username'):
-                    if device.get('username'):
-                        kwargs['username'] = device.get('username')
-
-                if not kwargs.get('password'):
-                    if device.get('password'):
-                        kwargs['password'] = device.get('password')
+            return False
 
 
 class Dgs:
