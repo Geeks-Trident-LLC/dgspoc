@@ -1,11 +1,30 @@
 """Module containing logic for describe-get-system proof of concept."""
 
 import time
+import re
+from io import StringIO
+import argparse
+
+from textfsm import TextFSM
+
+
+from dlapp import create_from_csv_data
+from dlapp import create_from_json_data
+from dlapp import DLQuery
 
 from dgspoc.adaptor import Adaptor
 
+from dgspoc.constant import CONVTYPE
+
+from dgspoc.storage import TemplateStorage
+
 from dgspoc.utils import DotObject
 from dgspoc.utils import File
+from dgspoc.utils import Misc
+
+from dgspoc.exceptions import DurationArgumentError
+from dgspoc.exceptions import ConvertorTypeError
+from dgspoc.exceptions import TemplateReferenceError
 
 
 class TestResourceCls:
@@ -28,7 +47,8 @@ class TestResourceCls:
     def release(self):
         if self.error:
             print(self.error)
-        return self.status
+            return False
+        return True
 
     def use_testcase(self, testcase):
         testcases = self.get('testcases')
@@ -36,27 +56,7 @@ class TestResourceCls:
             self.curr_resource = DotObject(testcases.get(testcase))
             return True
         else:
-            pass
-
-    def update_kwargs(self, host, kwargs):
-        if 'username' in kwargs and 'password' in kwargs:
-            return
-
-        if self.curr_resource:
-            devices = self.curr_resource.get('devices', DotObject())
-        else:
-            devices = self.get('devices', DotObject())
-
-        for addr, device in devices.items():
-            name = device.get('name', '')
-            if name == host or addr == host:
-                if not kwargs.get('username'):
-                    if device.get('username'):
-                        kwargs['username'] = device.get('username')
-
-                if not kwargs.get('password'):
-                    if device.get('password'):
-                        kwargs['password'] = device.get('password')
+            return False
 
 
 class Dgs:
@@ -65,14 +65,20 @@ class Dgs:
     kwargs = DotObject()
 
     @classmethod
-    def wait_for(cls, total_seconds):
+    def wait_for(cls, duration):
         """pausing method
 
         Parameters
         ----------
-        total_seconds (float): total seconds
+        duration (float): total seconds
         """
-        time.sleep(total_seconds)
+
+        is_number, number = Misc.try_to_get_number(duration, return_type=float)
+        if is_number:
+            time.sleep(number)
+        else:
+            failure = 'duration must be a number (unexpected: %s)' % duration
+            raise DurationArgumentError(failure)
 
     @classmethod
     def connect_resource(cls, resource_ref, **kwargs):
@@ -81,7 +87,7 @@ class Dgs:
         Parameters
         ----------
         resource_ref (str): a file or database
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for connecting test resource
 
         Returns
         -------
@@ -114,7 +120,7 @@ class Dgs:
         ----------
         host (str): address of device
         adaptor (str): connection adaptor.
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for connecting device
 
         Returns
         -------
@@ -132,7 +138,7 @@ class Dgs:
         Parameters
         ----------
         connection (Adaptor): instance of device connection
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for disconnection device connection
 
         Returns
         -------
@@ -148,7 +154,7 @@ class Dgs:
         Parameters
         ----------
         connection (Adaptor): instance of device connection
-        kwargs (dict): additional keyword arguments
+        kwargs (dict): additional keyword arguments for releasing device connection
 
         Returns
         -------
@@ -176,7 +182,7 @@ class Dgs:
         ----------
         connection (Adaptor): instance of device connection
         cmdline (str): command lines
-        kwargs (dict): additional keyword arguments for connection
+        kwargs (dict): additional keyword arguments for command line execution
 
         Returns
         -------
@@ -193,11 +199,11 @@ class Dgs:
         ----------
         connection (Adaptor): instance of device connection
         cfg (str): configuration lines
-        kwargs (dict): additional keyword arguments for connection
+        kwargs (dict): additional keyword arguments for configuring device
 
         Returns
         -------
-        str: a result of device configuration
+        str: the result of device configuration
         """
         result = connection.configure(cfg, **kwargs)
         return result
@@ -210,7 +216,7 @@ class Dgs:
         ----------
         connection (Adaptor): instance of device connection
         reload_command (str): reload command
-        kwargs (dict): additional keyword arguments for connection
+        kwargs (dict): additional keyword arguments for reloading device
 
         Returns
         -------
@@ -218,3 +224,132 @@ class Dgs:
         """
         result = connection.reload(reload_command, **kwargs)
         return result
+
+    @classmethod
+    def convert_and_filter(cls, text, convertor='', template_ref='', select_statement=''):
+        """generic method to convert text to data struct and do filtering
+
+        Parameters
+        ----------
+        text (str): output or text data
+        convertor (str): cvs, json, or template
+        template_ref (str): template-id or template filename
+        select_statement (str): a select statement
+
+        Returns
+        -------
+        list: the list of records
+        """
+
+        if convertor == CONVTYPE.CSV:
+            result = cls.do_filter_csv(text, select_statement=select_statement)
+            return result
+
+        elif convertor == CONVTYPE.JSON:
+            result = cls.do_filter_json(text, select_statement=select_statement)
+            return result
+        elif convertor == CONVTYPE.TEMPLATE:
+            result = cls.do_filter_template(text, template_ref,
+                                            select_statement=select_statement)
+            return result
+        else:
+            fmt = 'convertor MUST BE csv, json, or template (Unexpected: %s)'
+            raise ConvertorTypeError(fmt % convertor)
+
+    @classmethod
+    def do_filter_csv(cls, text, select_statement=''):
+        """generic method to convert csv text to list of dict and do filtering
+
+        Parameters
+        ----------
+        text (str): output or text data
+        select_statement (str): a select statement
+
+        Returns
+        -------
+        list: the list of records
+        """
+
+        query_obj = create_from_csv_data(text)
+        result = query_obj.find(select_statement=select_statement)
+        return result
+
+    @classmethod
+    def do_filter_json(cls, text, select_statement=''):
+        """generic method to convert json text to data structure and do filtering
+
+        Parameters
+        ----------
+        text (str): output or text data
+        select_statement (str): a select statement
+
+        Returns
+        -------
+        list: the list of records
+        """
+        query_obj = create_from_json_data(text)
+        result = query_obj.find(select_statement=select_statement)
+        return result
+
+    @classmethod
+    def do_filter_template(cls, text, tmpl_ref, select_statement=''):
+        """generic method to convert text to data struct using TextFSM and do filtering
+
+        Parameters
+        ----------
+        text (str): output or text data
+        template_ref (str): template-id or template filename
+        select_statement (str): a select statement
+
+        Returns
+        -------
+        list: the list of records
+        """
+
+        tmpl_ref = str(tmpl_ref).strip()
+
+        if not tmpl_ref:
+            failure = 'Template reference CANT BE empty.'
+            raise TemplateReferenceError(failure)
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument('val1', nargs='?', default='')
+        parser.add_argument('--template-id', type=str, default='')
+        parser.add_argument('--file', type=str, default='')
+        parser.add_argument('--filename', type=str, default='')
+        parser.add_argument('--file-name', type=str, default='')
+
+        result = parser.parse_args(re.split(r' +', tmpl_ref.strip()))
+
+        tmpl_id = result.val1 or result.template_id
+        fn = result.file or result.filename or result.file_name
+
+        if not tmpl_id and not fn:
+            fmt = 'Invalid template reference format (Unexpected: %r)'
+            raise TemplateReferenceError(fmt % tmpl_ref)
+
+        if tmpl_id:
+            if not TemplateStorage.check(tmpl_id):
+                fmt = '%r template id CANT BE FOUND in template storage.'
+                raise TemplateReferenceError(fmt % tmpl_id)
+            else:
+                template = TemplateStorage.get(tmpl_id)
+                stream = StringIO(template)
+                template_parser = TextFSM(stream)
+
+        else:
+            if not File.is_exist(fn):
+                fmt = '%r template file CANT BE FOUND.'
+                raise TemplateReferenceError(fmt % fn)
+            else:
+                with open(fn) as stream:
+                    template_parser = TextFSM(stream)
+
+        rows = template_parser.ParseTextToDicts(text)
+
+        if not select_statement:
+            return rows
+        else:
+            query_node = DLQuery(rows)
+            result = query_node.find(select=select_statement)
+            return result

@@ -60,5 +60,18 @@ class PerformerStatementError(InterpreterError):
 class VerificationStatementError(InterpreterError):
     """Use to capture error for verification statement"""
 
+
 class ScriptBuilderError(InterpreterError):
     """Use to capture error for building test script"""
+
+
+class DurationArgumentError(InterpreterError):
+    """Use to capture error for wait_for function"""
+
+
+class ConvertorTypeError(InterpreterError):
+    """Use to capture convertor argument for filter method"""
+
+
+class TemplateReferenceError(InterpreterError):
+    """Use to capture template reference for filter method"""
