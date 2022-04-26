@@ -6,6 +6,9 @@ from dgspoc.adaptor import Adaptor
 
 from dgspoc.utils import DotObject
 from dgspoc.utils import File
+from dgspoc.utils import Misc
+
+from dgspoc.exceptions import DurationArgumentError
 
 
 class TestResourceCls:
@@ -46,14 +49,20 @@ class Dgs:
     kwargs = DotObject()
 
     @classmethod
-    def wait_for(cls, total_seconds):
+    def wait_for(cls, duration):
         """pausing method
 
         Parameters
         ----------
-        total_seconds (float): total seconds
+        duration (float): total seconds
         """
-        time.sleep(total_seconds)
+
+        is_number, number = Misc.try_to_get_number(duration, return_type=float)
+        if is_number:
+            time.sleep(number)
+        else:
+            failure = 'duration must be a number (unexpected: %s)' % duration
+            raise DurationArgumentError(failure)
 
     @classmethod
     def connect_resource(cls, resource_ref, **kwargs):
@@ -178,7 +187,7 @@ class Dgs:
 
         Returns
         -------
-        str: a result of device configuration
+        str: the result of device configuration
         """
         result = connection.configure(cfg, **kwargs)
         return result

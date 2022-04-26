@@ -3,12 +3,12 @@
 from dgspoc.core import Dgs
 
 
-def wait_for(total_seconds):
+def wait_for(duration):
     """pausing function
     | Parameters:
-    |     total_seconds (float): connection of device
+    |     duration (float): total seconds
     """
-    Dgs.wait_for(total_seconds)
+    Dgs.wait_for(duration)
 
 
 def connect_resource(resource_ref, **kwargs):
