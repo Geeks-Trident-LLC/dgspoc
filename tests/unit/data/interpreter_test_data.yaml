@@ -101,22 +101,6 @@ connect_data_statement:
     robotframework: |-
       ${my_test_resource_var}=   connect data   filename=test_resource.yaml
 
-use_testcase_statement:
-
-  case1:
-    data: use testcase test1
-    unittest: test_data = ta.use_testcase(test_resource, testcase='test1')
-    pytest: test_data = ta.use_testcase(test_resource, testcase='test1')
-    robotframework: |-
-      ${test_data}=  use testcase   ${test_resource}  testcase=test1
-
-  case2:
-    data:  use testcase test1 as test_data_var
-    unittest: test_data_var = ta.use_testcase(test_resource, testcase='test1')
-    pytest: test_data_var = ta.use_testcase(test_resource, testcase='test1')
-    robotframework: |-
-      ${test_data_var}=  use testcase   ${test_resource}  testcase=test1
-
 connect_device_statement:
 
   case1:
