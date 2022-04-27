@@ -1,9 +1,7 @@
 """Module containing logic for describe-get-system proof of concept."""
 
 import time
-import re
 from io import StringIO
-import argparse
 
 from textfsm import TextFSM
 
@@ -21,6 +19,7 @@ from dgspoc.storage import TemplateStorage
 from dgspoc.utils import DotObject
 from dgspoc.utils import File
 from dgspoc.utils import Misc
+from dgspoc.utils import MiscArgs
 
 from dgspoc.exceptions import DurationArgumentError
 from dgspoc.exceptions import ConvertorTypeError
@@ -240,38 +239,29 @@ class Dgs:
             failure = 'Template reference CANT BE empty.'
             raise TemplateReferenceError(failure)
 
-        parser = argparse.ArgumentParser()
-        parser.add_argument('val1', nargs='?', default='')
-        parser.add_argument('--template-id', type=str, default='')
-        parser.add_argument('--file', type=str, default='')
-        parser.add_argument('--filename', type=str, default='')
-        parser.add_argument('--file-name', type=str, default='')
+        parsed_args_result = MiscArgs.get_parsed_result_as_data_or_file('--template-id')
 
-        result = parser.parse_args(re.split(r' +', tmpl_ref.strip()))
-
-        tmpl_id = result.val1 or result.template_id
-        fn = result.file or result.filename or result.file_name
-
-        if not tmpl_id and not fn:
+        if not parsed_args_result.is_parsed:
             fmt = 'Invalid template reference format (Unexpected: %r)'
             raise TemplateReferenceError(fmt % tmpl_ref)
 
-        if tmpl_id:
-            if not TemplateStorage.check(tmpl_id):
-                fmt = '%r template id CANT BE FOUND in template storage.'
-                raise TemplateReferenceError(fmt % tmpl_id)
-            else:
-                template = TemplateStorage.get(tmpl_id)
-                stream = StringIO(template)
-                template_parser = TextFSM(stream)
-
-        else:
+        if parsed_args_result.is_file:
+            fn = parsed_args_result.filename
             if not File.is_exist(fn):
                 fmt = '%r template file CANT BE FOUND.'
                 raise TemplateReferenceError(fmt % fn)
             else:
                 with open(fn) as stream:
                     template_parser = TextFSM(stream)
+        else:
+            tmpl_id = parsed_args_result.data
+            if not TemplateStorage.check(tmpl_id):
+                fmt = '%r template-id CANT BE FOUND in template storage.'
+                raise TemplateReferenceError(fmt % tmpl_id)
+            else:
+                template = TemplateStorage.get(tmpl_id)
+                stream = StringIO(template)
+                template_parser = TextFSM(stream)
 
         rows = template_parser.ParseTextToDicts(text)
 
