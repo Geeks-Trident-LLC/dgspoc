@@ -1576,16 +1576,18 @@ class PerformerStatement(Statement):
             for device_name in result.devices_names:
                 var_name = SCRIPTINFO.get_device_var(device_name)
                 if result.has_select_statement:
-                    fmt = '{output}=   execute   ${%s}   cmdline=%s'
+                    fmt = '${output}=   execute   ${%s}   cmdline=%s'
                     lst.append(fmt % (var_name, result.operation_ref))
                     if result.is_template:
-                        fmt = ('filter   ${output}   convertor=%s   template_ref=%s\n'
+                        fmt = ('convert_and_filter\n'
+                               '...   ${output}   convertor=%s   template_ref=%s\n'
                                '...   select_statement=%s')
                         stmt = fmt % (result.convertor, result.convertor_arg,
                                       result.select_statement)
                         lst.append(stmt)
                     else:
-                        fmt = ('filter   ${output}   convertor=%s\n'
+                        fmt = ('convert_and_filter\n'
+                               '...   ${output}   convertor=%s\n'
                                '...   select_statement=%s')
                         stmt = fmt % (result.convertor, result.select_statement)
                         lst.append(stmt)
@@ -1601,14 +1603,20 @@ class PerformerStatement(Statement):
                     new_fmt = self.substitute_new_format(fmt)
                     lst.append(new_fmt % (var_name, result.operation_ref))
                     if result.is_template:
-                        fmt = ('ta.filter(output, convertor=%r, template_ref=%r,\n'
-                               '          select_statement=%r)')
+                        fmt = ('ta.convert_and_filter(\n'
+                               '    output, convertor=%r, template_ref=%r,\n'
+                               '    select_statement=%r\n'
+                               ')')
+                        fmt = fmt.replace('    ', ' ' * self.indentation)
                         stmt = fmt % (result.convertor, result.convertor_arg,
                                       result.select_statement)
                         lst.append(stmt)
                     else:
-                        fmt = ('ta.filter(output, convertor=%r,\n'
-                               '          select_statement=%r)')
+                        fmt = ('ta.convert_and_filter(\n'
+                               '    output, convertor=%r,\n'
+                               '    select_statement=%r\n'
+                               ')')
+                        fmt = fmt.replace('    ', ' ' * self.indentation)
                         stmt = fmt % (result.convertor, result.select_statement)
                         lst.append(stmt)
                 else:
@@ -1706,16 +1714,18 @@ class VerificationStatement(Statement):
             for device_name in result.devices_names:
                 var_name = SCRIPTINFO.get_device_var(device_name)
 
-                fmt = '{output}=   execute   ${%s}   cmdline=%s'
+                fmt = '${output}=   execute   ${%s}   cmdline=%s'
                 lst.append(fmt % (var_name, result.operation_ref))
                 if result.is_template:
-                    fmt = ('${result}=   filter   ${output}   convertor=%s   template_ref=%s\n'
+                    fmt = ('${result}=   convert_and_filter\n'
+                           '...   ${output}   convertor=%s   template_ref=%s\n'
                            '...   select_statement=%s')
                     stmt = fmt % (result.convertor, result.convertor_arg,
                                   result.select_statement)
                     lst.append(stmt)
                 else:
-                    fmt = ('${result}=   filter   ${output}   convertor=%s\n'
+                    fmt = ('${result}=   convert_and_filter\n'
+                           '...   ${output}   convertor=%s\n'
                            '...   select_statement=%s')
                     stmt = fmt % (result.convertor, result.select_statement)
                     lst.append(stmt)
@@ -1731,14 +1741,20 @@ class VerificationStatement(Statement):
                 new_fmt = self.substitute_new_format(fmt)
                 lst.append(new_fmt % (var_name, result.operation_ref))
                 if result.is_template:
-                    fmt = ('result = ta.filter(output, convertor=%r, template_ref=%r,\n'
-                           '                   select_statement=%r)')
+                    fmt = ('result = ta.convert_and_filter(\n'
+                           '    output, convertor=%r, template_ref=%r,\n'
+                           '    select_statement=%r\n'
+                           ')')
+                    fmt = fmt.replace('    ', ' ' * self.indentation)
                     stmt = fmt % (result.convertor, result.convertor_arg,
                                   result.select_statement)
                     lst.append(stmt)
                 else:
-                    fmt = ('result = ta.filter(output, convertor=%r,\n'
-                           '                   select_statement=%r)')
+                    fmt = ('result = ta.convert_and_filter(\n'
+                           '    output, convertor=%r,\n'
+                           '    select_statement=%r\n'
+                           ')')
+                    fmt = fmt.replace('    ', ' ' * self.indentation)
                     stmt = fmt % (result.convertor, result.select_statement)
                     lst.append(stmt)
 
