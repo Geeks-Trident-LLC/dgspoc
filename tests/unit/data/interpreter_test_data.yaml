@@ -990,12 +990,12 @@ script_builder:
       section: case1
         device1 execute show module info
         device1 configure turn off module 1
-        device1 execute show module info using_template tmpl.show.module.info select name, status where name == module-1 and status == off must be true
+        device1 execute show module info using_template tmpl.show.module.info select name, status where name == module-1 and_ status == off must be true
     
       section: case2
         device1 execute show module info
         device1 configure turn on module 1
-        device1 execute show module info using_template tmpl.show.module.info select name, status where name == module-1 and status == on must be true
+        device1 execute show module info using_template tmpl.show.module.info select name, status where name == module-1 and_ status == on must be true
       
       teardown
         disconnect device1
@@ -1045,7 +1045,7 @@ script_builder:
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.convert_and_filter(
             output, convertor='template', template_ref='tmpl.show.module.info',
-            select_statement='select name, status where name == module-1 and status == off'
+            select_statement='select name, status where name == module-1 and_ status == off'
           )
           total_count = len(result)
           self.assertTrue(total_count == 1)
@@ -1057,7 +1057,7 @@ script_builder:
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.convert_and_filter(
             output, convertor='template', template_ref='tmpl.show.module.info',
-            select_statement='select name, status where name == module-1 and status == on'
+            select_statement='select name, status where name == module-1 and_ status == on'
           )
           total_count = len(result)
           self.assertTrue(total_count == 1)
@@ -1107,7 +1107,7 @@ script_builder:
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.convert_and_filter(
             output, convertor='template', template_ref='tmpl.show.module.info',
-            select_statement='select name, status where name == module-1 and status == off'
+            select_statement='select name, status where name == module-1 and_ status == off'
           )
           total_count = len(result)
           assert total_count == 1
@@ -1119,7 +1119,7 @@ script_builder:
           output = ta.execute(self.device1, cmdline='show module info')
           result = ta.convert_and_filter(
             output, convertor='template', template_ref='tmpl.show.module.info',
-            select_statement='select name, status where name == module-1 and status == on'
+            select_statement='select name, status where name == module-1 and_ status == on'
           )
           total_count = len(result)
           assert total_count == 1
@@ -1171,7 +1171,7 @@ script_builder:
         ${output}=   execute   ${device1}   cmdline=show module info
         ${result}=   convert_and_filter
         ...   ${output}   convertor=template   template_ref=tmpl.show.module.info
-        ...   select_statement=select name, status where name == module-1 and status == off
+        ...   select_statement=select name, status where name == module-1 and_ status == off
         ${total_count}=  get length   ${result}
         should be true   ${total_count} == 1
       
@@ -1182,7 +1182,7 @@ script_builder:
         ${output}=   execute   ${device1}   cmdline=show module info
         ${result}=   convert_and_filter
         ...   ${output}   convertor=template   template_ref=tmpl.show.module.info
-        ...   select_statement=select name, status where name == module-1 and status == on
+        ...   select_statement=select name, status where name == module-1 and_ status == on
         ${total_count}=  get length   ${result}
         should be true   ${total_count} == 1
 
