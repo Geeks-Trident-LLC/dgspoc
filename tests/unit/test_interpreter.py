@@ -164,60 +164,7 @@ class TestSetupStatement:
             ),
         ]
     )
-    def test_setup_connect_data(self, framework, user_data, expected_result):
-        node = SetupStatement(user_data, indentation=indentation,
-                              framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.setup_statement.case2.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case2.unittest),
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.setup_statement.case2.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case2.pytest),
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.setup_statement.case2.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case2.robotframework),
-            ),
-        ]
-    )
-    def test_setup_connect_data_and_use_testcase(self, framework, user_data, expected_result):
-        node = SetupStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.setup_statement.case3.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case3.unittest),
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.setup_statement.case3.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case3.pytest),
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.setup_statement.case3.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case3.robotframework),
-            ),
-        ]
-    )
-    def test_setup_connect_data_and_use_testcase_and_connect_device(
-        self, framework, user_data, expected_result
-    ):
+    def test_setup_statement_case1(self, framework, user_data, expected_result):
         SCRIPTINFO.reset_devices_vars()
         node = SetupStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
