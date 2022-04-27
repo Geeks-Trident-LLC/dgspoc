@@ -59,18 +59,8 @@ class CheckStatement:
         return bool(match)
 
     @classmethod
-    def is_connect_data_statement(cls, data):
-        match = re.match(r'(?i) *connects? +data +', data)
-        return bool(match)
-
-    @classmethod
     def is_connect_device_statement(cls, data):
         match = re.match(r'(?i) *connects? +device +', data)
-        return bool(match)
-
-    @classmethod
-    def is_use_testcase_statement(cls, data):
-        match = re.match(r'(?i) *uses? +testcase +', data)
         return bool(match)
 
     @classmethod
@@ -81,11 +71,6 @@ class CheckStatement:
     @classmethod
     def is_release_device_statement(cls, data):
         match = re.match(r'(?i) *releases? +device +', data)
-        return bool(match)
-
-    @classmethod
-    def is_release_resource_statement(cls, data):
-        match = re.match(r'(?i) *releases? +resource +', data)
         return bool(match)
 
     @classmethod
@@ -119,18 +104,8 @@ class CheckStatement:
         return chk
 
     @classmethod
-    def is_child_connect_data_statement(cls, data):
-        chk = cls.is_connect_data_statement(data) and data.startswith(' ')
-        return chk
-
-    @classmethod
     def is_child_connect_device_statement(cls, data):
         chk = cls.is_connect_device_statement(data) and data.startswith(' ')
-        return chk
-
-    @classmethod
-    def is_child_use_testcase_statement(cls, data):
-        chk = cls.is_use_testcase_statement(data) and data.startswith(' ')
         return chk
 
     @classmethod
@@ -141,11 +116,6 @@ class CheckStatement:
     @classmethod
     def is_child_release_device_statement(cls, data):
         chk = cls.is_release_device_statement(data) and data.startswith(' ')
-        return chk
-
-    @classmethod
-    def is_child_release_resource_statement(cls, data):
-        chk = cls.is_release_resource_statement(data) and data.startswith(' ')
         return chk
 
     @classmethod

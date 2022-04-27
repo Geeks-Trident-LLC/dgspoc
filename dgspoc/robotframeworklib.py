@@ -11,38 +11,6 @@ def wait_for(duration):
     Dgs.wait_for(duration)
 
 
-def connect_resource(resource_ref, **kwargs):
-    """generic function to connect test resource
-    | Parameters:
-    |     resource_ref (str): a file name or database
-    |     kwargs (dict): additional keyword arguments for connecting test resource
-    | Returns:
-    |     bool: True if successfully connected resource, otherwise, False.
-    """
-    result = Dgs.connect_resource(resource_ref, **kwargs)
-    return result
-
-
-def release_resource():
-    """generic function to release test resource
-    | Returns:
-    |     bool: True if successfully released resource, otherwise, False.
-    """
-    result = Dgs.release_resource()
-    return result
-
-
-def use_testcase(testcase):
-    """generic function to use testcase resource from test resource
-    | Parameters:
-    |     testcase (str): testcase from test result
-    | Returns:
-    |     bool: True if testcase resource is available, otherwise, False.
-    """
-    result = Dgs.use_testcase(testcase)
-    return result
-
-
 def connect_device(host, adaptor='unreal-device', **kwargs):
     """generic function to establish device connection
     | Parameters:
@@ -120,7 +88,7 @@ def reload_device(connection, reload_command, **kwargs):
 
 
 def convert_and_filter(text, convertor='', template_ref='', select_statement=''):
-    """generic function to convert text data struct and do filtering
+    """generic function to convert text data struct and filter per select_statement
     | Parameters:
     |     text (str): output or text data
     |     convertor (str): cvs, json, or template

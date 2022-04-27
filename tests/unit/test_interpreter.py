@@ -9,12 +9,9 @@ from dgspoc.interpreter import DummyStatement
 from dgspoc.interpreter import SetupStatement
 from dgspoc.interpreter import TeardownStatement
 from dgspoc.interpreter import SectionStatement
-from dgspoc.interpreter import ConnectDataStatement
-from dgspoc.interpreter import UseTestCaseStatement
 from dgspoc.interpreter import ConnectDeviceStatement
 from dgspoc.interpreter import DisconnectStatement
 from dgspoc.interpreter import ReleaseDeviceStatement
-from dgspoc.interpreter import ReleaseResourceStatement
 from dgspoc.interpreter import LoopStatement
 from dgspoc.interpreter import PerformerStatement
 from dgspoc.interpreter import VerificationStatement
@@ -164,172 +161,9 @@ class TestSetupStatement:
             ),
         ]
     )
-    def test_setup_connect_data(self, framework, user_data, expected_result):
-        node = SetupStatement(user_data, indentation=indentation,
-                              framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.setup_statement.case2.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case2.unittest),
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.setup_statement.case2.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case2.pytest),
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.setup_statement.case2.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case2.robotframework),
-            ),
-        ]
-    )
-    def test_setup_connect_data_and_use_testcase(self, framework, user_data, expected_result):
-        node = SetupStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.setup_statement.case3.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case3.unittest),
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.setup_statement.case3.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case3.pytest),
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.setup_statement.case3.data,
-                Misc.skip_first_line(TESTDATA.setup_statement.case3.robotframework),
-            ),
-        ]
-    )
-    def test_setup_connect_data_and_use_testcase_and_connect_device(
-        self, framework, user_data, expected_result
-    ):
+    def test_setup_statement_case1(self, framework, user_data, expected_result):
         SCRIPTINFO.reset_devices_vars()
         node = SetupStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-
-class TestConnectDataStatement:
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.connect_data_statement.case1.data,
-                TESTDATA.connect_data_statement.case1.unittest,
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.connect_data_statement.case1.data,
-                TESTDATA.connect_data_statement.case1.pytest,
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.connect_data_statement.case1.data,
-                TESTDATA.connect_data_statement.case1.robotframework,
-            ),
-        ]
-    )
-    def test_connect_data_statement(self, framework, user_data, expected_result):
-        node = ConnectDataStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.connect_data_statement.case2.data,
-                TESTDATA.connect_data_statement.case2.unittest,
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.connect_data_statement.case2.data,
-                TESTDATA.connect_data_statement.case2.pytest,
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.connect_data_statement.case2.data,
-                TESTDATA.connect_data_statement.case2.robotframework,
-            ),
-        ]
-    )
-    def test_connect_data_statement_and_assign_to_var(
-        self, framework, user_data, expected_result
-    ):
-        node = ConnectDataStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-
-class TestUseTestcaseStatement:
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.use_testcase_statement.case1.data,
-                TESTDATA.use_testcase_statement.case1.unittest,
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.use_testcase_statement.case1.data,
-                TESTDATA.use_testcase_statement.case1.pytest,
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.use_testcase_statement.case1.data,
-                TESTDATA.use_testcase_statement.case1.robotframework,
-            ),
-        ]
-    )
-    def test_use_testcase_statement(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
-        node = UseTestCaseStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.use_testcase_statement.case2.data,
-                TESTDATA.use_testcase_statement.case2.unittest,
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.use_testcase_statement.case2.data,
-                TESTDATA.use_testcase_statement.case2.pytest,
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.use_testcase_statement.case2.data,
-                TESTDATA.use_testcase_statement.case2.robotframework,
-            ),
-        ]
-    )
-    def test_use_testcase_statement_and_assign_to_var(
-        self, framework, user_data, expected_result
-    ):
-        SCRIPTINFO.reset_global_vars()
-        node = UseTestCaseStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
 
@@ -550,33 +384,6 @@ class TestReleaseDeviceStatement:
     )
     def test_release_device(self, framework, user_data, expected_result):
         node = ReleaseDeviceStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-
-class TestReleaseResourceStatement:
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.release_resource_statement.case1.data,
-                TESTDATA.release_resource_statement.case1.unittest,
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.release_resource_statement.case1.data,
-                TESTDATA.release_resource_statement.case1.pytest,
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.release_resource_statement.case1.data,
-                TESTDATA.release_resource_statement.case1.robotframework,
-            ),
-        ]
-    )
-    def test_release_device(self, framework, user_data, expected_result):
-        node = ReleaseResourceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
 

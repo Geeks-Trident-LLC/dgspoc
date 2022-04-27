@@ -27,41 +27,8 @@ from dgspoc.exceptions import ConvertorTypeError
 from dgspoc.exceptions import TemplateReferenceError
 
 
-class TestResourceCls:
-    def __init__(self):
-        self.resource = DotObject()
-        self.curr_resource = DotObject()
-        self.reference = ''
-        self.kwargs = DotObject()
-
-        self.status = False
-        self.error = ''
-
-    def connect(self, reference, **kwargs):
-        self.reference = reference
-        yaml_obj = File.get_result_from_yaml_file(reference, default=dict())
-        self.resource.update(yaml_obj)
-        self.kwargs.update(kwargs)
-        return True
-
-    def release(self):
-        if self.error:
-            print(self.error)
-            return False
-        return True
-
-    def use_testcase(self, testcase):
-        testcases = self.get('testcases')
-        if testcase in testcases:
-            self.curr_resource = DotObject(testcases.get(testcase))
-            return True
-        else:
-            return False
-
-
 class Dgs:
     """Describe-Get-System class"""
-    resource = TestResourceCls()
     kwargs = DotObject()
 
     @classmethod
@@ -79,38 +46,6 @@ class Dgs:
         else:
             failure = 'duration must be a number (unexpected: %s)' % duration
             raise DurationArgumentError(failure)
-
-    @classmethod
-    def connect_resource(cls, resource_ref, **kwargs):
-        """generic connecting test resource
-
-        Parameters
-        ----------
-        resource_ref (str): a file or database
-        kwargs (dict): additional keyword arguments for connecting test resource
-
-        Returns
-        -------
-        bool: True if successfully connected test resource, otherwise, False.
-        """
-        result = cls.resource.connect(resource_ref)
-        cls.kwargs.update(kwargs)
-        return result
-
-    @classmethod
-    def use_testcase(cls, testcase):
-        """generic use testcase method
-
-        Parameters
-        ----------
-        testcase (str): a test case resource in test resource
-
-        Returns
-        -------
-        bool: True if successfully applied testcase from test resource, otherwise, False.
-        """
-        result = cls.resource.use_testcase(testcase)
-        return result
 
     @classmethod
     def connect_device(cls, host, adaptor='unreal-device', **kwargs):
@@ -161,17 +96,6 @@ class Dgs:
         bool: True if successfully released device connection, otherwise, False.
         """
         result = connection.release(**kwargs)
-        return result
-
-    @classmethod
-    def release_resource(cls):
-        """generic method to release test resources
-
-        Returns
-        -------
-        bool: True if successfully released test resource, otherwise, False.
-        """
-        result = cls.resource.release()
         return result
 
     @classmethod
@@ -227,7 +151,8 @@ class Dgs:
 
     @classmethod
     def convert_and_filter(cls, text, convertor='', template_ref='', select_statement=''):
-        """generic method to convert text to data struct and do filtering
+        """generic method to convert text to data struct and filter result
+        per select_statement
 
         Parameters
         ----------
@@ -258,7 +183,8 @@ class Dgs:
 
     @classmethod
     def do_filter_csv(cls, text, select_statement=''):
-        """generic method to convert csv text to list of dict and do filtering
+        """generic method to convert csv text to list of dict and filter
+        per select_statement
 
         Parameters
         ----------
@@ -276,7 +202,8 @@ class Dgs:
 
     @classmethod
     def do_filter_json(cls, text, select_statement=''):
-        """generic method to convert json text to data structure and do filtering
+        """generic method to convert json text to data structure and filter
+        per select_statement
 
         Parameters
         ----------
@@ -293,7 +220,8 @@ class Dgs:
 
     @classmethod
     def do_filter_template(cls, text, tmpl_ref, select_statement=''):
-        """generic method to convert text to data struct using TextFSM and do filtering
+        """generic method to convert text to data struct using TextFSM and
+        filter per select_statement
 
         Parameters
         ----------

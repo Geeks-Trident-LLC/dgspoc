@@ -13,7 +13,7 @@ from textwrap import wrap
 from dgspoc.utils import DotObject
 from dgspoc.utils import Misc
 # from dgspoc.utils import File
-from dgspoc.utils import Text
+# from dgspoc.utils import Text
 
 from dgspoc.constant import FWTYPE
 
@@ -23,12 +23,9 @@ from dgspoc.parser import CheckStatement
 
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
-from dgspoc.exceptions import ConnectDataStatementError
-from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 from dgspoc.exceptions import DisconnectDeviceStatementError
 from dgspoc.exceptions import ReleaseDeviceStatementError
-from dgspoc.exceptions import ReleaseResourceStatementError
 from dgspoc.exceptions import WaitForStatementError
 from dgspoc.exceptions import PerformerStatementError
 from dgspoc.exceptions import VerificationStatementError
@@ -110,7 +107,7 @@ class ScriptInfo(DotObject):
             if var_val == device_name:
                 return var_name
         else:
-            return 'not_found_var for %r' % device_name
+            return 'NOT_FOUND_VARIABLE_%s' % device_name
 
 
 SCRIPTINFO = ScriptInfo()
@@ -638,11 +635,7 @@ class SetupStatement(Statement):
                       is_logger=self.is_logger)
         next_line = node.get_next_statement_data()
 
-        if CheckStatement.is_child_connect_data_statement(next_line):
-            other = ConnectDataStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_child_use_testcase_statement(next_line):
-            other = UseTestCaseStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_child_connect_device_statement(next_line):
+        if CheckStatement.is_child_connect_device_statement(next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
         elif CheckStatement.is_child_dummy_statement(next_line):
             other = DummyStatement(node.remaining_data, **kwargs)
@@ -658,154 +651,6 @@ class SetupStatement(Statement):
             other.parent = node.parent
             other.update_level_from_parent()
         return other
-
-
-class ConnectDataStatement(Statement):
-    def __init__(self, data, parent=None, framework='',
-                 indentation=4, is_logger=False):
-        super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation, is_logger=is_logger)
-        self.var_name = ''
-        self.test_resource_ref = ''
-        self.parse()
-
-    @property
-    def snippet(self):
-        if not self.is_parsed:
-            return ''
-
-        kwargs = dict(v1=self.var_name, v2=self.test_resource_ref)
-        if self.is_robotframework:
-            fmt = ("${%(v1)s}=   connect data   filename=%(v2)s\nset global "
-                   "variable   ${%(v1)s}")
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-        else:
-            fmt = "{_replace_}.%(v1)s = ta.connect_data(filename=%(v2)r)"
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-
-        level = self.parent.level + 1 if self.parent else self.level
-        stmt = self.indent_data(stmt, level)
-
-        return stmt
-
-    def parse(self):
-        pattern = r'(?i) *connect +data +(?P<capture_data>.+)'
-        match = re.match(pattern, self.statement_data)
-        if match:
-            capture_data = match.group('capture_data').strip()
-            pattern = r'(?i)(?P<test_resource_ref>.+?)( +as +(?P<var_name>[a-z]\w*))?$'
-            match = re.match(pattern, capture_data)
-            
-            if not match:
-                fmt = 'Invalid connect data statement - "{}"'
-                raise ConnectDataStatementError(fmt.format(self.statement_data))
-            
-            test_resource_ref = match.group('test_resource_ref').strip()
-            var_name = match.group('var_name') or 'test_resource'
-            self.reserve_data(test_resource_ref, var_name)
-            self.name = 'connect_data'
-            self._is_parsed = True
-        else:
-            self._is_parsed = False
-
-    def reserve_data(self, test_resource_ref, var_name):
-        try:
-            SCRIPTINFO.variables.test_resource_var = var_name
-            SCRIPTINFO.variables.test_resource_ref = test_resource_ref
-            self.var_name = var_name
-            self.test_resource_ref = test_resource_ref
-            with open(test_resource_ref) as stream:
-                content = stream.read().strip()
-                if not content:
-                    if SCRIPTINFO.is_testing_enabled:
-                        SCRIPTINFO.load_testing_data()
-                        return
-                    fmt = '"{}" test resource reference has no data'
-                    raise ConnectDataStatementError(fmt.format(test_resource_ref))
-                yaml_obj = yaml.safe_load(content)
-                
-                if not Misc.is_dict(yaml_obj):
-                    if SCRIPTINFO.is_testing_enabled:
-                        SCRIPTINFO.load_testing_data()
-                        return
-                    fmt = '"" test resource reference has invalid format'
-                    raise ConnectDataStatementError(fmt.format(test_resource_ref))
-                
-                SCRIPTINFO.update(yaml_obj)
-        except Exception as ex:
-            if SCRIPTINFO.is_testing_enabled:
-                SCRIPTINFO.load_testing_data()
-            else:
-                raise ConnectDataStatementError(Text(ex))
-
-
-class UseTestCaseStatement(Statement):
-    def __init__(self, data, parent=None, framework='',
-                 indentation=4, is_logger=False):
-        super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation, is_logger=is_logger)
-        self.var_name = ''
-        self.test_name = ''
-        self.parse()
-
-    @property
-    def snippet(self):
-        if not self.is_parsed:
-            return ''
-
-        test_resource_var = SCRIPTINFO.variables.get('test_resource_var', 'test_resource')
-
-        kwargs = dict(v1=self.var_name, v2=test_resource_var, v3=self.test_name)
-        if self.is_robotframework:
-            fmt = ("${%(v1)s}=  use testcase   ${%(v2)s}  testcase=%(v3)s\n"
-                   "set global variable   ${%(v1)s}")
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-        else:
-            fmt = ("{_replace_}.%(v1)s = ta.use_testcase({_replace_}.%(v2)s, "
-                   "testcase=%(v3)r)")
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-
-        level = self.parent.level + 1 if self.parent else self.level
-        stmt = self.indent_data(stmt, level)
-
-        return stmt
-
-    def parse(self):
-        pattern = r'(?i) *use +testcase +(?P<capture_data>[a-z0-9].+)'
-        match = re.match(pattern, self.statement_data)
-        if not match:
-            self._is_parsed = False
-            return
-
-        capture_data = match.group('capture_data').strip()
-        pattern = r'(?i)(?P<test_name>.+?)( +as +(?P<var_name>[a-z]\w*))? *$'
-        match = re.match(pattern, capture_data)
-        if not match:
-            fmt = 'Invalid use testcase statement - {}'
-            raise UseTestcaseStatementError(fmt.format(self.statement_data))
-
-        test_name = match.group('test_name')
-        var_name = match.group('var_name') or 'test_data'
-
-        if test_name in SCRIPTINFO.get('testcases', dict()):
-            self.reserve_data(test_name, var_name)
-            self.name = 'use_testcase'
-            self._is_parsed = True
-        else:
-            fmt = 'CANT find "{}" test name in test resource'
-            raise UseTestcaseStatementError(fmt.format(test_name))
-
-    def reserve_data(self, test_name, var_name):
-        variables = SCRIPTINFO.get('variables', dict())
-        SCRIPTINFO.variables = variables
-        SCRIPTINFO.variables.test_data_var = self.var_name
-        SCRIPTINFO.testcase = test_name
-        self.var_name = var_name
-        self.test_name = test_name
 
 
 class ConnectDeviceStatement(Statement):
@@ -889,6 +734,10 @@ class ConnectDeviceStatement(Statement):
         else:
             var_names = [k for k in devices_vars if re.match(pattern, k)]
             if var_names:
+                for v in var_names:
+                    if host == devices_vars[v]:
+                        self.devices_vars[v] = host
+                        return
                 new_index = int(var_names[-1].strip('device')) + 1
                 key = 'device{}'.format(new_index)
                 devices_vars[key] = host
@@ -1037,61 +886,6 @@ class ReleaseDeviceStatement(Statement):
         self.vars_lst.append('device{}'.format(index + 1))
 
 
-class ReleaseResourceStatement(Statement):
-    def __init__(self, data, parent=None, framework='',
-                 indentation=4, is_logger=False):
-        super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation, is_logger=is_logger)
-
-        self.var_name = ''
-        self.parse()
-
-    @property
-    def snippet(self):
-        if not self.is_parsed:
-            return ''
-
-        if not self.var_name:
-            fmt = 'Failed to generate invalid release resource statement - {}'
-            failure = fmt.format(self.statement_data)
-            raise ReleaseResourceStatementError(failure)
-
-        kwargs = dict(v1=self.var_name)
-        if self.is_robotframework:
-            stmt = "release resource   ${%(v1)s}" % kwargs
-        else:
-            fmt = "ta.release_resource({_replace_}.%(v1)s)"
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-
-        level = self.parent.level + 1 if self.parent else self.level
-        release_resource_statement = self.indent_data(stmt, level)
-
-        return release_resource_statement
-
-    def parse(self):
-        pattern = r'(?i) *release +resource +(?P<resource_ref>\w(\S*\w)?) *$'
-        match = re.match(pattern, self.statement_data)
-        if not match:
-            self._is_parsed = False
-            return
-
-        resource_ref = match.group('resource_ref').strip()
-
-        if SCRIPTINFO.variables.test_resource_ref != resource_ref:  # noqa
-            if SCRIPTINFO.is_testing_enabled:
-                self.var_name = 'test_resource'
-            else:
-                fmt = 'CANT find {!r} resource for release resource statement'
-                failure = fmt.format(resource_ref)
-                raise ReleaseResourceStatementError(failure)
-        else:
-            self.var_name = SCRIPTINFO.variables.test_resource_var  # noqa
-
-        self.name = 'release_resource'
-        self._is_parsed = True
-
-
 class TeardownStatement(Statement):
     def __init__(self, data, parent=None, framework='',
                  indentation=4, is_logger=False):
@@ -1155,8 +949,6 @@ class TeardownStatement(Statement):
             other = DisconnectStatement(node.remaining_data, **kwargs)
         elif CheckStatement.is_child_release_device_statement(next_line):
             other = ReleaseDeviceStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_child_release_resource_statement(next_line):
-            other = ReleaseResourceStatement(node.remaining_data, **kwargs)
         elif CheckStatement.is_child_dummy_statement(next_line):
             other = DummyStatement(node.remaining_data, **kwargs)
         else:
@@ -1576,16 +1368,18 @@ class PerformerStatement(Statement):
             for device_name in result.devices_names:
                 var_name = SCRIPTINFO.get_device_var(device_name)
                 if result.has_select_statement:
-                    fmt = '{output}=   execute   ${%s}   cmdline=%s'
+                    fmt = '${output}=   execute   ${%s}   cmdline=%s'
                     lst.append(fmt % (var_name, result.operation_ref))
                     if result.is_template:
-                        fmt = ('filter   ${output}   convertor=%s   template_ref=%s\n'
+                        fmt = ('convert_and_filter\n'
+                               '...   ${output}   convertor=%s   template_ref=%s\n'
                                '...   select_statement=%s')
                         stmt = fmt % (result.convertor, result.convertor_arg,
                                       result.select_statement)
                         lst.append(stmt)
                     else:
-                        fmt = ('filter   ${output}   convertor=%s\n'
+                        fmt = ('convert_and_filter\n'
+                               '...   ${output}   convertor=%s\n'
                                '...   select_statement=%s')
                         stmt = fmt % (result.convertor, result.select_statement)
                         lst.append(stmt)
@@ -1601,14 +1395,20 @@ class PerformerStatement(Statement):
                     new_fmt = self.substitute_new_format(fmt)
                     lst.append(new_fmt % (var_name, result.operation_ref))
                     if result.is_template:
-                        fmt = ('ta.filter(output, convertor=%r, template_ref=%r,\n'
-                               '          select_statement=%r)')
+                        fmt = ('ta.convert_and_filter(\n'
+                               '    output, convertor=%r, template_ref=%r,\n'
+                               '    select_statement=%r\n'
+                               ')')
+                        fmt = fmt.replace('    ', ' ' * self.indentation)
                         stmt = fmt % (result.convertor, result.convertor_arg,
                                       result.select_statement)
                         lst.append(stmt)
                     else:
-                        fmt = ('ta.filter(output, convertor=%r,\n'
-                               '          select_statement=%r)')
+                        fmt = ('ta.convert_and_filter(\n'
+                               '    output, convertor=%r,\n'
+                               '    select_statement=%r\n'
+                               ')')
+                        fmt = fmt.replace('    ', ' ' * self.indentation)
                         stmt = fmt % (result.convertor, result.select_statement)
                         lst.append(stmt)
                 else:
@@ -1706,16 +1506,18 @@ class VerificationStatement(Statement):
             for device_name in result.devices_names:
                 var_name = SCRIPTINFO.get_device_var(device_name)
 
-                fmt = '{output}=   execute   ${%s}   cmdline=%s'
+                fmt = '${output}=   execute   ${%s}   cmdline=%s'
                 lst.append(fmt % (var_name, result.operation_ref))
                 if result.is_template:
-                    fmt = ('${result}=   filter   ${output}   convertor=%s   template_ref=%s\n'
+                    fmt = ('${result}=   convert_and_filter\n'
+                           '...   ${output}   convertor=%s   template_ref=%s\n'
                            '...   select_statement=%s')
                     stmt = fmt % (result.convertor, result.convertor_arg,
                                   result.select_statement)
                     lst.append(stmt)
                 else:
-                    fmt = ('${result}=   filter   ${output}   convertor=%s\n'
+                    fmt = ('${result}=   convert_and_filter\n'
+                           '...   ${output}   convertor=%s\n'
                            '...   select_statement=%s')
                     stmt = fmt % (result.convertor, result.select_statement)
                     lst.append(stmt)
@@ -1731,14 +1533,20 @@ class VerificationStatement(Statement):
                 new_fmt = self.substitute_new_format(fmt)
                 lst.append(new_fmt % (var_name, result.operation_ref))
                 if result.is_template:
-                    fmt = ('result = ta.filter(output, convertor=%r, template_ref=%r,\n'
-                           '                   select_statement=%r)')
+                    fmt = ('result = ta.convert_and_filter(\n'
+                           '    output, convertor=%r, template_ref=%r,\n'
+                           '    select_statement=%r\n'
+                           ')')
+                    fmt = fmt.replace('    ', ' ' * self.indentation)
                     stmt = fmt % (result.convertor, result.convertor_arg,
                                   result.select_statement)
                     lst.append(stmt)
                 else:
-                    fmt = ('result = ta.filter(output, convertor=%r,\n'
-                           '                   select_statement=%r)')
+                    fmt = ('result = ta.convert_and_filter(\n'
+                           '    output, convertor=%r,\n'
+                           '    select_statement=%r\n'
+                           ')')
+                    fmt = fmt.replace('    ', ' ' * self.indentation)
                     stmt = fmt % (result.convertor, result.select_statement)
                     lst.append(stmt)
 

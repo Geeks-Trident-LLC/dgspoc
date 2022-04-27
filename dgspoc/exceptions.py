@@ -25,14 +25,6 @@ class ComparisonOperatorError(InterpreterError):
     """Use to capture error for invalid comparison operator"""
 
 
-class ConnectDataStatementError(InterpreterError):
-    """Use to capture error for interpreting connect data statement"""
-
-
-class UseTestcaseStatementError(InterpreterError):
-    """Use to capture error for interpreting use testcase statement"""
-
-
 class ConnectDeviceStatementError(InterpreterError):
     """Use to capture error for interpreting connect device statement"""
 
@@ -43,10 +35,6 @@ class DisconnectDeviceStatementError(InterpreterError):
 
 class ReleaseDeviceStatementError(InterpreterError):
     """Use to capture error for interpreting release device statement"""
-
-
-class ReleaseResourceStatementError(InterpreterError):
-    """Use to capture error for interpreting release resource statement"""
 
 
 class WaitForStatementError(InterpreterError):
