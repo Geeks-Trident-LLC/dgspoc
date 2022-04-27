@@ -59,11 +59,6 @@ class CheckStatement:
         return bool(match)
 
     @classmethod
-    def is_connect_data_statement(cls, data):
-        match = re.match(r'(?i) *connects? +data +', data)
-        return bool(match)
-
-    @classmethod
     def is_connect_device_statement(cls, data):
         match = re.match(r'(?i) *connects? +device +', data)
         return bool(match)
@@ -116,11 +111,6 @@ class CheckStatement:
     @classmethod
     def is_child_pausing_statement(cls, data):
         chk = cls.is_pausing_statement(data) and data.startswith(' ')
-        return chk
-
-    @classmethod
-    def is_child_connect_data_statement(cls, data):
-        chk = cls.is_connect_data_statement(data) and data.startswith(' ')
         return chk
 
     @classmethod

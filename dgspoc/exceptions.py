@@ -25,10 +25,6 @@ class ComparisonOperatorError(InterpreterError):
     """Use to capture error for invalid comparison operator"""
 
 
-class ConnectDataStatementError(InterpreterError):
-    """Use to capture error for interpreting connect data statement"""
-
-
 class UseTestcaseStatementError(InterpreterError):
     """Use to capture error for interpreting use testcase statement"""
 

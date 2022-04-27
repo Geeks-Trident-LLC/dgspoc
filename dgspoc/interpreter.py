@@ -13,7 +13,7 @@ from textwrap import wrap
 from dgspoc.utils import DotObject
 from dgspoc.utils import Misc
 # from dgspoc.utils import File
-from dgspoc.utils import Text
+# from dgspoc.utils import Text
 
 from dgspoc.constant import FWTYPE
 
@@ -23,7 +23,6 @@ from dgspoc.parser import CheckStatement
 
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
-from dgspoc.exceptions import ConnectDataStatementError
 from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 from dgspoc.exceptions import DisconnectDeviceStatementError
@@ -638,9 +637,7 @@ class SetupStatement(Statement):
                       is_logger=self.is_logger)
         next_line = node.get_next_statement_data()
 
-        if CheckStatement.is_child_connect_data_statement(next_line):
-            other = ConnectDataStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_child_use_testcase_statement(next_line):
+        if CheckStatement.is_child_use_testcase_statement(next_line):
             other = UseTestCaseStatement(node.remaining_data, **kwargs)
         elif CheckStatement.is_child_connect_device_statement(next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
@@ -658,87 +655,6 @@ class SetupStatement(Statement):
             other.parent = node.parent
             other.update_level_from_parent()
         return other
-
-
-class ConnectDataStatement(Statement):
-    def __init__(self, data, parent=None, framework='',
-                 indentation=4, is_logger=False):
-        super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation, is_logger=is_logger)
-        self.var_name = ''
-        self.test_resource_ref = ''
-        self.parse()
-
-    @property
-    def snippet(self):
-        if not self.is_parsed:
-            return ''
-
-        kwargs = dict(v1=self.var_name, v2=self.test_resource_ref)
-        if self.is_robotframework:
-            fmt = ("${%(v1)s}=   connect data   filename=%(v2)s\nset global "
-                   "variable   ${%(v1)s}")
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-        else:
-            fmt = "{_replace_}.%(v1)s = ta.connect_data(filename=%(v2)r)"
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-
-        level = self.parent.level + 1 if self.parent else self.level
-        stmt = self.indent_data(stmt, level)
-
-        return stmt
-
-    def parse(self):
-        pattern = r'(?i) *connect +data +(?P<capture_data>.+)'
-        match = re.match(pattern, self.statement_data)
-        if match:
-            capture_data = match.group('capture_data').strip()
-            pattern = r'(?i)(?P<test_resource_ref>.+?)( +as +(?P<var_name>[a-z]\w*))?$'
-            match = re.match(pattern, capture_data)
-            
-            if not match:
-                fmt = 'Invalid connect data statement - "{}"'
-                raise ConnectDataStatementError(fmt.format(self.statement_data))
-            
-            test_resource_ref = match.group('test_resource_ref').strip()
-            var_name = match.group('var_name') or 'test_resource'
-            self.reserve_data(test_resource_ref, var_name)
-            self.name = 'connect_data'
-            self._is_parsed = True
-        else:
-            self._is_parsed = False
-
-    def reserve_data(self, test_resource_ref, var_name):
-        try:
-            SCRIPTINFO.variables.test_resource_var = var_name
-            SCRIPTINFO.variables.test_resource_ref = test_resource_ref
-            self.var_name = var_name
-            self.test_resource_ref = test_resource_ref
-            with open(test_resource_ref) as stream:
-                content = stream.read().strip()
-                if not content:
-                    if SCRIPTINFO.is_testing_enabled:
-                        SCRIPTINFO.load_testing_data()
-                        return
-                    fmt = '"{}" test resource reference has no data'
-                    raise ConnectDataStatementError(fmt.format(test_resource_ref))
-                yaml_obj = yaml.safe_load(content)
-                
-                if not Misc.is_dict(yaml_obj):
-                    if SCRIPTINFO.is_testing_enabled:
-                        SCRIPTINFO.load_testing_data()
-                        return
-                    fmt = '"" test resource reference has invalid format'
-                    raise ConnectDataStatementError(fmt.format(test_resource_ref))
-                
-                SCRIPTINFO.update(yaml_obj)
-        except Exception as ex:
-            if SCRIPTINFO.is_testing_enabled:
-                SCRIPTINFO.load_testing_data()
-            else:
-                raise ConnectDataStatementError(Text(ex))
 
 
 class UseTestCaseStatement(Statement):
