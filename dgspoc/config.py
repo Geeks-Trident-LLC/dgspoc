@@ -14,7 +14,7 @@ import robot
 from dgspoc.utils import File
 from dgspoc.utils import Misc
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 version = __version__
 
 __all__ = [
