@@ -192,7 +192,6 @@ class TestConnectDeviceStatement:
     def test_connect_single_device_with_default_var_name(
         self, framework, user_data, expected_result
     ):
-        SCRIPTINFO.reset_global_vars()
         SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
@@ -221,7 +220,6 @@ class TestConnectDeviceStatement:
     def test_connect_multiple_devices_with_default_var_name(
         self, framework, user_data, expected_result
     ):
-        SCRIPTINFO.reset_global_vars()
         SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
@@ -248,7 +246,6 @@ class TestConnectDeviceStatement:
         ]
     )
     def test_connect_devices_with_custom_var_name(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
         SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
@@ -275,7 +272,6 @@ class TestConnectDeviceStatement:
         ]
     )
     def test_connect_devices_with_mixing_var_name(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
         SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
@@ -302,7 +298,6 @@ class TestConnectDeviceStatement:
         ]
     )
     def test_connect_device_with_other_format(self, framework, user_data, expected_result):
-        SCRIPTINFO.reset_global_vars()
         SCRIPTINFO.reset_devices_vars()
         node = ConnectDeviceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet

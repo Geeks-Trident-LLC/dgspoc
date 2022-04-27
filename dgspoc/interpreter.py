@@ -38,11 +38,6 @@ class ScriptInfo(DotObject):
         super().__init__(*args, **kwargs)
         self.testcase = testcase
         self.devices_vars = dict()
-        self.variables = dict(
-            test_resource_var='test_resource',
-            test_resource_ref='',
-            test_data_var='test_data'
-        )
         self._enabled_testing = False
 
     @property
@@ -93,13 +88,6 @@ class ScriptInfo(DotObject):
 
     def reset_devices_vars(self):
         self.devices_vars = dict()
-
-    def reset_global_vars(self):
-        self.variables = dict(
-            test_resource_var='test_resource',
-            test_resource_ref='',
-            test_data_var='test_data'
-        )
 
     def get_device_var(self, device_name):
 
