@@ -50,34 +50,6 @@ class ScriptInfo(DotObject):
     def disable_testing(self):
         self._enabled_testing = False
 
-    def load_testing_data(self):
-        if not self.is_testing_enabled:
-            return
-
-        data = """
-            devices:
-              1.1.1.1:
-                name: device1
-              1.1.1.2:
-                name: device2
-            testcases:
-              test1:
-                ref_1: blab blab
-                script_builder:
-                  class_name: Testcase1
-                  test_precondition: precondition
-                  test_case1: case1
-                  test_case2: case2
-              test2:
-                ref_2: blab blab
-                script_builder:
-                  class_name: Testcase2
-                  test_precondition: precondition
-                  test_case1: case1
-                  test_case2: case2
-        """
-        self.update(yaml.safe_load(data))
-
     def get_class_name(self):
         if 'testcases' in self:
             node = self.testcases.get(self.testcase)
