@@ -38,11 +38,6 @@ class ScriptInfo(DotObject):
         super().__init__(*args, **kwargs)
         self.testcase = testcase
         self.devices_vars = dict()
-        self.variables = dict(
-            test_resource_var='test_resource',
-            test_resource_ref='',
-            test_data_var='test_data'
-        )
         self._enabled_testing = False
 
     @property
@@ -55,34 +50,6 @@ class ScriptInfo(DotObject):
     def disable_testing(self):
         self._enabled_testing = False
 
-    def load_testing_data(self):
-        if not self.is_testing_enabled:
-            return
-
-        data = """
-            devices:
-              1.1.1.1:
-                name: device1
-              1.1.1.2:
-                name: device2
-            testcases:
-              test1:
-                ref_1: blab blab
-                script_builder:
-                  class_name: Testcase1
-                  test_precondition: precondition
-                  test_case1: case1
-                  test_case2: case2
-              test2:
-                ref_2: blab blab
-                script_builder:
-                  class_name: Testcase2
-                  test_precondition: precondition
-                  test_case1: case1
-                  test_case2: case2
-        """
-        self.update(yaml.safe_load(data))
-
     def get_class_name(self):
         if 'testcases' in self:
             node = self.testcases.get(self.testcase)
@@ -93,13 +60,6 @@ class ScriptInfo(DotObject):
 
     def reset_devices_vars(self):
         self.devices_vars = dict()
-
-    def reset_global_vars(self):
-        self.variables = dict(
-            test_resource_var='test_resource',
-            test_resource_ref='',
-            test_data_var='test_data'
-        )
 
     def get_device_var(self, device_name):
 
@@ -672,19 +632,16 @@ class ConnectDeviceStatement(Statement):
             failure = fmt.format(self.statement_data)
             raise ConnectDeviceStatementError(failure)
 
-        test_resource_var = SCRIPTINFO.variables.test_resource_var  # noqa
-
         lst = []
         for var_name, device_name in self.devices_vars.items():
-            kwargs = dict(v1=var_name, v2=test_resource_var, v3=device_name)
+            kwargs = dict(v1=var_name, v2=device_name)
             if self.is_robotframework:
-                fmt = ("${%(v1)s}=   connect device   ${%(v2)s}   "
-                       "name=%(v3)s\nset global variable   ${%(v1)s}")
+                fmt = ("${%(v1)s}=   connect device   %(v2)s\n"
+                       "set global variable   ${%(v1)s}")
                 new_fmt = self.substitute_new_format(fmt)
                 stmt = new_fmt % kwargs
             else:
-                fmt = ("{_replace_}.%(v1)s = ta.connect_device({_replace_}."
-                       "%(v2)s, name=%(v3)r)")
+                fmt = "{_replace_}.%(v1)s = ta.connect_device(%(v2)r)"
                 new_fmt = self.substitute_new_format(fmt)
                 stmt = new_fmt % kwargs
             lst.append(stmt)
