@@ -14,7 +14,6 @@ from dgspoc.interpreter import UseTestCaseStatement
 from dgspoc.interpreter import ConnectDeviceStatement
 from dgspoc.interpreter import DisconnectStatement
 from dgspoc.interpreter import ReleaseDeviceStatement
-from dgspoc.interpreter import ReleaseResourceStatement
 from dgspoc.interpreter import LoopStatement
 from dgspoc.interpreter import PerformerStatement
 from dgspoc.interpreter import VerificationStatement
@@ -497,33 +496,6 @@ class TestReleaseDeviceStatement:
     )
     def test_release_device(self, framework, user_data, expected_result):
         node = ReleaseDeviceStatement(user_data, indentation=indentation, framework=framework)
-        snippet = node.snippet
-        assert snippet == expected_result
-
-
-class TestReleaseResourceStatement:
-    @pytest.mark.parametrize(
-        ('framework', 'user_data', 'expected_result'),
-        [
-            (
-                FWTYPE.UNITTEST,
-                TESTDATA.release_resource_statement.case1.data,
-                TESTDATA.release_resource_statement.case1.unittest,
-            ),
-            (
-                FWTYPE.PYTEST,
-                TESTDATA.release_resource_statement.case1.data,
-                TESTDATA.release_resource_statement.case1.pytest,
-            ),
-            (
-                FWTYPE.ROBOTFRAMEWORK,
-                TESTDATA.release_resource_statement.case1.data,
-                TESTDATA.release_resource_statement.case1.robotframework,
-            ),
-        ]
-    )
-    def test_release_device(self, framework, user_data, expected_result):
-        node = ReleaseResourceStatement(user_data, indentation=indentation, framework=framework)
         snippet = node.snippet
         assert snippet == expected_result
 
