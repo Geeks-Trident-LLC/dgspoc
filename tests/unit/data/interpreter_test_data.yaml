@@ -85,22 +85,6 @@ setup_statement:
         ${device1}=   connect device   ${test_resource}   name=device1
         set global variable   ${device1}
 
-connect_data_statement:
-
-  case1:
-    data: connect data test_resource.yaml
-    unittest: test_resource = ta.connect_data(filename='test_resource.yaml')
-    pytest: test_resource = ta.connect_data(filename='test_resource.yaml')
-    robotframework: |-
-      ${test_resource}=   connect data   filename=test_resource.yaml
-
-  case2:
-    data: connect data test_resource.yaml as my_test_resource_var
-    unittest: my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
-    pytest: my_test_resource_var = ta.connect_data(filename='test_resource.yaml')
-    robotframework: |-
-      ${my_test_resource_var}=   connect data   filename=test_resource.yaml
-
 connect_device_statement:
 
   case1:
