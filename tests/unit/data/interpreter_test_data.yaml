@@ -72,87 +72,87 @@ setup_statement:
       ############ skip this line ############
         @classmethod
         def setUpClass(cls):
-          cls.device1 = ta.connect_device(cls.test_resource, name='device1')
+          cls.device1 = ta.connect_device('device1')
 
     pytest: |-
       ############ skip this line ############
         def setup_class(self):
-          self.device1 = ta.connect_device(self.test_resource, name='device1')
+          self.device1 = ta.connect_device('device1')
 
     robotframework: |-
       ############ skip this line ############
       setup
-        ${device1}=   connect device   ${test_resource}   name=device1
+        ${device1}=   connect device   device1
         set global variable   ${device1}
 
 connect_device_statement:
 
   case1:
     data: connect device device1
-    unittest: device1 = ta.connect_device(test_resource, name='device1')
-    pytest: device1 = ta.connect_device(test_resource, name='device1')
+    unittest: device1 = ta.connect_device('device1')
+    pytest: device1 = ta.connect_device('device1')
     robotframework: |-
-      ${device1}=   connect device   ${test_resource}   name=device1
+      ${device1}=   connect device   device1
 
   case2:
     data: connect device device1, device5, device8
     unittest: |-
-      device1 = ta.connect_device(test_resource, name='device1')
-      device2 = ta.connect_device(test_resource, name='device5')
-      device3 = ta.connect_device(test_resource, name='device8')
+      device1 = ta.connect_device('device1')
+      device2 = ta.connect_device('device5')
+      device3 = ta.connect_device('device8')
     pytest: |-
-      device1 = ta.connect_device(test_resource, name='device1')
-      device2 = ta.connect_device(test_resource, name='device5')
-      device3 = ta.connect_device(test_resource, name='device8')
+      device1 = ta.connect_device('device1')
+      device2 = ta.connect_device('device5')
+      device3 = ta.connect_device('device8')
     robotframework: |-
-      ${device1}=   connect device   ${test_resource}   name=device1
-      ${device2}=   connect device   ${test_resource}   name=device5
-      ${device3}=   connect device   ${test_resource}   name=device8
+      ${device1}=   connect device   device1
+      ${device2}=   connect device   device5
+      ${device3}=   connect device   device8
 
   case3:
     data: connect device device1 as first_device, device5 as second_device, device8 as third_device
     unittest: |-
-      first_device = ta.connect_device(test_resource, name='device1')
-      second_device = ta.connect_device(test_resource, name='device5')
-      third_device = ta.connect_device(test_resource, name='device8')
+      first_device = ta.connect_device('device1')
+      second_device = ta.connect_device('device5')
+      third_device = ta.connect_device('device8')
     pytest: |-
-      first_device = ta.connect_device(test_resource, name='device1')
-      second_device = ta.connect_device(test_resource, name='device5')
-      third_device = ta.connect_device(test_resource, name='device8')
+      first_device = ta.connect_device('device1')
+      second_device = ta.connect_device('device5')
+      third_device = ta.connect_device('device8')
     robotframework: |-
-      ${first_device}=   connect device   ${test_resource}   name=device1
-      ${second_device}=   connect device   ${test_resource}   name=device5
-      ${third_device}=   connect device   ${test_resource}   name=device8
+      ${first_device}=   connect device   device1
+      ${second_device}=   connect device   device5
+      ${third_device}=   connect device   device8
 
   case4:
     data: connect device device1, device5 as peer_device, device8
     unittest: |-
-      device1 = ta.connect_device(test_resource, name='device1')
-      peer_device = ta.connect_device(test_resource, name='device5')
-      device2 = ta.connect_device(test_resource, name='device8')
+      device1 = ta.connect_device('device1')
+      peer_device = ta.connect_device('device5')
+      device2 = ta.connect_device('device8')
     pytest: |-
-      device1 = ta.connect_device(test_resource, name='device1')
-      peer_device = ta.connect_device(test_resource, name='device5')
-      device2 = ta.connect_device(test_resource, name='device8')
+      device1 = ta.connect_device('device1')
+      peer_device = ta.connect_device('device5')
+      device2 = ta.connect_device('device8')
     robotframework: |-
-      ${device1}=   connect device   ${test_resource}   name=device1
-      ${peer_device}=   connect device   ${test_resource}   name=device5
-      ${device2}=   connect device   ${test_resource}   name=device8
+      ${device1}=   connect device   device1
+      ${peer_device}=   connect device   device5
+      ${device2}=   connect device   device8
 
   case5:
     data: connect device {device1, device5 as peer_device, device8}
     unittest: |-
-      device1 = ta.connect_device(test_resource, name='device1')
-      peer_device = ta.connect_device(test_resource, name='device5')
-      device2 = ta.connect_device(test_resource, name='device8')
+      device1 = ta.connect_device('device1')
+      peer_device = ta.connect_device('device5')
+      device2 = ta.connect_device('device8')
     pytest: |-
-      device1 = ta.connect_device(test_resource, name='device1')
-      peer_device = ta.connect_device(test_resource, name='device5')
-      device2 = ta.connect_device(test_resource, name='device8')
+      device1 = ta.connect_device('device1')
+      peer_device = ta.connect_device('device5')
+      device2 = ta.connect_device('device8')
     robotframework: |-
-      ${device1}=   connect device   ${test_resource}   name=device1
-      ${peer_device}=   connect device   ${test_resource}   name=device5
-      ${device2}=   connect device   ${test_resource}   name=device8
+      ${device1}=   connect device   device1
+      ${peer_device}=   connect device   device5
+      ${device2}=   connect device   device8
 
 disconnect_device_statement:
 
@@ -815,7 +815,7 @@ script_builder:
       
         @classmethod
         def setUpClass(cls):
-          cls.device1 = ta.connect_device(cls.test_resource, name='device1')
+          cls.device1 = ta.connect_device('device1')
       
         @classmethod
         def tearDownClass(cls):
@@ -840,7 +840,7 @@ script_builder:
       class TestClass:
       
         def setup_class(self):
-          self.device1 = ta.connect_device(self.test_resource, name='device1')
+          self.device1 = ta.connect_device('device1')
       
         def teardown_class(self):
           ta.disconnect_device(self.device1)
@@ -863,7 +863,7 @@ script_builder:
       
       *** Keywords ***
       setup
-        ${device1}=   connect device   ${test_resource}   name=device1
+        ${device1}=   connect device   device1
         set global variable   ${device1}
       
       teardown
@@ -909,7 +909,7 @@ script_builder:
       
         @classmethod
         def setUpClass(cls):
-          cls.device1 = ta.connect_device(cls.test_resource, name='device1')
+          cls.device1 = ta.connect_device('device1')
       
         @classmethod
         def tearDownClass(cls):
@@ -969,7 +969,7 @@ script_builder:
       class TestClass:
       
         def setup_class(self):
-          self.device1 = ta.connect_device(self.test_resource, name='device1')
+          self.device1 = ta.connect_device('device1')
       
         def teardown_class(self):
           ta.disconnect_device(self.device1)
@@ -1027,7 +1027,7 @@ script_builder:
       
       *** Keywords ***
       setup
-        ${device1}=   connect device   ${test_resource}   name=device1
+        ${device1}=   connect device   device1
         set global variable   ${device1}
       
       teardown

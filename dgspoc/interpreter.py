@@ -672,19 +672,16 @@ class ConnectDeviceStatement(Statement):
             failure = fmt.format(self.statement_data)
             raise ConnectDeviceStatementError(failure)
 
-        test_resource_var = SCRIPTINFO.variables.test_resource_var  # noqa
-
         lst = []
         for var_name, device_name in self.devices_vars.items():
-            kwargs = dict(v1=var_name, v2=test_resource_var, v3=device_name)
+            kwargs = dict(v1=var_name, v2=device_name)
             if self.is_robotframework:
-                fmt = ("${%(v1)s}=   connect device   ${%(v2)s}   "
-                       "name=%(v3)s\nset global variable   ${%(v1)s}")
+                fmt = ("${%(v1)s}=   connect device   %(v2)s\n"
+                       "set global variable   ${%(v1)s}")
                 new_fmt = self.substitute_new_format(fmt)
                 stmt = new_fmt % kwargs
             else:
-                fmt = ("{_replace_}.%(v1)s = ta.connect_device({_replace_}."
-                       "%(v2)s, name=%(v3)r)")
+                fmt = "{_replace_}.%(v1)s = ta.connect_device(%(v2)r)"
                 new_fmt = self.substitute_new_format(fmt)
                 stmt = new_fmt % kwargs
             lst.append(stmt)
