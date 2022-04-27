@@ -1,18 +1,25 @@
+"""Module containing the logic for constant definition"""
 
+import re
 from enum import IntFlag
 
 
-class IValue:
+class ICSValue:
+    """Treating value as ignore case and ignore space during evaluating
+    string equality"""
     def __init__(self, value):
         self.value = str(value)
 
     def __eq__(self, other):
         value1 = self.value.lower()
+
         if isinstance(other, self.__class__):
             value2 = other.value.lower()
         else:
             value2 = str(other).lower()
 
+        value1 = re.sub(' +', ' ', value1)
+        value2 = re.sub(' +', ' ', value2)
         chk = value1.strip() == value2.strip()
         return chk
 
@@ -62,6 +69,6 @@ class FWTYPE:
 
 
 class CONVTYPE:
-    CSV = IValue('csv')
-    JSON = IValue('json')
-    TEMPLATE = IValue('template')
+    CSV = ICSValue('csv')
+    JSON = ICSValue('json')
+    TEMPLATE = ICSValue('template')
