@@ -70,44 +70,50 @@ class UnrealDeviceAdaptor:
         return self.status
 
     def connect(self):
-        fmt = 'unreal-device connect {0.address} {0.testcase}'
-        unreal_statement = fmt.format(self).strip()
+        fmt = 'unreal-device connect --host={}'
+        unreal_statement = fmt.format(self.address)
+        if self.testcase:
+            fmt = '{} --testcase={}'
+            unreal_statement = fmt.format(unreal_statement, self.testcase)
         self.process(unreal_statement)
         return self.status
 
     def execute(self, *args, **kwargs):
         addr = kwargs.get('name', self.address)
         cmdline = args[0]
-        fmt = 'unreal-device execute {}::{}'
-        unreal_statement = fmt.format(addr, cmdline)
+        fmt = 'unreal-device execute {} --host={}'
+        unreal_statement = fmt.format(cmdline, addr)
         self.process(unreal_statement)
         return self.result
 
     def configure(self, *args, **kwargs):
         addr = kwargs.get('name', self.address)
         cfg_reference = args[0]
-        fmt = 'unreal-device configure {}::{}'
-        unreal_statement = fmt.format(addr, cfg_reference)
+        fmt = 'unreal-device configure {} --host={}'
+        unreal_statement = fmt.format(cfg_reference, addr)
         self.process(unreal_statement)
         return self.result
 
     def disconnect(self, *args, **kwargs):      # noqa
         addr = kwargs.get('name', self.address)
-        fmt = 'unreal-device disconnect {}'
+        fmt = 'unreal-device disconnect --host={}'
         unreal_statement = fmt.format(addr)
         self.process(unreal_statement)
         return self.status
 
     def reload(self, *args, **kwargs):      # noqa
         addr = kwargs.get('name', self.address)
-        fmt = 'unreal-device reload {} {}'
-        unreal_statement = fmt.format(addr, self.testcase)
+        fmt = 'unreal-device reload --host={}'
+        unreal_statement = fmt.format(addr)
+        if self.testcase:
+            fmt = '{} --testcase={}'
+            unreal_statement = fmt.format(unreal_statement, self.testcase)
         self.process(unreal_statement)
         return self.status
 
     def release(self, *args, **kwargs):     # noqa
         addr = kwargs.get('name', self.address)
-        fmt = 'unreal-device destroy {}'
+        fmt = 'unreal-device release --host={}'
         unreal_statement = fmt.format(addr)
         self.process(unreal_statement)
         return self.status
