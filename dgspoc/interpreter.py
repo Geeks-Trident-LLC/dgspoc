@@ -110,7 +110,7 @@ class ScriptInfo(DotObject):
             if var_val == device_name:
                 return var_name
         else:
-            return 'not_found_var for %r' % device_name
+            return 'NOT_FOUND_VARIABLE_%s' % device_name
 
 
 SCRIPTINFO = ScriptInfo()
@@ -889,6 +889,10 @@ class ConnectDeviceStatement(Statement):
         else:
             var_names = [k for k in devices_vars if re.match(pattern, k)]
             if var_names:
+                for v in var_names:
+                    if host == devices_vars[v]:
+                        self.devices_vars[v] = host
+                        return
                 new_index = int(var_names[-1].strip('device')) + 1
                 key = 'device{}'.format(new_index)
                 devices_vars[key] = host
