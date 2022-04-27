@@ -20,17 +20,6 @@ def release_resource():
     return result
 
 
-def use_testcase(testcase):
-    """generic function to use testcase resource from test resource
-    | Parameters:
-    |     testcase (str): testcase from test result
-    | Returns:
-    |     bool: True if testcase resource is available, otherwise, False.
-    """
-    result = Dgs.use_testcase(testcase)
-    return result
-
-
 def connect_device(host, adaptor='unreal-device', **kwargs):
     """generic function to establish device connection
     | Parameters:

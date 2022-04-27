@@ -81,21 +81,6 @@ class Dgs:
             raise DurationArgumentError(failure)
 
     @classmethod
-    def use_testcase(cls, testcase):
-        """generic use testcase method
-
-        Parameters
-        ----------
-        testcase (str): a test case resource in test resource
-
-        Returns
-        -------
-        bool: True if successfully applied testcase from test resource, otherwise, False.
-        """
-        result = cls.resource.use_testcase(testcase)
-        return result
-
-    @classmethod
     def connect_device(cls, host, adaptor='unreal-device', **kwargs):
         """generic connecting device
 
