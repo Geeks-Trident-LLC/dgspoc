@@ -74,11 +74,6 @@ class CheckStatement:
         return bool(match)
 
     @classmethod
-    def is_release_resource_statement(cls, data):
-        match = re.match(r'(?i) *releases? +resource +', data)
-        return bool(match)
-
-    @classmethod
     def is_dummy_statement(cls, data):
         match = re.match(r'(?i) *dummy[_. -]*(pass|fail)', data)
         return bool(match)
@@ -121,11 +116,6 @@ class CheckStatement:
     @classmethod
     def is_child_release_device_statement(cls, data):
         chk = cls.is_release_device_statement(data) and data.startswith(' ')
-        return chk
-
-    @classmethod
-    def is_child_release_resource_statement(cls, data):
-        chk = cls.is_release_resource_statement(data) and data.startswith(' ')
         return chk
 
     @classmethod
