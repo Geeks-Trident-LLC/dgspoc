@@ -64,11 +64,6 @@ class CheckStatement:
         return bool(match)
 
     @classmethod
-    def is_use_testcase_statement(cls, data):
-        match = re.match(r'(?i) *uses? +testcase +', data)
-        return bool(match)
-
-    @classmethod
     def is_disconnect_device_statement(cls, data):
         match = re.match(r'(?i) *disconnects?( +device)? +', data)
         return bool(match)
@@ -116,11 +111,6 @@ class CheckStatement:
     @classmethod
     def is_child_connect_device_statement(cls, data):
         chk = cls.is_connect_device_statement(data) and data.startswith(' ')
-        return chk
-
-    @classmethod
-    def is_child_use_testcase_statement(cls, data):
-        chk = cls.is_use_testcase_statement(data) and data.startswith(' ')
         return chk
 
     @classmethod

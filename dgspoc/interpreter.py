@@ -23,7 +23,6 @@ from dgspoc.parser import CheckStatement
 
 from dgspoc.exceptions import NotImplementedFrameworkError
 from dgspoc.exceptions import ComparisonOperatorError
-from dgspoc.exceptions import UseTestcaseStatementError
 from dgspoc.exceptions import ConnectDeviceStatementError
 from dgspoc.exceptions import DisconnectDeviceStatementError
 from dgspoc.exceptions import ReleaseDeviceStatementError
@@ -637,9 +636,7 @@ class SetupStatement(Statement):
                       is_logger=self.is_logger)
         next_line = node.get_next_statement_data()
 
-        if CheckStatement.is_child_use_testcase_statement(next_line):
-            other = UseTestCaseStatement(node.remaining_data, **kwargs)
-        elif CheckStatement.is_child_connect_device_statement(next_line):
+        if CheckStatement.is_child_connect_device_statement(next_line):
             other = ConnectDeviceStatement(node.remaining_data, **kwargs)
         elif CheckStatement.is_child_dummy_statement(next_line):
             other = DummyStatement(node.remaining_data, **kwargs)
@@ -655,73 +652,6 @@ class SetupStatement(Statement):
             other.parent = node.parent
             other.update_level_from_parent()
         return other
-
-
-class UseTestCaseStatement(Statement):
-    def __init__(self, data, parent=None, framework='',
-                 indentation=4, is_logger=False):
-        super().__init__(data, parent=parent, framework=framework,
-                         indentation=indentation, is_logger=is_logger)
-        self.var_name = ''
-        self.test_name = ''
-        self.parse()
-
-    @property
-    def snippet(self):
-        if not self.is_parsed:
-            return ''
-
-        test_resource_var = SCRIPTINFO.variables.get('test_resource_var', 'test_resource')
-
-        kwargs = dict(v1=self.var_name, v2=test_resource_var, v3=self.test_name)
-        if self.is_robotframework:
-            fmt = ("${%(v1)s}=  use testcase   ${%(v2)s}  testcase=%(v3)s\n"
-                   "set global variable   ${%(v1)s}")
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-        else:
-            fmt = ("{_replace_}.%(v1)s = ta.use_testcase({_replace_}.%(v2)s, "
-                   "testcase=%(v3)r)")
-            new_fmt = self.substitute_new_format(fmt)
-            stmt = new_fmt % kwargs
-
-        level = self.parent.level + 1 if self.parent else self.level
-        stmt = self.indent_data(stmt, level)
-
-        return stmt
-
-    def parse(self):
-        pattern = r'(?i) *use +testcase +(?P<capture_data>[a-z0-9].+)'
-        match = re.match(pattern, self.statement_data)
-        if not match:
-            self._is_parsed = False
-            return
-
-        capture_data = match.group('capture_data').strip()
-        pattern = r'(?i)(?P<test_name>.+?)( +as +(?P<var_name>[a-z]\w*))? *$'
-        match = re.match(pattern, capture_data)
-        if not match:
-            fmt = 'Invalid use testcase statement - {}'
-            raise UseTestcaseStatementError(fmt.format(self.statement_data))
-
-        test_name = match.group('test_name')
-        var_name = match.group('var_name') or 'test_data'
-
-        if test_name in SCRIPTINFO.get('testcases', dict()):
-            self.reserve_data(test_name, var_name)
-            self.name = 'use_testcase'
-            self._is_parsed = True
-        else:
-            fmt = 'CANT find "{}" test name in test resource'
-            raise UseTestcaseStatementError(fmt.format(test_name))
-
-    def reserve_data(self, test_name, var_name):
-        variables = SCRIPTINFO.get('variables', dict())
-        SCRIPTINFO.variables = variables
-        SCRIPTINFO.variables.test_data_var = self.var_name
-        SCRIPTINFO.testcase = test_name
-        self.var_name = var_name
-        self.test_name = test_name
 
 
 class ConnectDeviceStatement(Statement):
