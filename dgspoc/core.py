@@ -81,23 +81,6 @@ class Dgs:
             raise DurationArgumentError(failure)
 
     @classmethod
-    def connect_resource(cls, resource_ref, **kwargs):
-        """generic connecting test resource
-
-        Parameters
-        ----------
-        resource_ref (str): a file or database
-        kwargs (dict): additional keyword arguments for connecting test resource
-
-        Returns
-        -------
-        bool: True if successfully connected test resource, otherwise, False.
-        """
-        result = cls.resource.connect(resource_ref)
-        cls.kwargs.update(kwargs)
-        return result
-
-    @classmethod
     def use_testcase(cls, testcase):
         """generic use testcase method
 

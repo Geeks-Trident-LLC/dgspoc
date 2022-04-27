@@ -11,18 +11,6 @@ def wait_for(duration):
     Dgs.wait_for(duration)
 
 
-def connect_resource(resource_ref, **kwargs):
-    """generic function to connect test resource
-    | Parameters:
-    |     resource_ref (str): a file name or database
-    |     kwargs (dict): additional keyword arguments for connecting test resource
-    | Returns:
-    |     bool: True if successfully connected resource, otherwise, False.
-    """
-    result = Dgs.connect_resource(resource_ref, **kwargs)
-    return result
-
-
 def release_resource():
     """generic function to release test resource
     | Returns:
