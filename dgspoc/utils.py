@@ -14,6 +14,12 @@ import yaml
 
 import typing
 
+from io import StringIO
+
+from textfsm import TextFSM
+
+from dgspoc.exceptions import UtilsParsedTemplateError
+
 
 class Text(str):
     def __new__(cls, *args, **kwargs):
@@ -545,3 +551,45 @@ class DotObject(DictObject):
     def __getitem__(self, key):
         value = super().__getitem__(key)
         return DotObject(value) if Misc.is_dict(value) else value
+
+
+def parse_template_result(test_data='', test_file='',
+                          template_data='', template_file=''):
+
+    if not any([test_data, test_file]):
+        failure = 'Neither test_data nor test_file CANT be empty.'
+        raise UtilsParsedTemplateError(failure)
+    else:
+        if not test_data:
+            if File.is_exist(test_file):
+                test_data = File.get_content(test_file)
+            else:
+                failure = '%r test data file is not existed.' % test_file
+                raise UtilsParsedTemplateError(failure)
+
+    if not any([template_data, template_file]):
+        failure = 'Neither template_data nor template_file CANT be empty.'
+        raise UtilsParsedTemplateError(failure)
+    else:
+        if template_data:
+            template = template_data
+        else:
+            if File.is_exist(template_file):
+                template = File.get_content(template_file)
+            else:
+                failure = '%r template file is not existed.' % template_file
+                raise UtilsParsedTemplateError(failure)
+
+    try:
+        stream = StringIO(template)
+        parser = TextFSM(stream)
+        rows = parser.ParseTextToDicts(test_data)
+
+        result = DotObject(
+            test_data=test_data, template=template,
+            records=rows, records_count=len(rows)
+        )
+        return result
+    except Exception as ex:
+        failure = 'BAD-TEMPLATE ({})'.format(Text(ex))
+        raise UtilsParsedTemplateError(failure)
