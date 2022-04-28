@@ -3,13 +3,19 @@
 import sys
 import re
 import argparse
+import operator
+
+from functools import partial
 
 from dgspoc.utils import File
 from dgspoc.utils import Printer
 from dgspoc.utils import Text
-from dgspoc.utils import DictObject
+from dgspoc.utils import DotObject
+from dgspoc.utils import parse_template_result
+from dgspoc.utils import Misc
 
 from dgspoc.constant import ECODE
+from dgspoc.constant import CONVTYPE
 
 from dgspoc.storage import TemplateStorage
 
@@ -19,7 +25,14 @@ from dgspoc.usage import show_usage
 
 from dgspoc.adaptor import Adaptor
 
+from dgspoc.parser import ParsedOperation
+from dgspoc.parser import CheckStatement
+
 from templateapp import TemplateBuilder
+
+from dlapp import DLQuery
+from dlapp import create_from_csv_data
+from dlapp import create_from_json_data
 
 from io import StringIO
 from textfsm import TextFSM
@@ -243,7 +256,7 @@ def get_parsed_result(options, test_data):
         parser = TextFSM(stream)
         rows = parser.ParseTextToDicts(test_data)
 
-        result = DictObject(
+        result = DotObject(
             test_data=test_data, template=template,
             records=rows, records_count=len(rows)
         )
@@ -353,9 +366,159 @@ def do_test_verification(options):
 
 
 def do_testing(options):
+    pattern = '^--(template-id|(file(-?name)?))='
     command, operands = options.command, list(options.operands)
-    # op_count = len(operands)
+    adaptor = options.adaptor.strip().lower()
+
+    action = options.action.strip()
     if command == 'test':
         name = command
         validate_usage(name, operands)
         validate_example_usage(name, operands)
+
+        is_showed = False
+        if re.search(r'(?i)--showed\b', action):
+            is_showed = True
+            action = re.sub(r'(?i)--showed\b', '', action).strip()
+
+        is_tabular = False
+        if re.search(r'(?i)--tabular\b', action):
+            is_tabular = True
+            action = re.sub(r'(?i)--tabular\b', '', action).strip()
+
+        adaptor = adaptor or 'stream'
+        is_adaptor_stream = bool(re.match(r'(stream|file(name)?)$', adaptor))
+        is_performer_stmt = CheckStatement.is_performer_statement(action)
+        is_execute_cmdline = CheckStatement.is_execute_cmdline(action)
+
+        if is_adaptor_stream:
+            data = 'dummy execute %s' % action if not is_execute_cmdline else action
+
+            node = ParsedOperation(data)
+
+            if not node.convertor == CONVTYPE.TEMPLATE or not node.convertor_arg:
+                print('*** Invalid action: %s ***' % action)
+                sys.exit(ECODE.BAD)
+
+            test_data_file = re.sub(pattern, '', node.operation_ref.strip())
+            pfunc = partial(parse_template_result, test_file=test_data_file)
+
+            try:
+                if re.match('(?i)--file', node.convertor_arg.strip()):
+                    template_file = re.sub(pattern, '', node.convertor_arg.strip())
+                    result = pfunc(template_file=template_file)
+                else:
+                    tmpl_id = re.sub(pattern, '', node.convertor_arg.strip())
+                    if TemplateStorage.check(tmpl_id):
+                        tmpl_data = TemplateStorage.get(tmpl_id)
+                        result = pfunc(template_data=tmpl_data)
+                    else:
+                        fmt = '*** %r template id CANT find in template storage.'
+                        print(fmt % tmpl_id)
+                        sys.exit(ECODE.BAD)
+            except Exception as ex:
+                failure = '*** %s' % ex
+                print(failure)
+                sys.exit(ECODE.BAD)
+
+        else:
+            if not CheckStatement.is_performer_statement(action):
+                failure = '*** Invalid action: %s ***' % action
+                print(failure)
+                sys.exit(ECODE.BAD)
+
+            node = ParsedOperation(action)
+            if not node.devices_names:
+                failure = '*** Invalid action: %s ***' % action
+                print(failure)
+                sys.exit(ECODE.BAD)
+
+            host = node.devices_names[0]
+            connection = Adaptor(adaptor, host)
+            tbl = dict(execution=connection.execute,
+                       configuration=connection.configure,
+                       reload=connection.reload())
+            operation_method = tbl[node.name]
+            connection.connect()
+            output = operation_method(node.operation_ref)
+            connection.release()
+
+            if node.is_reload or node.is_configuration:
+                print(output)
+                sys.exit(ECODE.SUCCESS)
+
+            if node.is_csv or node.is_json:
+                method = create_from_json_data if node.is_json else create_from_csv_data
+                records = method(output)
+                result = DotObject(
+                    test_data=output, template='',
+                    records=records, records_count=len(records)
+                )
+            elif node.is_template:
+                pfunc = partial(parse_template_result, test_data=output)
+                try:
+                    if re.match('(?i)--file', node.convertor_arg.strip()):
+                        template_file = re.sub(pattern, '', node.convertor_arg.strip())
+                        result = pfunc(template_file=template_file)
+                    else:
+                        tmpl_id = re.sub(pattern, '', node.convertor_arg.strip())
+                        if TemplateStorage.check(tmpl_id):
+                            tmpl_data = TemplateStorage.get(tmpl_id)
+                            result = pfunc(template_data=tmpl_data)
+                        else:
+                            fmt = '*** %r template id CANT find in template storage.'
+                            print(fmt % tmpl_id)
+                            sys.exit(ECODE.BAD)
+                except Exception as ex:
+                    failure = '*** %s' % ex
+                    print(failure)
+                    sys.exit(ECODE.BAD)
+            else:
+                failure = '*** Invalid action: %s ***' % action
+                print(failure)
+                sys.exit(ECODE.BAD)
+
+        if node.has_select_statement:
+            query_obj = DLQuery(result.records)
+            tested_records = query_obj.find(select=node.select_statement)
+        else:
+            tested_records = result.records
+
+        if is_showed:
+            Printer.print('User Test Data:')
+            print(result.test_data)
+            print()
+
+            if result.template:
+                Printer.print('Template:')
+                print('%s\n' % result.template)
+                print()
+
+        lst = ['Parsed Results:']
+        if node.has_select_statement:
+            lst.append('  Select Statement -- %s' % node.select_statement)
+        Printer.print(lst)
+        if is_tabular:
+            Tabular(tested_records).print()
+        else:
+            pprint(tested_records)
+        print()
+
+        if node.is_need_verification and Misc.is_list(tested_records):
+            lst = ['Result Verification:',
+                   '  Condition -- %s' % node.condition_data]
+            Printer.print(lst)
+            total = len(tested_records)
+            op = node.condition
+            expected_number = node.expected_condition
+            chk = getattr(operator, op)(total, expected_number)
+            verb = 'is' if chk else 'is not'
+            tbl = dict(eq='equal to', ne='not equal to',
+                       lt='less than', le='less than or equal to',
+                       gt='greater than', ge='greater than or equal to')
+
+            fmt = '(total found records: %s) %s %s (expected total count: %s)\n'
+            msg = fmt % (total, verb, tbl[op], expected_number)
+            print(msg)
+
+        sys.exit(ECODE.SUCCESS)
