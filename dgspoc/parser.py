@@ -137,6 +137,7 @@ class ParsedOperation:
         self.select_statement = ''
         self.condition = ''
         self.expected_condition = -1
+        self.condition_data = ''
 
         self.error = ''
 
@@ -178,6 +179,10 @@ class ParsedOperation:
         return self._has_select_statement
 
     @property
+    def is_need_verification(self):
+        return self.condition != '' and self.expected_condition >= 0
+
+    @property
     def is_json(self):
         return self.convertor == 'json'
 
@@ -212,6 +217,7 @@ class ParsedOperation:
                 self.select_statement = result.select_statement
                 self.condition = result.condition
                 self.expected_condition = result.expected_condition
+                self.condition_data = result.condition_data
                 self._has_select_statement = result.has_select_statement
                 self.error = result.error
             elif self.is_configuration:
@@ -254,6 +260,7 @@ class ExecuteOperation:
         self.select_statement = ''
         self.condition = ''
         self.expected_condition = -1
+        self.condition_data = ''
 
         self.error = ''
 
@@ -294,20 +301,21 @@ class ExecuteOperation:
             self.error = 'Invalid command line verification format'
             return
 
+        self.condition_data = match.group().strip()
         self._remaining_data = re.sub(pattern, '', data)
 
         node = DotObject(match.groupdict())
         if node.val1:
-            self.condition = '=='
+            self.condition = 'eq'
             self.expected_condition = 1 if node.val1.lower() == 'true' else 0
         else:
             tbl = dict(
-                EQ='==', EQUAL_TO='==',
-                NE='!=', NOT_EQUAL='!=', NOT_EQUAL_TO='!=',
-                GT='>', GREATER_THAN='>',
-                GE='>=', GREATER_THAN_OR_EQUAL_TO='>=', EQUAL_TO_OR_GREATER_THAN='>=',
-                LT='<', LESS_THAN='<',
-                LE='<=', LESS_THAN_OR_EQUAL_TO='<=', EQUAL_TO_OR_LESS_THAN='<='
+                EQ='eq', EQUAL_TO='eq',
+                NE='ne', NOT_EQUAL='ne', NOT_EQUAL_TO='ne',
+                GT='gt', GREATER_THAN='gt',
+                GE='ge', GREATER_THAN_OR_EQUAL_TO='ge', EQUAL_TO_OR_GREATER_THAN='ge',
+                LT='lt', LESS_THAN='lt',
+                LE='lt', LESS_THAN_OR_EQUAL_TO='lt', EQUAL_TO_OR_LESS_THAN='lt'
             )
 
             op = node.op.upper()
