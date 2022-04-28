@@ -23,22 +23,24 @@ class FLAG(IntFlag):
     TEMPLATE_ID = pow(2, 4)
     TEST_FILE = pow(2, 5)
     ADAPTOR = pow(2, 6)
-    EXECUTION = pow(2, 7)
-    SELECT_STATEMENT = pow(2, 8)
-    REPLACED = pow(2, 9)
-    IGNORE_CASE = pow(2, 10)
-    SHOWED = pow(2, 11)
-    TABULAR = pow(2, 12)
-    ALL = pow(2, 13)
-    DEPENDENCY = pow(2, 14)
-    TEMPLATE_STORAGE = pow(2, 15)
-    HELP = pow(2, 16)
+    ACTION = pow(2, 7)
+    EXECUTION = pow(2, 8)
+    SELECT_STATEMENT = pow(2, 9)
+    REPLACED = pow(2, 10)
+    IGNORE_CASE = pow(2, 11)
+    SHOWED = pow(2, 12)
+    TABULAR = pow(2, 13)
+    ALL = pow(2, 14)
+    DEPENDENCY = pow(2, 15)
+    TEMPLATE_STORAGE = pow(2, 16)
+    HELP = pow(2, 17)
 
     BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
     SEARCH_TEMPLATE = IGNORE_CASE | SHOWED | HELP
     TEST_TEMPLATE = TEST_FILE | ADAPTOR | EXECUTION | SHOWED | TABULAR | HELP
     TEST_VERIFICATION = TEST_TEMPLATE | TEMPLATE_ID | SELECT_STATEMENT
     INFO_USAGE = ALL | DEPENDENCY | TEMPLATE_STORAGE | HELP
+    TEST_USAGE = ADAPTOR | ACTION | HELP
 
 
 class UData:
@@ -110,6 +112,7 @@ def get_usage_header(name, flags=0):
         '  --template-id TMPLID    template ID',
         '  --test-file TESTFILE    test data file',
         '  --adaptor ADAPTOR       connector adaptor',
+        '  --action ACTION         execution action which uses to test template or verification',
         '  --execution EXECUTION   command line',
         '  --select-statement STMT the select statement for verification',
         '  --replaced              overwrite template ID/file',
@@ -200,6 +203,12 @@ class TestVerificationUsage:
     example_usage = get_example_usage('test_verification')
 
 
+class TestUsage:
+    usage = get_usage('test', flags=FLAG.TEST_USAGE)
+    other_usage = get_usage('test', flags=FLAG.TEST_USAGE)
+    example_usage = get_example_usage('test')
+
+
 class Usage:
     info = InfoUsage
     build = BuildUsage
@@ -207,6 +216,7 @@ class Usage:
     search_template = SearchTemplateUsage
     test_template = TestTemplateUsage
     test_verification = TestVerificationUsage
+    test = TestUsage
 
 
 def validate_usage(name, operands):

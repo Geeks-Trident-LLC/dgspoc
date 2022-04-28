@@ -350,3 +350,12 @@ def do_test_verification(options):
             return
         exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
         show_usage('{}_template'.format(command), exit_code=exit_code)
+
+
+def do_testing(options):
+    command, operands = options.command, list(options.operands)
+    # op_count = len(operands)
+    if command == 'test':
+        name = command
+        validate_usage(name, operands)
+        validate_example_usage(name, operands)

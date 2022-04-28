@@ -21,6 +21,7 @@ from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
 from dgspoc.operation import do_test_template
 from dgspoc.operation import do_test_verification
+from dgspoc.operation import do_testing
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -165,6 +166,11 @@ class Cli:
         ),
 
         parser.add_argument(
+            '--action', type=str, default='',
+            help="execution action which uses to test template or verification"
+        ),
+
+        parser.add_argument(
             '--execution', type=str, default='',
             help="command line"
         ),
@@ -255,9 +261,10 @@ class Cli:
         # operation
         do_build_template(self.options)
         do_search_template(self.options)
-        do_test_template(self.options)
+        # do_test_template(self.options)
 
-        do_test_verification(self.options)
+        # do_test_verification(self.options)
+        do_testing(self.options)
 
 
 def execute():
