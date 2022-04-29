@@ -137,6 +137,7 @@ class ParsedOperation:
         self.select_statement = ''
         self.condition = ''
         self.expected_condition = -1
+        self.condition_data = ''
 
         self.error = ''
 
@@ -178,6 +179,10 @@ class ParsedOperation:
         return self._has_select_statement
 
     @property
+    def is_need_verification(self):
+        return self.condition != '' and self.expected_condition >= 0
+
+    @property
     def is_json(self):
         return self.convertor == 'json'
 
@@ -205,23 +210,13 @@ class ParsedOperation:
         if self.is_parsed and self.is_valid_operation:
             if self.is_execution:
                 result = ExecuteOperation(node.operation)
-                self.name = result.name
-                self.operation_ref = result.operation_ref
-                self.convertor = result.convertor
-                self.convertor_arg = result.convertor_arg
-                self.select_statement = result.select_statement
-                self.condition = result.condition
-                self.expected_condition = result.expected_condition
-                self._has_select_statement = result.has_select_statement
-                self.error = result.error
+                result.sync(other=self)
             elif self.is_configuration:
                 result = ConfigOperation(node.operation)
-                self.name = result.name
-                self.operation_ref = result.operation_ref
+                result.sync(other=self)
             elif self.is_reload:
                 result = ReloadOperation(node.operation)
-                self.name = result.name
-                self.operation_ref = result.operation_ref
+                result.sync(other=self)
 
     def parse_devices_names(self, data):
         other_data = data.strip().lstrip('{').rstrip('}')
@@ -254,6 +249,7 @@ class ExecuteOperation:
         self.select_statement = ''
         self.condition = ''
         self.expected_condition = -1
+        self.condition_data = ''
 
         self.error = ''
 
@@ -283,32 +279,41 @@ class ExecuteOperation:
         data = self._remaining_data
 
         pattern = r'(?i) +must +be +\S+( +\S+)? *$'
-        if not re.search(pattern, data):
+        match = re.search(pattern, data)
+        if not match:
             return
 
-        pattern = (r'(?i) +must +be +((?P<val1>true|false)|'
+        verified_str = match.group().strip()
+
+        pattern = (r'(?i)must +be +((?P<val1>true|false)|'
                    r'((?P<op>\S+) +(?P<val2>[0-9]+)))$')
-        match = re.search(pattern, self._remaining_data)
+        match = re.search(pattern, verified_str)
 
         if not match:
-            self.error = 'Invalid command line verification format'
+            fmt = 'Invalid command line verification format (Unexpected: %s)'
+            self.error = fmt % verified_str
             return
 
+        self.condition_data = match.group().strip()
         self._remaining_data = re.sub(pattern, '', data)
 
         node = DotObject(match.groupdict())
         if node.val1:
-            self.condition = '=='
+            self.condition = 'eq'
             self.expected_condition = 1 if node.val1.lower() == 'true' else 0
         else:
             tbl = dict(
-                EQ='==', EQUAL_TO='==',
-                NE='!=', NOT_EQUAL='!=', NOT_EQUAL_TO='!=',
-                GT='>', GREATER_THAN='>',
-                GE='>=', GREATER_THAN_OR_EQUAL_TO='>=', EQUAL_TO_OR_GREATER_THAN='>=',
-                LT='<', LESS_THAN='<',
-                LE='<=', LESS_THAN_OR_EQUAL_TO='<=', EQUAL_TO_OR_LESS_THAN='<='
+                EQ='eq', EQUAL='eq', EQUAL_TO='eq',
+                NE='ne', NOT_EQUAL='ne', NOT_EQUAL_TO='ne',
+                GT='gt', GREATER_THAN='gt',
+                GE='ge', GREATER_THAN_OR_EQUAL='ge', EQUAL_OR_GREATER_THAN='ge',
+                GREATER_THAN_OR_EQUAL_TO='ge', EQUAL_TO_OR_GREATER_THAN='ge',
+                LT='lt', LESS_THAN='lt',
+                LE='lt', LESS_THAN_OR_EQUAL='lt', EQUAL_OR_LESS_THAN='lt',
+                LESS_THAN_OR_EQUAL_TO='lt', EQUAL_TO_OR_LESS_THAN='lt'
             )
+            tbl.update({'==': 'eq', '!=': 'ne', '>': 'gt',
+                        '>=': 'ge', '<': 'lt', '<=': 'le'})
 
             op = node.op.upper()
             found = [True for k, v in tbl.items() if k == op or v == op]
@@ -335,15 +340,29 @@ class ExecuteOperation:
 
         data = self._remaining_data.strip()
 
-        pattern = r'(?i) using_(?P<type>csv|json|template)( +(?P<arg>\S+))? *$'
+        pattern = r'(?i) using[- _]+(?P<type>csv|json|template)([ =]+(?P<arg>\S+))? *$'
         match = re.search(pattern, data)
         if not match:
             if self.has_select_statement:
                 self.error = 'Invalid command line verification without convertor'
             return
         self.convertor = match.group('type').lower()
-        self.convertor_arg = match.group('arg')
+        if match.group('arg'):
+            self.convertor_arg = match.group('arg').strip().strip('=')
         self._remaining_data = re.sub(pattern, '', data)
+
+    def sync(self, other=None):
+        if isinstance(other, ParsedOperation):
+            other.name = self.name
+            other.operation_ref = self.operation_ref
+            other.convertor = self.convertor
+            other.convertor_arg = self.convertor_arg
+            other.select_statement = self.select_statement
+            other.condition = self.condition
+            other.expected_condition = self.expected_condition
+            other.condition_data = self.condition_data
+            other._has_select_statement = self.has_select_statement
+            other.error = self.error
 
 
 class ConfigOperation:
@@ -363,6 +382,11 @@ class ConfigOperation:
     def parse(self):
         self.operation_ref = self.data
 
+    def sync(self, other=None):
+        if isinstance(other, ParsedOperation):
+            other.name = self.name
+            other.operation_ref = self.operation_ref
+
 
 class ReloadOperation:
     def __init__(self, data):
@@ -380,3 +404,8 @@ class ReloadOperation:
 
     def parse(self):
         self.operation_ref = self.data
+
+    def sync(self, other=None):
+        if isinstance(other, ParsedOperation):
+            other.name = self.name
+            other.operation_ref = self.operation_ref

@@ -63,3 +63,7 @@ class ConvertorTypeError(InterpreterError):
 
 class TemplateReferenceError(InterpreterError):
     """Use to capture template reference for filter method"""
+
+
+class UtilsParsedTemplateError(InterpreterError):
+    """Use to capture error for parsing template in utils"""
