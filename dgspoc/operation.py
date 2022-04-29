@@ -388,7 +388,6 @@ def do_testing(options):
 
         adaptor = adaptor or 'stream'
         is_adaptor_stream = bool(re.match(r'(stream|file(name)?)$', adaptor))
-        is_performer_stmt = CheckStatement.is_performer_statement(action)
         is_execute_cmdline = CheckStatement.is_execute_cmdline(action)
 
         if is_adaptor_stream:
@@ -496,7 +495,7 @@ def do_testing(options):
 
         lst = ['Parsed Results:']
         if node.has_select_statement:
-            lst.append('  Select Statement -- %s' % node.select_statement)
+            lst.append('    SELECT-STATEMENT: %s' % node.select_statement)
         Printer.print(lst)
         if is_tabular:
             Tabular(tested_records).print()
@@ -505,20 +504,21 @@ def do_testing(options):
         print()
 
         if node.is_need_verification and Misc.is_list(tested_records):
-            lst = ['Result Verification:',
-                   '  Condition -- %s' % node.condition_data]
-            Printer.print(lst)
             total = len(tested_records)
             op = node.condition
             expected_number = node.expected_condition
             chk = getattr(operator, op)(total, expected_number)
-            verb = 'is' if chk else 'is not'
-            tbl = dict(eq='equal to', ne='not equal to',
-                       lt='less than', le='less than or equal to',
-                       gt='greater than', ge='greater than or equal to')
+            prefix = '' if chk else '*** CANT BE ***'
+            tbl = dict(eq='==', ne='!=', lt='<', le='<=', gt='>', ge='>=')
 
-            fmt = '(total found records: %s) %s %s (expected total count: %s)\n'
-            msg = fmt % (total, verb, tbl[op], expected_number)
+            lst = ['Verification:',
+                   '    CONDITION: %s' % node.condition_data,
+                   '    STATUS   : %s' % ('Passed' if chk else 'Failed')]
+            Printer.print(lst)
+
+            fmt = '%s (total found records: %s) %s (expected total count: %s)'
+            msg = (fmt % (prefix, total, tbl[op], expected_number)).strip()
             print(msg)
+            print()
 
         sys.exit(ECODE.SUCCESS)
