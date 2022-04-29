@@ -34,8 +34,6 @@ from dlapp import DLQuery
 from dlapp import create_from_csv_data
 from dlapp import create_from_json_data
 
-from io import StringIO
-from textfsm import TextFSM
 from pprint import pprint
 from dlapp.collection import Tabular
 
@@ -131,9 +129,7 @@ def do_search_template(options):
             show_usage(name, exit_code=ECODE.BAD)
 
         tmpl_id_pattern = operands[0]
-        is_found = TemplateStorage.search(tmpl_id_pattern,
-                                          ignore_case=options.ignore_case,
-                                          showed=options.showed)
+        is_found = TemplateStorage.search(tmpl_id_pattern)
         print(TemplateStorage.message)
         sys.exit(ECODE.SUCCESS if is_found else ECODE.BAD)
 
@@ -201,114 +197,6 @@ def get_test_from_adaptor(options):
         failure = 'AdaptorInquiryError - ({})'.format(Text(ex))
         Printer.print(failure)
         sys.exit(ECODE.BAD)
-
-
-def get_test_data_from_provided_file(options):
-    if File.is_exist(options.testfile):
-        test_data = open(options.testfile).read()
-        return test_data
-    else:
-        fmt = '*** "{}" test data file is NOT existed.'
-        failure = fmt.format(options.testfile)
-        Printer.print(failure)
-        sys.exit(ECODE.BAD)
-
-
-def get_test_data(options):
-    validate_test_data_flag(options)
-    test_data = ''
-    if options.adaptor:
-        test_data = get_test_from_adaptor(options)
-    elif options.testfile:
-        test_data = get_test_data_from_provided_file(options)
-    return test_data
-
-
-def get_parsed_result(options, test_data):
-
-    command = options.command
-    feature = options.operands[0] if options.operands else ''
-    name = '{}_{}'.format(command, feature)
-
-    tmpl_ref = options.tmplid
-    if not tmpl_ref:
-        tmpl_ref = options.operands[1] if len(options.operands) > 1 else ''
-
-    if not tmpl_ref:
-        show_usage(name, exit_code=ECODE.BAD)
-
-    template = ''
-    if TemplateStorage.check(tmpl_ref):
-        template = TemplateStorage.get(tmpl_ref)
-    elif File.is_exist(tmpl_ref):
-        template = open(tmpl_ref).read()
-
-    if not template:
-        lst = [
-            '"{}" is NOT template ID or template filename.'.format(tmpl_ref),
-            'Please provide the valid template_id or template_file'
-        ]
-        Printer.print(lst)
-        sys.exit(ECODE.BAD)
-
-    try:
-        stream = StringIO(template)
-        parser = TextFSM(stream)
-        rows = parser.ParseTextToDicts(test_data)
-
-        result = DotObject(
-            test_data=test_data, template=template,
-            records=rows, records_count=len(rows)
-        )
-        return result
-    except Exception as ex:
-        failure = 'BAD-TEMPLATE ({})'.format(Text(ex))
-        Printer.print(failure)
-        sys.exit(ECODE.BAD)
-
-
-def do_test_template(options):
-    command, operands = options.command, list(options.operands)
-    op_count = len(operands)
-    feature = str(operands[0]).lower().strip() if op_count > 0 else ''
-    if command == 'test' and feature == 'template':
-        operands = operands[1:]
-        name = '{}_{}'.format(command, feature)
-        validate_usage(name, operands)
-        validate_example_usage(name, operands)
-
-        op_txt = ' '.join(operands).rstrip()
-        if op_txt == options.tmplid and not options.tmplid:
-            show_usage(name, exit_code=ECODE.BAD)
-
-        test_data = get_test_data(options)
-        result = get_parsed_result(options, test_data)
-
-        if options.showed:
-            Printer.print('Test Data:')
-            print(result.test_data)     # noqa
-            print()
-            Printer.print('Template:')
-            print(result.template)      # noqa
-            print()
-
-        lst = ['Result:']
-        if result.records_count:        # noqa
-            fmt = '+++ Template parsed {} record(s).'
-            lst.append(fmt.format(result.records_count))    # noqa
-        else:
-            lst.append('*** Template could NOT find and parse any record.')
-        Printer.print(lst)
-
-        records = result.records        # noqa
-        records and Tabular(records).print() if options.tabular else pprint(records)
-        sys.exit(ECODE.SUCCESS if result.records_count > 0 else ECODE.BAD)  # noqa
-
-    elif command == 'test' and feature != 'template':
-        if feature == 'verification':
-            return
-        exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
-        show_usage('{}_template'.format(command), exit_code=exit_code)
 
 
 def do_testing(options):

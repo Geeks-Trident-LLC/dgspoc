@@ -21,23 +21,16 @@ class FLAG(IntFlag):
     COMPANY = pow(2, 2)
     SAVE_TO = pow(2, 3)
     TEMPLATE_ID = pow(2, 4)
-    TEST_FILE = pow(2, 5)
-    ADAPTOR = pow(2, 6)
-    ACTION = pow(2, 7)
-    EXECUTION = pow(2, 8)
-    SELECT_STATEMENT = pow(2, 9)
-    REPLACED = pow(2, 10)
-    IGNORE_CASE = pow(2, 11)
-    SHOWED = pow(2, 12)
-    TABULAR = pow(2, 13)
-    ALL = pow(2, 14)
-    DEPENDENCY = pow(2, 15)
-    TEMPLATE_STORAGE = pow(2, 16)
-    HELP = pow(2, 17)
+    ADAPTOR = pow(2, 5)
+    ACTION = pow(2, 6)
+    REPLACED = pow(2, 7)
+    ALL = pow(2, 8)
+    DEPENDENCY = pow(2, 9)
+    TEMPLATE_STORAGE = pow(2, 10)
+    HELP = pow(2, 11)
 
     BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
-    SEARCH_TEMPLATE = IGNORE_CASE | SHOWED | HELP
-    TEST_TEMPLATE = TEST_FILE | ADAPTOR | EXECUTION | SHOWED | TABULAR | HELP
+    SEARCH_TEMPLATE = HELP
     INFO_USAGE = ALL | DEPENDENCY | TEMPLATE_STORAGE | HELP
     TEST_USAGE = ADAPTOR | ACTION | HELP
 
@@ -109,15 +102,9 @@ def get_usage_header(name, flags=0):
         "  --company COMPANY       author's company",
         '  --save-to FILENAME      saving to file',
         '  --template-id TMPLID    template ID',
-        '  --test-file TESTFILE    test data file',
         '  --adaptor ADAPTOR       connector adaptor',
         '  --action ACTION         execution action which uses to test template or verification',
-        '  --execution EXECUTION   command line',
-        '  --select-statement STMT the select statement for verification',
         '  --replaced              overwrite template ID/file',
-        '  --ignore-case           case insensitive matching',
-        '  --showed                showing result',
-        '  --tabular               showing result in tabular format',
         '  --all                   showing all information',
         '  --dependency            showing package dependencies',
         '  --template-storage      showing template storage information',
@@ -190,12 +177,6 @@ class SearchTemplateUsage:
     example_usage = get_example_usage('search_template')
 
 
-class TestTemplateUsage:
-    usage = get_usage('test_template', flags=FLAG.TEST_TEMPLATE)
-    other_usage = get_usage('test_template', flags=FLAG.TEST_TEMPLATE)
-    example_usage = get_example_usage('test_template')
-
-
 class TestUsage:
     usage = get_usage('test', flags=FLAG.TEST_USAGE)
     other_usage = get_usage('test', flags=FLAG.TEST_USAGE)
@@ -207,7 +188,6 @@ class Usage:
     build = BuildUsage
     build_template = BuildTemplateUsage
     search_template = SearchTemplateUsage
-    test_template = TestTemplateUsage
     test = TestUsage
 
 
@@ -259,7 +239,7 @@ def get_global_usage():
         InfoUsage.usage,
         BuildTemplateUsage.usage,
         SearchTemplateUsage.usage,
-        TestTemplateUsage.usage,
+        TestUsage.usage,
     ]
 
     return '\n'.join(str(item) for item in lst)

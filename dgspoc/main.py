@@ -19,7 +19,6 @@ from dgspoc.usage import validate_example_usage
 
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
-from dgspoc.operation import do_test_template
 from dgspoc.operation import do_testing
 
 
@@ -155,11 +154,6 @@ class Cli:
         ),
 
         parser.add_argument(
-            '--test-file', type=str, dest='testfile', default='',
-            help="test data file"
-        ),
-
-        parser.add_argument(
             '--adaptor', type=str, default='',
             help="connector adaptor"
         ),
@@ -170,33 +164,8 @@ class Cli:
         ),
 
         parser.add_argument(
-            '--execution', type=str, default='',
-            help="command line"
-        ),
-
-        parser.add_argument(
-            '--select-statement', type=str, default='', dest='stmt',
-            help='the select statement of verification'
-        )
-
-        parser.add_argument(
             '--replaced', action='store_true',
             help='overwrite template ID/file'
-        )
-
-        parser.add_argument(
-            '--ignore-case', action='store_true', dest='ignore_case',
-            help='case insensitive matching'
-        )
-
-        parser.add_argument(
-            '--showed', action='store_true',
-            help='showing result'
-        )
-
-        parser.add_argument(
-            '--tabular', action='store_true',
-            help='showing result in tabular format'
         )
 
         parser.add_argument(
@@ -260,7 +229,6 @@ class Cli:
         # operation
         do_build_template(self.options)
         do_search_template(self.options)
-        # do_test_template(self.options)
 
         do_testing(self.options)
 
