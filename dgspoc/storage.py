@@ -49,7 +49,7 @@ class TemplateStorage:
             return False
 
     @classmethod
-    def search(cls, template_id_pattern, ignore_case=False, showed=False):
+    def search(cls, template_id_pattern):
         msg1 = '*** CANT find template ID because template storage file is empty.'
         msg2 = '*** CANT find template ID because template storage file is not created.'
         fmt1 = '{} file has invalid template storage format.'
@@ -68,11 +68,10 @@ class TemplateStorage:
                     raise TemplateStorageError(fmt1.format(cls.filename))
 
                 pattern = convert_wildcard_to_regex(template_id_pattern)
-                flags = re.I if ignore_case else 0
                 ids = dict()
 
                 for tmpl_id in sorted(node):
-                    if re.search(pattern, tmpl_id, flags=flags):
+                    if re.search(pattern, tmpl_id, flags=re.I):
                         ids[tmpl_id] = node.get(tmpl_id)
 
                 total = len(ids)
@@ -85,13 +84,11 @@ class TemplateStorage:
                 for tmpl_id in ids:
                     lst.append('  - {}'.format(tmpl_id))
 
-                lst = [Printer.get(lst)]
-                if showed:
+                lst = [Printer.get(lst), '']
+                for tmpl_id, template in ids.items():
+                    lst.append(Printer.get('Template ID: {}'.format(tmpl_id)))
+                    lst.append(template)
                     lst.append('')
-                    for tmpl_id, template in ids.items():
-                        lst.append(Printer.get('Template ID: {}'.format(tmpl_id)))
-                        lst.append(template)
-                        lst.append('')
 
                 cls.message = '\n'.join(lst)
                 return True
