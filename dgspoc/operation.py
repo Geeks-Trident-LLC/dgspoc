@@ -6,6 +6,7 @@ import argparse
 import operator
 
 from functools import partial
+from textwrap import wrap
 
 from dgspoc.utils import File
 from dgspoc.utils import Printer
@@ -355,4 +356,9 @@ def do_testing(options):
             print(msg)
             print()
 
-        sys.exit(ECODE.SUCCESS)
+        if node.error:
+            lst = ['Error:', '------', '\n'.join(wrap(node.error, width=76)), '']
+            Printer.print(lst)
+            sys.exit(ECODE.BAD)
+        else:
+            sys.exit(ECODE.SUCCESS)
