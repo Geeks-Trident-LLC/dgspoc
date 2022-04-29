@@ -311,60 +311,6 @@ def do_test_template(options):
         show_usage('{}_template'.format(command), exit_code=exit_code)
 
 
-def do_test_verification(options):
-    command, operands = options.command, list(options.operands)
-    op_count = len(operands)
-    feature = str(operands[0]).lower().strip() if op_count > 0 else ''
-    if command == 'test' and feature == 'verification':
-        operands = operands[1:]
-        name = '{}_{}'.format(command, feature)
-        validate_usage(name, operands)
-        validate_example_usage(name, operands)
-
-        select_stmt = options.stmt.strip() or ' '.join(operands).rstrip()
-        if not select_stmt:
-            show_usage(name, exit_code=ECODE.BAD)
-
-        test_data = get_test_data(options)
-        result = get_parsed_result(options, test_data)
-
-        if options.showed:
-            Printer.print('Test Data:')
-            print(result.test_data)     # noqa
-            print()
-            Printer.print('Template:')
-            print(result.template)      # noqa
-            print()
-
-        lst = ['Result:']
-        if result.records_count:        # noqa
-            fmt = '+++ Template parsed {} record(s).'
-            lst.append(fmt.format(result.records_count))    # noqa
-        else:
-            lst.append('*** Verification could NOT find and parse any record.')
-        Printer.print(lst)
-
-        if result.records_count:        # noqa
-            Printer.print('Select Statement:')
-            print(select_stmt)
-
-            items = re.split('(?i) *must *be *', select_stmt)
-            print(items)
-
-        else:
-            Printer.print(
-                ['Results:',
-                 '*** Verification could NOT find and parse any record.']
-            )
-            sys.exit(ECODE.BAD)
-
-    elif command == 'test' and feature != 'verification':
-        if feature == 'template':
-            return
-        exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
-        show_usage('{}_template'.format(command), exit_code=exit_code)
-
-
 def do_testing(options):
     pattern = '^--(template-id|(file(-?name)?))='
     command, operands = options.command, list(options.operands)

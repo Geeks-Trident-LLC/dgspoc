@@ -20,7 +20,6 @@ from dgspoc.usage import validate_example_usage
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
 from dgspoc.operation import do_test_template
-from dgspoc.operation import do_test_verification
 from dgspoc.operation import do_testing
 
 
@@ -263,7 +262,6 @@ class Cli:
         do_search_template(self.options)
         # do_test_template(self.options)
 
-        # do_test_verification(self.options)
         do_testing(self.options)
 
 

@@ -38,7 +38,6 @@ class FLAG(IntFlag):
     BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
     SEARCH_TEMPLATE = IGNORE_CASE | SHOWED | HELP
     TEST_TEMPLATE = TEST_FILE | ADAPTOR | EXECUTION | SHOWED | TABULAR | HELP
-    TEST_VERIFICATION = TEST_TEMPLATE | TEMPLATE_ID | SELECT_STATEMENT
     INFO_USAGE = ALL | DEPENDENCY | TEMPLATE_STORAGE | HELP
     TEST_USAGE = ADAPTOR | ACTION | HELP
 
@@ -197,12 +196,6 @@ class TestTemplateUsage:
     example_usage = get_example_usage('test_template')
 
 
-class TestVerificationUsage:
-    usage = get_usage('test_verification', flags=FLAG.TEST_VERIFICATION)
-    other_usage = get_usage('test_verification', flags=FLAG.TEST_VERIFICATION)
-    example_usage = get_example_usage('test_verification')
-
-
 class TestUsage:
     usage = get_usage('test', flags=FLAG.TEST_USAGE)
     other_usage = get_usage('test', flags=FLAG.TEST_USAGE)
@@ -215,7 +208,6 @@ class Usage:
     build_template = BuildTemplateUsage
     search_template = SearchTemplateUsage
     test_template = TestTemplateUsage
-    test_verification = TestVerificationUsage
     test = TestUsage
 
 
