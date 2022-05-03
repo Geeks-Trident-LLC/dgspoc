@@ -4,6 +4,7 @@ import re
 
 from pathlib import Path
 from pathlib import PurePath
+from pathlib import WindowsPath
 from datetime import datetime
 
 from textwrap import wrap
@@ -347,6 +348,22 @@ class File:
         except Exception as ex:
             cls.message = Text(ex)
             return False
+
+    @classmethod
+    def change_home_dir_to_generic(cls, filename):
+        """change HOME DIRECTORY in filename to generic name
+        ++++++++++++++++++++++++++++++++++++++++++++++
+        Note: this function only uses for displaying.
+        ++++++++++++++++++++++++++++++++++++++++++++++
+        """
+        node = Path.home()
+        home_dir = str(node)
+        if isinstance(node, WindowsPath):
+            replaced = '%HOMEDRIVE%\\%HOMEPATH%'
+        else:
+            replaced = '${HOME}'
+        new_name = filename.replace(home_dir, replaced)
+        return new_name
 
 
 class Misc:
