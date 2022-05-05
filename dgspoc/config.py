@@ -116,6 +116,7 @@ class Data:
     @classmethod
     def get_template_storage_info(cls):
         fn = cls.template_storage_filename
+        generic_fn = File.change_home_dir_to_generic(fn)
         if File.is_exist(fn):
             existed = 'Yes'
             with open(fn) as stream:
@@ -126,7 +127,8 @@ class Data:
             total = 0
         lst = [
             'Template Storage Info:',
-            '  - Location: {}'.format(fn),
+            # '  - Location: {}'.format(fn),
+            '  - Location: {}'.format(generic_fn),
             '  - Existed: {}'.format(existed),
             '  - Total Templates: {}'.format(total)
         ]

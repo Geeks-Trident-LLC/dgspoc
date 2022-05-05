@@ -79,7 +79,9 @@ def show_info(options):
 
         if is_showed_all or is_showed_dependency:
             lst and lst.append('--------------------')
-            for pkg in Data.get_dependency().values():
+            lst.append('Packages:')
+            values = Data.get_dependency().values()
+            for pkg in sorted(values, key=lambda item: item.get('package')):
                 lst.append('  + Package: {0[package]}'.format(pkg))
                 lst.append('             {0[url]}'.format(pkg))
 
