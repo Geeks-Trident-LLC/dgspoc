@@ -308,9 +308,12 @@ def do_testing(options):
                     print(failure)
                     sys.exit(ECODE.BAD)
             else:
-                failure = '*** Invalid action: %s ***' % action
-                print(failure)
-                sys.exit(ECODE.BAD)
+                if not node.has_select_statement:
+                    sys.exit(ECODE.SUCCESS)
+                else:
+                    failure = '*** Invalid action: %s ***' % action
+                    print(failure)
+                    sys.exit(ECODE.BAD)
 
         if node.has_select_statement:
             query_obj = DLQuery(result.records)
