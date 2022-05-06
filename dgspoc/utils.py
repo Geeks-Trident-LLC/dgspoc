@@ -2,6 +2,8 @@
 
 import re
 
+import subprocess
+
 from pathlib import Path
 from pathlib import PurePath
 from pathlib import WindowsPath
@@ -20,6 +22,8 @@ from io import StringIO
 from textfsm import TextFSM
 
 from dgspoc.exceptions import UtilsParsedTemplateError
+
+from dgspoc.constant import ECODE
 
 
 class Text(str):
@@ -565,6 +569,16 @@ class MiscOutput:
                 lines.append(line)
         new_output = '\n'.join(lines)
         return new_output
+
+    @classmethod
+    def execute_shell_command(cls, cmdline):
+        exit_code, output = subprocess.getstatusoutput(cmdline)
+        result = DotObject(
+            output=output,
+            exit_code=exit_code,
+            is_success=exit_code == ECODE.SUCCESS
+        )
+        return result
 
 
 class DictObject(dict):

@@ -1,8 +1,5 @@
-from subprocess import getstatusoutput
-
 import pytest
 
-from dgspoc.constant import ECODE
 from dgspoc.utils import File
 from dgspoc.utils import MiscOutput
 
@@ -19,7 +16,9 @@ cmdline_with_user_info = '%s %s' % (base_cmdline, postfix)
 
 
 class TestBuildTemplate:
-    """Note: comment line will be work as same as previous"""
+    """Note: the comment in pytest.mark.parametrize should work as same as
+    the previous command line"""
+
     @pytest.mark.parametrize(
         'cmdline',
         [
@@ -28,19 +27,19 @@ class TestBuildTemplate:
         ]
     )
     def test_build_template_help(self, cmdline):
-        exit_code, output = getstatusoutput(cmdline)
+        result = MiscOutput.execute_shell_command(cmdline)
 
-        assert exit_code == ECODE.SUCCESS
-        assert 'dgs build template usage' in output
-        assert ' --author AUTHOR ' in output
-        assert ' --email EMAIL ' in output
-        assert ' --company COMPANY ' in output
-        assert ' --save-to FILENAME ' in output
-        assert ' --template-id TMPLID ' in output
-        assert ' --replaced ' in output
-        assert ' -h, --help ' in output
-        assert 'dgs build template operands [options]' in output
-        assert 'dgs build template example ' in output
+        assert result.is_success
+        assert 'dgs build template usage' in result.output
+        assert ' --author AUTHOR ' in result.output
+        assert ' --email EMAIL ' in result.output
+        assert ' --company COMPANY ' in result.output
+        assert ' --save-to FILENAME ' in result.output
+        assert ' --template-id TMPLID ' in result.output
+        assert ' --replaced ' in result.output
+        assert ' -h, --help ' in result.output
+        assert 'dgs build template operands [options]' in result.output
+        assert 'dgs build template example ' in result.output
 
     @pytest.mark.parametrize(
         ('cmdline', 'expected_result'),
@@ -50,11 +49,11 @@ class TestBuildTemplate:
         ]
     )
     def test_build_template(self, cmdline, expected_result):
-        exit_code, output = getstatusoutput(cmdline)
-        template_txt = MiscOutput.clean_created_date_stamp(output)
+        result = MiscOutput.execute_shell_command(cmdline)
+        template_txt = MiscOutput.clean_created_date_stamp(result.output)
         template_txt.strip()
 
-        assert exit_code == ECODE.SUCCESS
+        assert result.is_success
         assert template_txt == expected_result
 
     @pytest.mark.parametrize(
@@ -65,5 +64,5 @@ class TestBuildTemplate:
         ]
     )
     def test_build_template_and_save_to_storage(self, cmdline):
-        exit_code, _skip = getstatusoutput(cmdline)
-        assert exit_code == ECODE.SUCCESS
+        result = MiscOutput.execute_shell_command(cmdline)
+        assert result.is_success

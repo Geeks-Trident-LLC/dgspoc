@@ -1,11 +1,12 @@
 """Module containing the logic for connector adaptor"""
 
-from subprocess import getstatusoutput
 import re
 
 from dgspoc.exceptions import AdaptorAuthenticationError
 
 from dgspoc.constant import ECODE
+
+from dgspoc.utils import MiscOutput
 
 
 class Adaptor:
@@ -65,7 +66,8 @@ class UnrealDeviceAdaptor:
         return True if self.exit_code == ECODE.SUCCESS else False
 
     def process(self, statement):
-        self.exit_code, self.result = getstatusoutput(statement.strip())
+        result = MiscOutput.execute_shell_command(statement.strip())
+        self.exit_code, self.result = result.output
         print(self.result)
         return self.status
 
