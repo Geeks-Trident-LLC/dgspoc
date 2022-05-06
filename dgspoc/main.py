@@ -17,6 +17,7 @@ from dgspoc.usage import validate_usage
 # from dgspoc.usage import show_usage
 from dgspoc.usage import validate_example_usage
 
+from dgspoc.operation import do_clear_template
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
 from dgspoc.operation import do_testing
@@ -156,6 +157,11 @@ class Cli:
         ),
 
         parser.add_argument(
+            '--clear', type=str, dest='template_id', default='',
+            help="clear template from template-storage"
+        ),
+
+        parser.add_argument(
             '--adaptor', type=str, default='',
             help="connector adaptor"
         ),
@@ -229,6 +235,7 @@ class Cli:
         show_info(self.options)
 
         # operation
+        do_clear_template(self.options)
         do_build_template(self.options)
         do_search_template(self.options)
 

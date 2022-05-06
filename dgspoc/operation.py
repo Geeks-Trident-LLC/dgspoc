@@ -14,6 +14,7 @@ from dgspoc.utils import Text
 from dgspoc.utils import DotObject
 from dgspoc.utils import parse_template_result
 from dgspoc.utils import Misc
+from dgspoc.utils import MiscArgs
 
 from dgspoc.constant import ECODE
 from dgspoc.constant import CONVTYPE
@@ -137,6 +138,32 @@ def do_search_template(options):
     elif command == 'search' and feature != 'template':
         exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
         show_usage('{}_template'.format(command), exit_code=exit_code)
+
+
+def do_clear_template(options):
+    template_id = options.template_id.strip()
+
+    if re.match(r'(?i) *([*]|_+all_+) *$', template_id):
+        fmt = ('*** Failed to clear %r template reference because '
+               'Describe-Get-System prohibits multiple clearing')
+        print(fmt % template_id)
+        sys.exit(ECODE.BAD)
+
+    if template_id:
+        result = MiscArgs.get_parsed_result_as_data_or_file(data=template_id)
+        if result.is_file:
+            is_deleted = File.delete(result.filename)
+            print('%s %s' % ('+++' if is_deleted else '***', File.message))
+            sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
+        else:
+            is_cleared = TemplateStorage.clear(template_id)
+            if is_cleared:
+                fmt = '+++ Successfully cleared %r template id in template storage.'
+                message = fmt % template_id
+            else:
+                message = '*** %s' % TemplateStorage.message
+            print(message)
+            sys.exit(ECODE.SUCCESS if is_cleared else ECODE.BAD)
 
 
 def validate_test_data_flag(options):
