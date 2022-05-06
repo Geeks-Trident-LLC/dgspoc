@@ -1,17 +1,16 @@
-import re
-from os import path
 from subprocess import getstatusoutput
 
 import pytest
 
 from dgspoc.constant import ECODE
 from dgspoc.utils import File
-from dgspoc.utils import DotObject
 from dgspoc.utils import MiscOutput
 
-fn = path.join(path.dirname(__file__), 'data/console_build_template_cli_data.yaml')
-TESTDATA = File.get_result_from_yaml_file(fn)
-TESTDATA = DotObject(TESTDATA)
+TESTDATA = File.get_result_from_yaml_file(
+    'data/console_build_template_cli_data.yaml',
+    base_dir=__file__,
+    dot_datatype=True
+)
 
 base_cmdline = 'dgs build template "%s"' % TESTDATA.user_data
 fmt = '--author="%(author)s" --email="%(email)s" --company="%(company)s"'

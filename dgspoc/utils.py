@@ -285,22 +285,35 @@ class File:
             return ''
 
     @classmethod
-    def get_result_from_yaml_file(cls, file_path, default=dict(),   # noqa
-                                  is_stripped=True):
+    def get_result_from_yaml_file(cls, file_path, base_dir='',
+                                  is_stripped=True,
+                                  dot_datatype=False,
+                                  default=dict(),  # noqa
+                                  ):
         """get result of YAML file
 
         Parameters
         ----------
         file_path (string): file path
-        default (object): a default result file is not found.  Default is empty dict.
+        base_dir (str): a based directory
         is_stripped (bool): removing leading or trailing space.  Default is True.
+        dot_datatype (bool): convert a return_result to DotObject if
+                return_result is dictionary.  Default is False.
+        default (object): a default result file is not found.  Default is empty dict.
 
         Returns
         -------
         object: YAML result
         """
+
+        yaml_result = default
+
         try:
-            filename = cls.get_path(file_path)
+            if base_dir:
+                filename = cls.get_path(cls.get_dir(base_dir), file_path)
+            else:
+                filename = cls.get_path(file_path)
+
             with open(filename) as stream:
                 content = stream.read()
                 if is_stripped:
@@ -309,13 +322,17 @@ class File:
                 if content:
                     yaml_result = yaml.safe_load(content)
                     cls.message = 'loaded {}'.format(filename)
-                    return yaml_result
                 else:
                     cls.message = '"{}" file is empty.'.format(filename)
-                    return default
+
         except Exception as ex:
             cls.message = Text(ex)
-            return default
+
+        if Misc.is_dict(yaml_result) and dot_datatype:
+            dot_result = DotObject(yaml_result)
+            return dot_result
+        else:
+            return yaml_result
 
     @classmethod
     def save(cls, filename, data):
