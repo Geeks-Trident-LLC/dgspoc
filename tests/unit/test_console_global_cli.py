@@ -8,7 +8,8 @@ from dgspoc.main import Cli
 
 
 class TestConsoleHelpFlag:
-    exit_code, output = getstatusoutput('dgs --help')
+    def setup_class(self):
+        self.exit_code, self.output = getstatusoutput('dgs --help')
 
     def test_exit_code(self):
         assert self.exit_code == ECODE.SUCCESS
