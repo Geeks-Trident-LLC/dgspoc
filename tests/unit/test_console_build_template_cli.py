@@ -7,6 +7,7 @@ import pytest
 from dgspoc.constant import ECODE
 from dgspoc.utils import File
 from dgspoc.utils import DotObject
+from dgspoc.utils import MiscOutput
 
 fn = path.join(path.dirname(__file__), 'data/console_build_template_cli_data.yaml')
 TESTDATA = File.get_result_from_yaml_file(fn)
@@ -16,16 +17,6 @@ base_cmdline = 'dgs build template "%s"' % TESTDATA.user_data
 fmt = '--author="%(author)s" --email="%(email)s" --company="%(company)s"'
 postfix = fmt % TESTDATA.user_info
 cmdline_with_user_info = '%s %s' % (base_cmdline, postfix)
-
-
-def remove_date_stamp_from_output(output):
-    lines = []
-    pattern = r'# Created date: [0-9]{4}(-[0-9]{2}){2} *$'
-    for line in output.splitlines():
-        if not re.match(pattern, line):
-            lines.append(line)
-    new_output = '\n'.join(lines)
-    return new_output
 
 
 class TestBuildTemplate:
@@ -61,7 +52,7 @@ class TestBuildTemplate:
     )
     def test_build_template(self, cmdline, expected_result):
         exit_code, output = getstatusoutput(cmdline)
-        template_txt = remove_date_stamp_from_output(output)
+        template_txt = MiscOutput.clean_created_date_stamp(output)
         template_txt.strip()
 
         assert exit_code == ECODE.SUCCESS

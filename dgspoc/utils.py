@@ -538,6 +538,18 @@ class MiscArgs:
             return result
 
 
+class MiscOutput:
+    @classmethod
+    def clean_created_date_stamp(cls, output):
+        lines = []
+        pattern = r'# Created date: [0-9]{4}(-[0-9]{2}){2} *$'
+        for line in output.splitlines():
+            if not re.match(pattern, line):
+                lines.append(line)
+        new_output = '\n'.join(lines)
+        return new_output
+
+
 class DictObject(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
