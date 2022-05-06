@@ -340,7 +340,7 @@ class File:
 
     @classmethod
     def save(cls, filename, data):
-        """Create a file path
+        """save data to file
 
         Parameters
         ----------
@@ -365,6 +365,31 @@ class File:
             file_obj.touch()
             file_obj.write_text(content)
             cls.message = 'Successfully saved data to "{}" file'.format(filename)
+            return True
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    @classmethod
+    def delete(cls, filename):
+        """Delete file
+
+        Parameters
+        ----------
+        filename (str): filename
+
+        Returns
+        -------
+        bool: True if successfully deleted, otherwise, False
+        """
+        try:
+            filepath = File.get_path(filename)
+            file_obj = Path(filepath)
+            if file_obj.is_dir():
+                file_obj.rmdir()
+            else:
+                file_obj.unlink()
+            cls.message = 'Successfully deleted "{}" file'.format(filename)
             return True
         except Exception as ex:
             cls.message = Text(ex)
