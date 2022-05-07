@@ -1,7 +1,4 @@
 import pytest
-import tempfile
-import time
-from os import path
 
 from dgspoc.utils import File
 from dgspoc.utils import MiscOutput
@@ -59,44 +56,13 @@ class TestBuildTemplate:
         assert result.is_success
         assert template_txt == expected_result
 
-
-class TestBuildTemplateAndSaveToTemplateStorage:
-
-    def setup_class(self):
-        self.template_id = TESTDATA.template_id
-        other = '--template-id=%s' % self.template_id
-        self.cmdline = '%s %s' % (base_cmdline, other)
-        MiscOutput.execute_shell_command('dgs --clear=%s' % self.template_id)
-
-    def teardown_class(self):
-        MiscOutput.execute_shell_command('dgs --clear=%s' % self.template_id)
-
-    def test_build_template_and_save(self):
-        result = MiscOutput.execute_shell_command(self.cmdline)
-        assert result.is_success
-        assert 'Successfully uploaded ' in result.output
-        assert '"%s" template ID' % self.template_id in result.output
-
-    def test_build_template_and_save_and_replace(self):
-        cmdline = '%s --replace' % self.cmdline
+    @pytest.mark.parametrize(
+        'cmdline',
+        [
+            '%s --template-id=%s --replace' % (cmdline_with_user_info,
+                                               TESTDATA.template_id)
+        ]
+    )
+    def test_build_template_and_save_to_storage(self, cmdline):
         result = MiscOutput.execute_shell_command(cmdline)
         assert result.is_success
-        assert 'Successfully uploaded ' in result.output
-        assert '"%s" template ID' % self.template_id in result.output
-
-
-class TestBuildTemplateAndSaveToFile:
-
-    def setup_class(self):
-        directory = tempfile.gettempdir()
-        fn = 'test_file_%s.txt' % str(time.time())
-        self.filename = path.join(directory, fn)
-        self.cmdline = '%s --save-to="%s"' % (base_cmdline, self.filename)
-
-    def teardown_class(self):
-        MiscOutput.execute_shell_command('dgs --clear="--filename=%s"' % self.filename)
-
-    def test_build_template_and_save_to_file(self):
-        result = MiscOutput.execute_shell_command(self.cmdline)
-        assert result.is_success
-        assert 'Successfully saved generated template ' in result.output

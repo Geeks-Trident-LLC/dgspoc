@@ -1,5 +1,4 @@
 import pytest
-from os import path
 
 from dgspoc.constant import FWTYPE
 
@@ -22,11 +21,12 @@ from dgspoc.interpreter import ScriptBuilder
 from dgspoc.utils import Misc
 
 from dgspoc.utils import File
-from dgspoc.utils import DotObject
 
-fn = path.join(path.dirname(__file__), 'data/interpreter_test_data.yaml')
-TESTDATA = File.get_result_from_yaml_file(fn)
-TESTDATA = DotObject(TESTDATA)
+TESTDATA = File.get_result_from_yaml_file(
+    'data/interpreter_test_data.yaml',
+    base_dir=__file__,
+    dot_datatype=True
+)
 
 SCRIPTINFO.enable_testing()
 

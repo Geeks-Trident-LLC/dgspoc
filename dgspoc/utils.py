@@ -2,6 +2,8 @@
 
 import re
 
+import subprocess
+
 from pathlib import Path
 from pathlib import PurePath
 from pathlib import WindowsPath
@@ -20,6 +22,8 @@ from io import StringIO
 from textfsm import TextFSM
 
 from dgspoc.exceptions import UtilsParsedTemplateError
+
+from dgspoc.constant import ECODE
 
 
 class Text(str):
@@ -285,22 +289,35 @@ class File:
             return ''
 
     @classmethod
-    def get_result_from_yaml_file(cls, file_path, default=dict(),   # noqa
-                                  is_stripped=True):
+    def get_result_from_yaml_file(cls, file_path, base_dir='',
+                                  is_stripped=True,
+                                  dot_datatype=False,
+                                  default=dict(),  # noqa
+                                  ):
         """get result of YAML file
 
         Parameters
         ----------
         file_path (string): file path
-        default (object): a default result file is not found.  Default is empty dict.
+        base_dir (str): a based directory
         is_stripped (bool): removing leading or trailing space.  Default is True.
+        dot_datatype (bool): convert a return_result to DotObject if
+                return_result is dictionary.  Default is False.
+        default (object): a default result file is not found.  Default is empty dict.
 
         Returns
         -------
         object: YAML result
         """
+
+        yaml_result = default
+
         try:
-            filename = cls.get_path(file_path)
+            if base_dir:
+                filename = cls.get_path(cls.get_dir(base_dir), file_path)
+            else:
+                filename = cls.get_path(file_path)
+
             with open(filename) as stream:
                 content = stream.read()
                 if is_stripped:
@@ -309,17 +326,21 @@ class File:
                 if content:
                     yaml_result = yaml.safe_load(content)
                     cls.message = 'loaded {}'.format(filename)
-                    return yaml_result
                 else:
                     cls.message = '"{}" file is empty.'.format(filename)
-                    return default
+
         except Exception as ex:
             cls.message = Text(ex)
-            return default
+
+        if Misc.is_dict(yaml_result) and dot_datatype:
+            dot_result = DotObject(yaml_result)
+            return dot_result
+        else:
+            return yaml_result
 
     @classmethod
     def save(cls, filename, data):
-        """Create a file path
+        """save data to file
 
         Parameters
         ----------
@@ -344,6 +365,31 @@ class File:
             file_obj.touch()
             file_obj.write_text(content)
             cls.message = 'Successfully saved data to "{}" file'.format(filename)
+            return True
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    @classmethod
+    def delete(cls, filename):
+        """Delete file
+
+        Parameters
+        ----------
+        filename (str): filename
+
+        Returns
+        -------
+        bool: True if successfully deleted, otherwise, False
+        """
+        try:
+            filepath = File.get_path(filename)
+            file_obj = Path(filepath)
+            if file_obj.is_dir():
+                file_obj.rmdir()
+            else:
+                file_obj.unlink()
+            cls.message = 'Successfully deleted "{}" file'.format(filename)
             return True
         except Exception as ex:
             cls.message = Text(ex)
@@ -536,6 +582,28 @@ class MiscArgs:
             result.failure = '{}: {}'.format(type(ex).__name__, ex)
             result.is_parsed = False
             return result
+
+
+class MiscOutput:
+    @classmethod
+    def clean_created_date_stamp(cls, output):
+        lines = []
+        pattern = r'# Created date: [0-9]{4}(-[0-9]{2}){2} *$'
+        for line in output.splitlines():
+            if not re.match(pattern, line):
+                lines.append(line)
+        new_output = '\n'.join(lines)
+        return new_output
+
+    @classmethod
+    def execute_shell_command(cls, cmdline):
+        exit_code, output = subprocess.getstatusoutput(cmdline)
+        result = DotObject(
+            output=output,
+            exit_code=exit_code,
+            is_success=exit_code == ECODE.SUCCESS
+        )
+        return result
 
 
 class DictObject(dict):

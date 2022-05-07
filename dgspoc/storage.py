@@ -122,3 +122,21 @@ class TemplateStorage:
         except Exception as ex:
             cls.message = Text(ex)
             return False
+
+    @classmethod
+    def clear(cls, template_id):
+
+        if re.match(r'(?i) *([*]|_+all_+) *$', template_id):
+            fmt = 'WONT clear %r because method prohibits multiple clearing template id.'
+            cls.message = fmt % template_id
+            return False
+
+        yaml_obj = File.get_result_from_yaml_file(cls.filename)
+        if template_id in yaml_obj:
+            yaml_obj.pop(template_id)
+            File.save(cls.filename, yaml.safe_dump(yaml_obj))
+            return True
+        else:
+            fmt = 'CANT clear %r because it is not in storage template.'
+            cls.message = fmt % template_id
+            return False
