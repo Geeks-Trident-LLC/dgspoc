@@ -1,6 +1,11 @@
 template_id: unreal.device.os.show.modules.tmpl
 adaptor: unreal-device
-build_template_cmdline: |-
-  dgs --template-id=unreal.os.show.modules.test.tmpl --replaced build template "digits(var_module)  words(var_name)  mixed_word(var_model)  version(var_version)  word(var_status) end(space) -> record"
+
+template_snippet: "digits(var_module)  words(var_name)  mixed_word(var_model)  version(var_version)  word(var_status) end(space) -> record"
+created_template_cmdline: 'dgs build template "{self.template_snippet}" --template-id={self.template_id} --replaced'
+cleared_template_cmdline: ''
+
+select_statement: ""
+
 case1:
   cmdline:

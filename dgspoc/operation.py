@@ -237,7 +237,6 @@ def do_testing(options):
         name = command
         validate_usage(name, operands)
         validate_example_usage(name, operands)
-
         is_showed = False
         if re.search(r'(?i)--showed\b', action):
             is_showed = True
@@ -298,7 +297,7 @@ def do_testing(options):
             connection = Adaptor(adaptor, host)
             tbl = dict(execution=connection.execute,
                        configuration=connection.configure,
-                       reload=connection.reload())
+                       reload=connection.reload)
             operation_method = tbl[node.name]
             connection.connect()
             output = operation_method(node.operation_ref)

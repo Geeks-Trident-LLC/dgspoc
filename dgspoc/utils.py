@@ -3,6 +3,7 @@
 import re
 
 import subprocess
+from copy import deepcopy
 
 from pathlib import Path
 from pathlib import PurePath
@@ -293,6 +294,8 @@ class File:
                                   is_stripped=True,
                                   dot_datatype=False,
                                   default=dict(),  # noqa
+                                  var_substitution=False,
+                                  root_var_name='self'
                                   ):
         """get result of YAML file
 
@@ -304,6 +307,8 @@ class File:
         dot_datatype (bool): convert a return_result to DotObject if
                 return_result is dictionary.  Default is False.
         default (object): a default result file is not found.  Default is empty dict.
+        var_substitution (bool): internal variable substitution.  Default is False.
+        root_var_name (str): root variable of data structure.  Default is self.
 
         Returns
         -------
@@ -331,6 +336,10 @@ class File:
 
         except Exception as ex:
             cls.message = Text(ex)
+
+        if var_substitution:
+            yaml_result = Misc.substitute_variable(yaml_result,
+                                                   root_var_name=root_var_name)
 
         if Misc.is_dict(yaml_result) and dot_datatype:
             dot_result = DotObject(yaml_result)
@@ -533,6 +542,40 @@ class Misc:
         else:
             new_data = '\n'.join(data.splitlines()[1:])
             return new_data
+
+    @classmethod
+    def substitute_variable(cls, data, root_var_name='self'):
+        def substitute(node, variables_):
+            if cls.is_dict(node):
+                for key, val in node.items():
+                    if cls.is_dict(val) or cls.is_list(val):
+                        substitute(val, variables_)
+                    else:
+                        if cls.is_string(val):
+                            try:
+                                new_val = val.format(**variables_)
+                                node[key] = new_val
+                            except Exception as ex:     # noqa
+                                continue
+            elif cls.is_list(node):
+                for index, item in enumerate(node):
+                    if cls.is_dict(item) or cls.is_list(item):
+                        substitute(item, variables_)
+                    else:
+                        if cls.is_string(item):
+                            try:
+                                new_item = item.format(obj=variables_)
+                                node[index] = new_item
+                            except Exception as ex:     # noqa
+                                continue
+            else:
+                return
+
+        if not cls.is_dict(data):
+            return data
+        variables = {root_var_name: DotObject(deepcopy(data))}
+        substitute(data, variables)
+        return data
 
 
 class MiscArgs:
