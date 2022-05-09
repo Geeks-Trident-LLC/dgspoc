@@ -186,7 +186,6 @@ def get_test_from_adaptor(options):
         lst = [
             'ExecutionSyntaxError: must be',
             '--execution="--host=<addr_or_name> <cmdline>"',
-            '--execution="--host=<addr_or_name> --test_case=<testcase_name> <cmdline>"'
         ]
         Printer.print(lst)
         show_usage(name, exit_code=ECODE.BAD)
@@ -198,24 +197,21 @@ def get_test_from_adaptor(options):
         parser = argparse.ArgumentParser(exit_on_error=False)
         parser.add_argument('items', nargs='*')
         parser.add_argument('--host', type=str, default='')
-        parser.add_argument('--testcase', type=str, default='')
         parser.add_argument('other_items', nargs='*')
         parser_args = parser.parse_args(lst)
 
         host = parser_args.host
-        testcase = parser_args.testcase
         cmdline = ' '.join(parser_args.items + parser_args.other_items)
 
         if not parser_args.host:
             lst = [
                 'ExecutionSyntaxError: must be',
                 '--execution="--host=<addr_or_name> <cmdline>"',
-                '--execution="--host=<addr_or_name> --test_case=<testcase_name> <cmdline>"'
             ]
             Printer.print(lst)
             show_usage(name, exit_code=ECODE.BAD)
 
-        device = Adaptor(options.adaptor, host, testcase=testcase)
+        device = Adaptor(options.adaptor, host)
         device.connect()
         test_data = device.execute(cmdline)
         device.disconnect()

@@ -14,8 +14,7 @@ class Adaptor:
         self.adaptor = adaptor.strip()
         if self.is_unreal_device_adaptor:
             addr = args[0]
-            testcase = kwargs.get('testcase', '')
-            self.device = UnrealDeviceAdaptor(addr, testcase=testcase)
+            self.device = UnrealDeviceAdaptor(addr)
         else:
             fmt = '*** Need to implement "{}" adaptor'
             NotImplementedError(fmt.format(adaptor))
@@ -54,10 +53,9 @@ class Adaptor:
 
 
 class UnrealDeviceAdaptor:
-    def __init__(self, address, testcase=''):
+    def __init__(self, address):
         self.address = str(address).strip()
         self.name = self.address
-        self.testcase = str(testcase).strip()
         self.result = ''
         self.exit_code = ECODE.SUCCESS
 
@@ -67,16 +65,13 @@ class UnrealDeviceAdaptor:
 
     def process(self, statement):
         result = MiscOutput.execute_shell_command(statement.strip())
-        self.exit_code, self.result = result.output
+        self.exit_code, self.result = result.exit_code, result.output
         print(self.result)
         return self.status
 
     def connect(self):
         fmt = 'unreal-device connect --host={}'
         unreal_statement = fmt.format(self.address)
-        if self.testcase:
-            fmt = '{} --testcase={}'
-            unreal_statement = fmt.format(unreal_statement, self.testcase)
         self.process(unreal_statement)
         return self.status
 
@@ -107,9 +102,6 @@ class UnrealDeviceAdaptor:
         addr = kwargs.get('name', self.address)
         fmt = 'unreal-device reload --host={}'
         unreal_statement = fmt.format(addr)
-        if self.testcase:
-            fmt = '{} --testcase={}'
-            unreal_statement = fmt.format(unreal_statement, self.testcase)
         self.process(unreal_statement)
         return self.status
 
