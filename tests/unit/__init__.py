@@ -30,14 +30,24 @@ class ReformatOutput:
 
         lines = self.raw_data.splitlines()
         lst = []
-        pat1 = r'(?i)- UNREAL-DEVICE-[a-z]+-SERVICE-TIMESTAMP'
-        pat2 = r'(?i)(?P<name>\S+) +is +(successfully +)?((dis)?connected)[.]'
+        service_stamp_pat = r'(?i)- UNREAL-DEVICE-[a-z]+-SERVICE-TIMESTAMP'
+        replacing_service_stamp_pat = r'(?i)^[a-z]{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}[.]\d{3}'
+        replacing_created_date_pat = r'(?i)^(# Created date: )([0-9]{4}(-[0-9]{2}){2})( *)$'
+
+        device_name_pat = r'(?i)(?P<name>\S+) +is +(successfully +)?((dis)?connected)[.]'
         for line in lines:
-            if re.search(pat1, line):
-                continue
-            lst.append(line)
-            match = re.match(pat2, line)
-            if match and not self.device_name:
-                self.device_name = match.group('name')
+            if re.search(service_stamp_pat, line):
+                changed_txt = re.sub(replacing_service_stamp_pat,
+                                     'mmm dd yyyy HH:MM:SS.###', line)
+                lst.append(changed_txt)
+            elif re.match(replacing_created_date_pat, line):
+                changed_txt = re.sub(replacing_created_date_pat,
+                                     r'\1 yyyy-mm-dd \3', line)
+                lst.append(changed_txt)
+            else:
+                lst.append(line)
+                match = re.match(device_name_pat, line)
+                if match and not self.device_name:
+                    self.device_name = match.group('name')
 
         self.output = '\n'.join(lst)
