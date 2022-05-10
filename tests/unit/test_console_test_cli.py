@@ -6,7 +6,7 @@ from dgspoc.utils import MiscOutput
 from . import ReformatOutput
 
 TESTDATA = File.get_result_from_yaml_file(
-    'data/console_test_data.yaml',
+    'data/console_test_cli_data.yaml',
     base_dir=__file__,
     dot_datatype=True,
     var_substitution=True,
