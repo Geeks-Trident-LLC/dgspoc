@@ -1,21 +1,22 @@
 import pytest
-import tempfile
-import time
+from tempfile import gettempdir
+from time import time
 from os import path
 
 from dgspoc.utils import File
 from dgspoc.utils import MiscOutput
 
+from . import ReformatOutput
+
 TESTDATA = File.get_result_from_yaml_file(
     'data/console_build_template_cli_data.yaml',
     base_dir=__file__,
-    dot_datatype=True
+    dot_datatype=True,
+    var_substitution=True,
+    root_var_name='self'
 )
 
-base_cmdline = 'dgs build template "%s"' % TESTDATA.user_data
-fmt = '--author="%(author)s" --email="%(email)s" --company="%(company)s"'
-postfix = fmt % TESTDATA.user_info
-cmdline_with_user_info = '%s %s' % (base_cmdline, postfix)
+tmp_file = path.join(gettempdir(), 'test_file_%d.txt' % time())
 
 
 class TestBuildTemplate:
@@ -47,56 +48,49 @@ class TestBuildTemplate:
     @pytest.mark.parametrize(
         ('cmdline', 'expected_result'),
         [
-            (base_cmdline, TESTDATA.expected_result_wo_user_info),
-            (cmdline_with_user_info, TESTDATA.expected_result_with_user_info),
+            (TESTDATA.built_tmpl_cmdline, TESTDATA.expected_result_wo_user_info),
+            (TESTDATA.built_tmpl_with_user_info_cmdline, TESTDATA.expected_result_with_user_info),
         ]
     )
     def test_build_template(self, cmdline, expected_result):
         result = MiscOutput.execute_shell_command(cmdline)
-        template_txt = MiscOutput.clean_created_date_stamp(result.output)
+        template_txt = str(ReformatOutput(result.output))
         template_txt.strip()
-
         assert result.is_success
         assert template_txt == expected_result
 
 
 class TestBuildTemplateAndSaveToTemplateStorage:
 
-    def setup_class(self):
-        self.template_id = TESTDATA.template_id
-        other = '--template-id=%s' % self.template_id
-        self.cmdline = '%s %s' % (base_cmdline, other)
-        MiscOutput.execute_shell_command('dgs --clear=%s' % self.template_id)
+    def setup_class(self):      # noqa
+        MiscOutput.execute_shell_command(TESTDATA.cleared_tmpl_in_storage_cmdline)
 
-    def teardown_class(self):
-        MiscOutput.execute_shell_command('dgs --clear=%s' % self.template_id)
+    def teardown_class(self):   # noqa
+        MiscOutput.execute_shell_command(TESTDATA.cleared_tmpl_in_storage_cmdline)
 
-    def test_build_template_and_save(self):
-        result = MiscOutput.execute_shell_command(self.cmdline)
-        assert result.is_success
-        assert 'Successfully uploaded ' in result.output
-        assert '"%s" template ID' % self.template_id in result.output
-
-    def test_build_template_and_save_and_replace(self):
-        cmdline = '%s --replace' % self.cmdline
+    @pytest.mark.parametrize(
+        'cmdline',
+        [
+            TESTDATA.built_tmpl_and_saved_to_storage_cmdline,
+            TESTDATA.built_tmpl_and_replaced_in_storage_cmdline,
+        ]
+    )
+    def test_build_template_and_save_to_template_storage(self, cmdline):
         result = MiscOutput.execute_shell_command(cmdline)
         assert result.is_success
         assert 'Successfully uploaded ' in result.output
-        assert '"%s" template ID' % self.template_id in result.output
+        assert '"%s" template ID' % TESTDATA.template_id in result.output
 
 
 class TestBuildTemplateAndSaveToFile:
-
-    def setup_class(self):
-        directory = tempfile.gettempdir()
-        fn = 'test_file_%s.txt' % str(time.time())
-        self.filename = path.join(directory, fn)
-        self.cmdline = '%s --save-to="%s"' % (base_cmdline, self.filename)
-
-    def teardown_class(self):
-        MiscOutput.execute_shell_command('dgs --clear="--filename=%s"' % self.filename)
-
-    def test_build_template_and_save_to_file(self):
-        result = MiscOutput.execute_shell_command(self.cmdline)
+    @pytest.mark.parametrize(
+        'cmdline',
+        [
+            '%s --save-to="%s"' % (TESTDATA.built_tmpl_cmdline, tmp_file),
+        ]
+    )
+    def test_build_template_and_save_to_file(self, cmdline):
+        result = MiscOutput.execute_shell_command(cmdline)
+        MiscOutput.execute_shell_command('dgs --clear="--filename=%s"' % tmp_file)
         assert result.is_success
         assert 'Successfully saved generated template ' in result.output

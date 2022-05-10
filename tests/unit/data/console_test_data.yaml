@@ -13,9 +13,11 @@ select_statement: ""
 case1:
   cmdline: 'dgs test --adaptor={self.adaptor} --action="{self.host} execute {self.base_cmdline}"'
   expected_result: |-
-    login unreal-device 1.1.1.1@dummy_username:dummy_password
+    login unreal-device {self.host}@dummy_username:dummy_password
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
     {device_name} is successfully connected.
     show modules
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-EXECUTION-SERVICE-TIMESTAMP
     Module Name        Model   Version  Status
     ------ ----------- ------- -------- --------
     1      Left Fan    FAN.1A  1.1.0    Running
@@ -23,16 +25,19 @@ case1:
     3      Misc Fan    FAN.1A  1.1.0    Off
     4      Top Cooler  C1-AX   2.3.5    Running
     5      Bot Cooler  C1-AX   2.3.5    Running
-    logout unreal-device 1.1.1.1
+    logout unreal-device {self.host}
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
     {device_name} is disconnected.
-    UnrealDeviceMessage: +++ Successfully released 1.1.1.1 unreal-device.
+    UnrealDeviceMessage: +++ Successfully released {self.host} unreal-device.
 
 case2:
   cmdline: 'dgs test --adaptor={self.adaptor} --action="{self.host} execute {self.base_cmdline} USING-TEMPLATE {self.template_id}"'
   expected_result: |-
-    login unreal-device 1.1.1.1@dummy_username:dummy_password
+    login unreal-device {self.host}@dummy_username:dummy_password
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
     {device_name} is successfully connected.
     show modules
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-EXECUTION-SERVICE-TIMESTAMP
     Module Name        Model   Version  Status
     ------ ----------- ------- -------- --------
     1      Left Fan    FAN.1A  1.1.0    Running
@@ -40,9 +45,10 @@ case2:
     3      Misc Fan    FAN.1A  1.1.0    Off
     4      Top Cooler  C1-AX   2.3.5    Running
     5      Bot Cooler  C1-AX   2.3.5    Running
-    logout unreal-device 1.1.1.1
+    logout unreal-device {self.host}
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
     {device_name} is disconnected.
-    UnrealDeviceMessage: +++ Successfully released 1.1.1.1 unreal-device.
+    UnrealDeviceMessage: +++ Successfully released {self.host} unreal-device.
     +------------------------------------------------------------------------------+
     | Parsed Results:                                                              |
     +------------------------------------------------------------------------------+
@@ -75,9 +81,11 @@ case2:
 case3:
   cmdline: 'dgs test --adaptor={self.adaptor} --action="{self.host} execute {self.base_cmdline} USING-TEMPLATE {self.template_id} --tabular"'
   expected_result: |-
-    login unreal-device 1.1.1.1@dummy_username:dummy_password
+    login unreal-device {self.host}@dummy_username:dummy_password
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
     {device_name} is successfully connected.
     show modules
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-EXECUTION-SERVICE-TIMESTAMP
     Module Name        Model   Version  Status
     ------ ----------- ------- -------- --------
     1      Left Fan    FAN.1A  1.1.0    Running
@@ -85,9 +93,10 @@ case3:
     3      Misc Fan    FAN.1A  1.1.0    Off
     4      Top Cooler  C1-AX   2.3.5    Running
     5      Bot Cooler  C1-AX   2.3.5    Running
-    logout unreal-device 1.1.1.1
+    logout unreal-device {self.host}
+    mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
     {device_name} is disconnected.
-    UnrealDeviceMessage: +++ Successfully released 1.1.1.1 unreal-device.
+    UnrealDeviceMessage: +++ Successfully released {self.host} unreal-device.
     +------------------------------------------------------------------------------+
     | Parsed Results:                                                              |
     +------------------------------------------------------------------------------+

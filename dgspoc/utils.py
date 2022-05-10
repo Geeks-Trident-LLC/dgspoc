@@ -308,7 +308,8 @@ class File:
                 return_result is dictionary.  Default is False.
         default (object): a default result file is not found.  Default is empty dict.
         var_substitution (bool): internal variable substitution.  Default is False.
-        root_var_name (str): root variable of data structure.  Default is self.
+        root_var_name (str): root variable of data structure for
+                variable substitution.  Default is self.
 
         Returns
         -------
@@ -545,6 +546,47 @@ class Misc:
 
     @classmethod
     def substitute_variable(cls, data, root_var_name='self'):
+        """substitute variable within data structure if there
+
+        Parameters
+        ----------
+        data (dict): a dictionary.
+        root_var_name (str): root variable of data structure for
+                variable substitution.  Default is self.
+
+        Returns
+        -------
+        dict: a new dictionary if substituted, otherwise, the given data.
+
+        """
+        def replace(txt, **kwargs):
+            if len(kwargs) == 1:
+                var_name = list(kwargs)[0]
+                pattern = r'(?i)[{]%s([.][a-z]\w*)+[}]' % var_name
+            else:
+                pattern = r'(?i)[{][a-z]\w*([.][a-z]\w*)+[}]'
+            lines = txt.splitlines()
+            for index, line in enumerate(lines):
+                if line.strip():
+                    lst = []
+                    start = 0
+                    for match in re.finditer(pattern, line):
+                        lst.append(line[start:match.start()])
+                        start = match.end()
+                        matched_result = match.group()
+                        try:
+                            val = matched_result.format(**kwargs)
+                            lst.append(val)
+                        except Exception as ex:     # noqa
+                            lst.append(matched_result)
+                    else:
+                        if lst:
+                            lst.append(line[start:])
+                            lines[index] = ''.join(lst)
+
+            new_txt = '\n'.join(lines)
+            return new_txt
+
         def substitute(node, variables_):
             if cls.is_dict(node):
                 for key, val in node.items():
@@ -552,30 +594,26 @@ class Misc:
                         substitute(val, variables_)
                     else:
                         if cls.is_string(val):
-                            try:
-                                new_val = val.format(**variables_)
-                                node[key] = new_val
-                            except Exception as ex:     # noqa
-                                continue
+                            new_val = replace(val, **variables_)
+                            node[key] = new_val
             elif cls.is_list(node):
                 for index, item in enumerate(node):
                     if cls.is_dict(item) or cls.is_list(item):
                         substitute(item, variables_)
                     else:
                         if cls.is_string(item):
-                            try:
-                                new_item = item.format(obj=variables_)
-                                node[index] = new_item
-                            except Exception as ex:     # noqa
-                                continue
+                            new_item = item.format(obj=variables_)
+                            node[index] = new_item
             else:
                 return
 
         if not cls.is_dict(data):
             return data
-        variables = {root_var_name: DotObject(deepcopy(data))}
-        substitute(data, variables)
-        return data
+
+        new_data = deepcopy(data)
+        variables = {root_var_name: DotObject(deepcopy(new_data))}
+        substitute(new_data, variables)
+        return new_data
 
 
 class MiscArgs:
@@ -628,16 +666,6 @@ class MiscArgs:
 
 
 class MiscOutput:
-    @classmethod
-    def clean_created_date_stamp(cls, output):
-        lines = []
-        pattern = r'# Created date: [0-9]{4}(-[0-9]{2}){2} *$'
-        for line in output.splitlines():
-            if not re.match(pattern, line):
-                lines.append(line)
-        new_output = '\n'.join(lines)
-        return new_output
-
     @classmethod
     def execute_shell_command(cls, cmdline):
         exit_code, output = subprocess.getstatusoutput(cmdline)
