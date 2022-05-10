@@ -667,16 +667,6 @@ class MiscArgs:
 
 class MiscOutput:
     @classmethod
-    def clean_created_date_stamp(cls, output):
-        lines = []
-        pattern = r'# Created date: [0-9]{4}(-[0-9]{2}){2} *$'
-        for line in output.splitlines():
-            if not re.match(pattern, line):
-                lines.append(line)
-        new_output = '\n'.join(lines)
-        return new_output
-
-    @classmethod
     def execute_shell_command(cls, cmdline):
         exit_code, output = subprocess.getstatusoutput(cmdline)
         result = DotObject(
