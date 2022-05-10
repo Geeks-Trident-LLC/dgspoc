@@ -3,15 +3,15 @@ adaptor: unreal-device
 host: 1.1.1.1
 
 template_snippet: "digits(var_module)  words(var_name)  mixed_word(var_model)  version(var_version)  word(var_status) end(space) -> record"
-created_template_cmdline: 'dgs build template "{self.template_snippet}" --template-id={self.template_id} --replaced'
-cleared_template_cmdline: 'dgs --clear={self.template_id}'
+created_template_cmdline: 'dgs build template "{self.template_snippet}" --template-id="{self.template_id}" --replaced'
+cleared_template_cmdline: 'dgs --clear="{self.template_id}"'
 
 base_cmdline: "show modules"
 
 select_statement: ""
 
 case1:
-  cmdline: 'dgs test --adaptor={self.adaptor} --action="{self.host} execute {self.base_cmdline}"'
+  cmdline: 'dgs test --adaptor="{self.adaptor}" --action="{self.host} execute {self.base_cmdline}"'
   expected_result: |-
     login unreal-device {self.host}@dummy_username:dummy_password
     mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
@@ -31,7 +31,7 @@ case1:
     UnrealDeviceMessage: +++ Successfully released {self.host} unreal-device.
 
 case2:
-  cmdline: 'dgs test --adaptor={self.adaptor} --action="{self.host} execute {self.base_cmdline} USING-TEMPLATE {self.template_id}"'
+  cmdline: 'dgs test --adaptor="{self.adaptor}" --action="{self.host} execute {self.base_cmdline} USING-TEMPLATE {self.template_id}"'
   expected_result: |-
     login unreal-device {self.host}@dummy_username:dummy_password
     mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP
@@ -79,7 +79,7 @@ case2:
       'version': '2.3.5'}]
 
 case3:
-  cmdline: 'dgs test --adaptor={self.adaptor} --action="{self.host} execute {self.base_cmdline} USING-TEMPLATE {self.template_id} --tabular"'
+  cmdline: 'dgs test --adaptor="{self.adaptor}" --action="{self.host} execute {self.base_cmdline} USING-TEMPLATE {self.template_id} --tabular"'
   expected_result: |-
     login unreal-device {self.host}@dummy_username:dummy_password
     mmm dd yyyy HH:MM:SS.### for "{device_name}" - UNREAL-DEVICE-AUTHENTICATION-SERVICE-TIMESTAMP

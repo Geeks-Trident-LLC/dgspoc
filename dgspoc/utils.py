@@ -194,8 +194,12 @@ class File:
         -------
         bool: True if existed, otherwise False
         """
-        file_obj = Path(filename)
-        return file_obj.exists()
+        try:
+            file_obj = Path(filename)
+            return file_obj.exists()
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
 
     @classmethod
     def create(cls, filename, showed=True):
@@ -619,7 +623,11 @@ class Misc:
 class MiscArgs:
     @classmethod
     def get_parsed_result_as_data_or_file(cls, *kwflags, data=''):
-        parser = ArgumentParser(exit_on_error=False)
+        try:
+            parser = ArgumentParser(exit_on_error=False)
+        except Exception as ex:     # noqa
+            parser = ArgumentParser()
+
         parser.add_argument('val1', nargs='*')
         parser.add_argument('--file', type=str, default='')
         parser.add_argument('--filename', type=str, default='')
