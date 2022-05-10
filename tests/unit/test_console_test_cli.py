@@ -3,6 +3,8 @@ import pytest
 from dgspoc.utils import File
 from dgspoc.utils import MiscOutput
 
+from . import ReformatOutput
+
 TESTDATA = File.get_result_from_yaml_file(
     'data/console_test_data.yaml',
     base_dir=__file__,
@@ -20,8 +22,9 @@ class TestConsoleTestCommandLine:
         result = MiscOutput.execute_shell_command(TESTDATA.created_template_cmdline)
         assert result.is_success
 
-    def teardown_class(self):
-        pass
+    def teardown_class(self):   # noqa
+        result = MiscOutput.execute_shell_command(TESTDATA.cleared_template_cmdline)
+        assert result.is_success
 
     @pytest.mark.parametrize(
         'cmdline',
@@ -40,3 +43,19 @@ class TestConsoleTestCommandLine:
         assert ' -h, --help ' in result.output
         assert 'dgs test operands [options]' in result.output
         assert 'dgs test example ' in result.output
+
+    @pytest.mark.parametrize(
+        ('cmdline', 'expected_result'),
+        [
+            (TESTDATA.case1.cmdline, TESTDATA.case1.expected_result),
+            (TESTDATA.case2.cmdline, TESTDATA.case2.expected_result),
+            (TESTDATA.case3.cmdline, TESTDATA.case3.expected_result),
+        ]
+    )
+    def test_or_verify(self, cmdline, expected_result):
+        result = MiscOutput.execute_shell_command(cmdline)
+        reformat_result = ReformatOutput(result.output)
+        assert result.is_success
+        assert reformat_result == expected_result
+
+
