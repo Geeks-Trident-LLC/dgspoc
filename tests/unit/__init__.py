@@ -32,7 +32,7 @@ class ReformatOutput:
         lst = []
         service_stamp_pat = r'(?i)- UNREAL-DEVICE-[a-z]+-SERVICE-TIMESTAMP'
         replacing_service_stamp_pat = r'(?i)^[a-z]{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}[.]\d{3}'
-        replacing_created_date_pat = r'(?i)^(# Created date: )([0-9]{4}(-[0-9]{2}){2})( *)$'
+        replacing_created_date_pat = r'(?i)^(# Created date:) (\d{4}-\d\d-\d\d)( *)$'
 
         device_name_pat = r'(?i)(?P<name>\S+) +is +(successfully +)?((dis)?connected)[.]'
         for line in lines:
@@ -42,7 +42,7 @@ class ReformatOutput:
                 lst.append(changed_txt)
             elif re.match(replacing_created_date_pat, line):
                 changed_txt = re.sub(replacing_created_date_pat,
-                                     r'\1 yyyy-mm-dd \3', line)
+                                     r'\1 yyyy-mm-dd\3', line)
                 lst.append(changed_txt)
             else:
                 lst.append(line)
