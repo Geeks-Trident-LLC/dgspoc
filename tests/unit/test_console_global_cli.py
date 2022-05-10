@@ -79,11 +79,10 @@ class TestConsoleVersionCommand:
     )
     def test_version_flag(self, cmdline):
         result = MiscOutput.execute_shell_command(cmdline)
-
         assert result.is_success
 
-        pattern = r'(?i)%s +v[0-9]+([.][0-9]+)*' % Cli.prog
-        match = re.match(pattern, result.output)
+        pattern = r'(?i)^%s +v[0-9]+([.][0-9]+)*' % Cli.prog
+        match = re.search(pattern, result.output, re.M)
         chk = bool(match)
         assert chk is True
 
