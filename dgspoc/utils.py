@@ -194,8 +194,12 @@ class File:
         -------
         bool: True if existed, otherwise False
         """
-        file_obj = Path(filename)
-        return file_obj.exists()
+        try:
+            file_obj = Path(filename)
+            return file_obj.exists()
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
 
     @classmethod
     def create(cls, filename, showed=True):
