@@ -34,9 +34,8 @@ from dgspoc.exceptions import ScriptBuilderError
 
 
 class ScriptInfo(DotObject):
-    def __init__(self, *args, testcase='', **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.testcase = testcase
         self.devices_vars = dict()
         self._enabled_testing = False
 
@@ -51,12 +50,7 @@ class ScriptInfo(DotObject):
         self._enabled_testing = False
 
     def get_class_name(self):
-        if 'testcases' in self:
-            node = self.testcases.get(self.testcase)
-            cls_name = node.get('class_name', 'TestClass') if node else 'TestClass'
-            return cls_name
-        else:
-            return 'TestClass'
+        return 'TestClass'
 
     def reset_devices_vars(self):
         self.devices_vars = dict()
