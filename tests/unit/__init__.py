@@ -30,13 +30,16 @@ class ReformatOutput:
 
         lines = self.raw_data.splitlines()
         lst = []
+        excluded_txt_pat = r'^ERROR: .+? [<>=]{1,2} .+?$'
         service_stamp_pat = r'(?i)- UNREAL-DEVICE-[a-z]+-SERVICE-TIMESTAMP'
         replacing_service_stamp_pat = r'(?i)^[a-z]{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}[.]\d{3}'
         replacing_created_date_pat = r'(?i)^(# Created date:) (\d{4}-\d\d-\d\d)( *)$'
 
         device_name_pat = r'(?i)(?P<name>\S+) +is +(successfully +)?((dis)?connected)[.]'
         for line in lines:
-            if re.search(service_stamp_pat, line):
+            if re.match(excluded_txt_pat, line):
+                continue
+            elif re.search(service_stamp_pat, line):
                 changed_txt = re.sub(replacing_service_stamp_pat,
                                      'mmm dd yyyy HH:MM:SS.###', line)
                 lst.append(changed_txt)
