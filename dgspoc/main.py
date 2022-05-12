@@ -16,6 +16,7 @@ from dgspoc.usage import validate_usage
 # from dgspoc.usage import show_usage
 from dgspoc.usage import validate_example_usage
 
+from dgspoc.operation import do_show_version
 from dgspoc.operation import do_show_global_usage
 from dgspoc.operation import do_clear_template
 from dgspoc.operation import do_build_template
@@ -94,17 +95,11 @@ def show_info(options):
         sys.exit(ECODE.SUCCESS)
 
 
-def show_version(options):
-    if options.command == 'version':
-        print('{} v{}'.format(Cli.prog, version))
-        sys.exit(ECODE.SUCCESS)
-
-
 class Cli:
     """describe-get-system proof of concept console CLI application."""
-    prog = 'dgs'
-    prog_fn = 'describe-get-system'
-    commands = ['build', 'info', 'run', 'search', 'test', 'version', 'usage']
+    prog = Data.console_cli_name
+    prog_fn = Data.console_cli_fullname
+    commands = Data.console_supported_commands
 
     def __init__(self):
         # parser = argparse.ArgumentParser(
@@ -224,7 +219,7 @@ class Cli:
         """Take CLI arguments, parse it, and process."""
         self.validate_command()
 
-        show_version(self.options)
+        do_show_version(self.options)
         do_show_global_usage(self.options)
         show_info(self.options)
 

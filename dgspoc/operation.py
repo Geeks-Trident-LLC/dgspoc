@@ -8,6 +8,10 @@ import operator
 from functools import partial
 from textwrap import wrap
 
+from dgspoc import version
+
+from dgspoc.config import Data
+
 from dgspoc.utils import File
 from dgspoc.utils import Printer
 from dgspoc.utils import Text
@@ -44,6 +48,12 @@ from dlapp.collection import Tabular
 def do_show_global_usage(options):
     if options.command == 'usage':
         print(get_global_usage())
+        sys.exit(ECODE.SUCCESS)
+
+
+def do_show_version(options):
+    if options.command == 'version':
+        print('{} v{}'.format(Data.console_cli_name, version))
         sys.exit(ECODE.SUCCESS)
 
 

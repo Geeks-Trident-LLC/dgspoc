@@ -25,6 +25,11 @@ __all__ = [
 
 class Data:
 
+    console_cli_name = 'dgs'
+    console_cli_fullname = 'describe-get-system'
+    console_supported_commands = ['build', 'info', 'run', 'search',
+                                  'test', 'version', 'usage']
+
     # app yaml files
     app_directory = File.get_path('.geekstrident', 'dgspoc', is_home=True)
     template_storage_filename = File.get_path(app_directory, 'template_storage.yaml')
