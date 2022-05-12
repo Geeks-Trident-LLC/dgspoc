@@ -103,40 +103,40 @@ def do_show_version(options):
 
 def do_show_info(options):
     command, operands = options.command, options.operands
-    if command == 'info':
-        name = command
-        validate_usage(command, operands)
-        validate_example_usage(name, operands)
 
-        op_txt = ' '.join(operands).lower()
+    name = command
+    validate_usage(command, operands)
+    validate_example_usage(name, operands)
 
-        lst = []
-        default_lst = [
-            'Describe-Get-System Proof of Concept',
-            Data.get_app_info()
-        ]
+    op_txt = ' '.join(operands).lower()
 
-        is_showed_all = options.all or re.search('all', op_txt)
-        is_showed_dependency = options.dependency or re.search('depend', op_txt)
-        is_showed_storage = options.template_storage or re.search('template|storage', op_txt)
+    lst = []
+    default_lst = [
+        'Describe-Get-System Proof of Concept',
+        Data.get_app_info()
+    ]
 
-        if is_showed_all:
-            lst.extend(default_lst)
+    is_showed_all = options.all or re.search('all', op_txt)
+    is_showed_dependency = options.dependency or re.search('depend', op_txt)
+    is_showed_storage = options.template_storage or re.search('template|storage', op_txt)
 
-        if is_showed_all or is_showed_dependency:
-            lst and lst.append('--------------------')
-            lst.append('Packages:')
-            values = Data.get_dependency().values()
-            for pkg in sorted(values, key=lambda item: item.get('package')):
-                lst.append('  + Package: {0[package]}'.format(pkg))
-                lst.append('             {0[url]}'.format(pkg))
+    if is_showed_all:
+        lst.extend(default_lst)
 
-        if is_showed_all or is_showed_storage:
-            lst and lst.append('--------------------', )
-            lst.append(Data.get_template_storage_info())
+    if is_showed_all or is_showed_dependency:
+        lst and lst.append('--------------------')
+        lst.append('Packages:')
+        values = Data.get_dependency().values()
+        for pkg in sorted(values, key=lambda item: item.get('package')):
+            lst.append('  + Package: {0[package]}'.format(pkg))
+            lst.append('             {0[url]}'.format(pkg))
 
-        Printer.print(lst) if lst else Printer.print(default_lst)
-        sys.exit(ECODE.SUCCESS)
+    if is_showed_all or is_showed_storage:
+        lst and lst.append('--------------------', )
+        lst.append(Data.get_template_storage_info())
+
+    Printer.print(lst) if lst else Printer.print(default_lst)
+    sys.exit(ECODE.SUCCESS)
 
 
 def do_build_template(options):
