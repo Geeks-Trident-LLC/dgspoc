@@ -4,7 +4,8 @@ user describing problem"""
 
 import re
 import operator
-import yaml
+# import yaml
+from datetime import datetime
 
 from textwrap import indent
 from textwrap import dedent
@@ -49,7 +50,7 @@ class ScriptInfo(DotObject):
     def disable_testing(self):
         self._enabled_testing = False
 
-    def get_class_name(self):
+    def get_class_name(self):   # noqa
         return 'TestClass'
 
     def reset_devices_vars(self):
@@ -1701,12 +1702,12 @@ class ScriptBuilder:
         user_fmt = '# Created by  : {0.username}'
         email_fmt = '# Email       : {0.email}'
         company_fmt = '# Company     : {0.company}'
-        date_fmt = '# Created date: {}'
+        datetime_str = '# Created date: {:%Y-%m-%d}'.format(datetime.now())
         lst = [fmt.format(self.framework.lower())]
         self.username and lst.append(user_fmt.format(self))
         self.email and lst.append(email_fmt.format(self))
         self.company and lst.append(company_fmt.format(self))
-        not SCRIPTINFO.is_testing_enabled and lst.append(date_fmt)
+        not SCRIPTINFO.is_testing_enabled and lst.append(datetime_str)
 
         intro = '\n'.join(['#' * 80] + lst + ['#' * 80])
         return intro
