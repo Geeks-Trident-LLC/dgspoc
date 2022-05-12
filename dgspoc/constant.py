@@ -72,3 +72,13 @@ class CONVTYPE:
     CSV = ICSValue('csv')
     JSON = ICSValue('json')
     TEMPLATE = ICSValue('template')
+
+
+class COMMAND:
+    BUILD = ICSValue('build')
+    INFO = ICSValue('info')
+    RUN = ICSValue('run')
+    SEARCH = ICSValue('search')
+    TEST = ICSValue('test')
+    VERSION = ICSValue('version')
+    USAGE = ICSValue('usage')
