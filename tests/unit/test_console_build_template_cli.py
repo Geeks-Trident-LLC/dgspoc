@@ -54,7 +54,7 @@ class TestBuildTemplate:
     )
     def test_build_template(self, cmdline, expected_result):
         result = MiscOutput.execute_shell_command(cmdline)
-        template_txt = str(ReformatOutput(result.output))
+        template_txt = str(ReformatOutput(result.output, everything=True))
         template_txt.strip()
         assert result.is_success
         assert template_txt == expected_result

@@ -227,7 +227,6 @@ def do_testing(options):
     pattern = '^--(template-id|(file(-?name)?))='
     command, operands = options.command, list(options.operands)
     adaptor = options.adaptor.strip().lower()
-
     action = options.action.strip()
     if command == 'test':
         name = command
@@ -251,32 +250,60 @@ def do_testing(options):
             data = 'dummy execute %s' % action if not is_execute_cmdline else action
 
             node = ParsedOperation(data)
-
-            if not node.convertor == CONVTYPE.TEMPLATE or not node.convertor_arg:
-                print('*** Invalid action: %s ***' % action)
-                sys.exit(ECODE.BAD)
-
             test_data_file = re.sub(pattern, '', node.operation_ref.strip())
-            pfunc = partial(parse_template_result, test_file=test_data_file)
-
-            try:
-                if re.match('(?i)--file', node.convertor_arg.strip()):
-                    template_file = re.sub(pattern, '', node.convertor_arg.strip())
-                    result = pfunc(template_file=template_file)
-                else:
-                    tmpl_id = re.sub(pattern, '', node.convertor_arg.strip())
-                    if TemplateStorage.check(tmpl_id):
-                        tmpl_data = TemplateStorage.get(tmpl_id)
-                        result = pfunc(template_data=tmpl_data)
-                    else:
-                        fmt = '*** %r template id CANT find in template storage.'
-                        print(fmt % tmpl_id)
-                        sys.exit(ECODE.BAD)
-            except Exception as ex:
-                failure = '*** %s' % ex
-                print(failure)
+            File.message = ''
+            output = File.get_content(test_data_file)
+            if File.message:
+                print('*** %s' % File.message)
                 sys.exit(ECODE.BAD)
+            print(output)
+            result = DotObject(test_data=output, template='', records=[], records_count=0)
 
+            if node.has_select_statement or node.convertor:
+                if node.is_csv or node.is_json:
+                    try:
+                        lines = result.test_data.splitlines()
+                        index = 0
+                        pat = (r'(?i)\w{3} +\d\d? +\d{4} '
+                               r'\d\d:\d\d:\d\d[.]\d\d\d for "\S+" - '
+                               r'UNREAL-DEVICE-\w+-SERVICE-TIMESTAMP')
+                        for i, line in enumerate(lines):
+                            if re.match(pat, line):
+                                index = i
+                                break
+                        test_data = '\n'.join(lines[index+1:])
+                        method = create_from_json_data if node.is_json else create_from_csv_data
+                        records = method(test_data).data
+                        result.records = records
+                        result.records_count = len(records)
+                    except Exception as ex:
+                        print('*** %s' % Text(ex))
+                        sys.exit(ECODE.BAD)
+                else:
+                    pfunc = partial(parse_template_result, test_file=test_data_file)
+                    if not node.convertor == CONVTYPE.TEMPLATE or not node.convertor_arg:
+                        print('*** Invalid action: %s ***' % action)
+                        sys.exit(ECODE.BAD)
+
+                    try:
+                        if re.match('(?i)--file', node.convertor_arg.strip()):
+                            template_file = re.sub(pattern, '', node.convertor_arg.strip())
+                            result = pfunc(template_file=template_file)
+                        else:
+                            tmpl_id = re.sub(pattern, '', node.convertor_arg.strip())
+                            if TemplateStorage.check(tmpl_id):
+                                tmpl_data = TemplateStorage.get(tmpl_id)
+                                result = pfunc(template_data=tmpl_data)
+                            else:
+                                fmt = '*** %r template id CANT find in template storage.'
+                                print(fmt % tmpl_id)
+                                sys.exit(ECODE.BAD)
+                    except Exception as ex:
+                        failure = '*** %s' % ex
+                        print(failure)
+                        sys.exit(ECODE.BAD)
+            else:
+                sys.exit(ECODE.SUCCESS)
         else:
             if not CheckStatement.is_performer_statement(action):
                 failure = '*** Invalid action: %s ***' % action
@@ -304,12 +331,26 @@ def do_testing(options):
                 sys.exit(ECODE.SUCCESS)
 
             if node.is_csv or node.is_json:
-                method = create_from_json_data if node.is_json else create_from_csv_data
-                records = method(output)
-                result = DotObject(
-                    test_data=output, template='',
-                    records=records, records_count=len(records)
-                )
+                try:
+                    lines = output.test_data.splitlines()
+                    index = 0
+                    pat = (r'(?i)\w{3} +\d\d? +\d{4} '
+                           r'\d\d:\d\d:\d\d[.]\d\d\d for "\S+" - '
+                           r'UNREAL-DEVICE-\w+-SERVICE-TIMESTAMP')
+                    for i, line in enumerate(lines):
+                        if re.match(pat, line):
+                            index = i
+                            break
+                    test_data = '\n'.join(lines[index + 1:])
+                    method = create_from_json_data if node.is_json else create_from_csv_data
+                    records = method(test_data).data
+                    result = DotObject(
+                        test_data=output, template='',
+                        records=records, records_count=len(records)
+                    )
+                except Exception as ex:
+                    print('*** %s' % Text(ex))
+                    sys.exit(ECODE.BAD)
             elif node.is_template:
                 pfunc = partial(parse_template_result, test_data=output)
                 try:
