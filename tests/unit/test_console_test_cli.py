@@ -13,6 +13,12 @@ TESTDATA = File.get_result_from_yaml_file(
     root_var_name='self'
 )
 
+base_dir = File.get_dir(__file__)
+template_filename = File.get_path(base_dir, 'data/show_modules_template.textfsm')
+text_output_filename = File.get_path(base_dir, 'data/show_modules_output.txt')
+csv_output_filename = File.get_path(base_dir, 'data/show_modules_csv_output.txt')
+json_output_filename = File.get_path(base_dir, 'data/show_modules_json_output.txt')
+
 
 class TestConsoleTestCommandLineUsage:
     """Note: the comment in pytest.mark.parametrize should work as same as
@@ -63,15 +69,51 @@ class TestConsoleTestCommandLineUsingUnrealDevice:
             (TESTDATA.case3.cmdline, TESTDATA.case3.expected_result),
             (TESTDATA.case4.cmdline, TESTDATA.case4.expected_result),
             (TESTDATA.case5.cmdline, TESTDATA.case5.expected_result),
-            (TESTDATA.case6.cmdline, TESTDATA.case6.expected_result),
-            (TESTDATA.case7.cmdline, TESTDATA.case7.expected_result),
-            (TESTDATA.case8.cmdline, TESTDATA.case8.expected_result),
-            (TESTDATA.case9.cmdline, TESTDATA.case9.expected_result),
-            (TESTDATA.case10.cmdline, TESTDATA.case10.expected_result),
+        ]
+    )
+    def test_or_verify(self, cmdline, expected_result):
+        result = MiscOutput.execute_shell_command(cmdline)
+        reformat_result = ReformatOutput(result.output, everything=True)
+
+        assert result.is_success
+        assert reformat_result.strip() == expected_result
+
+
+class TestConsoleTestCommandLineUsingFile:
+    @pytest.mark.parametrize(
+        ('cmdline', 'expected_result'),
+        [
+            (TESTDATA.case1_using_file_syntax1.fmt % text_output_filename, TESTDATA.case1_using_file_syntax1.expected_result),   # noqa
+            (TESTDATA.case1_using_file_syntax2.fmt % text_output_filename, TESTDATA.case1_using_file_syntax2.expected_result),  # noqa
+            (TESTDATA.case1_using_file_syntax3.fmt % text_output_filename, TESTDATA.case1_using_file_syntax3.expected_result),  # noqa
+            (TESTDATA.case1_using_file_syntax4.fmt % text_output_filename, TESTDATA.case1_using_file_syntax4.expected_result),  # noqa
+            (TESTDATA.case1_using_file_syntax5.fmt % text_output_filename, TESTDATA.case1_using_file_syntax5.expected_result),  # noqa
+
+            (TESTDATA.case2_using_file_scenario1.fmt % (text_output_filename, template_filename), TESTDATA.case2_using_file_scenario1.expected_result),  # noqa
+            (TESTDATA.case2_using_file_scenario2.fmt % (text_output_filename, template_filename), TESTDATA.case2_using_file_scenario2.expected_result),  # noqa
+            (TESTDATA.case2_using_file_scenario3.fmt % (text_output_filename, template_filename), TESTDATA.case2_using_file_scenario3.expected_result),  # noqa
+
+            (TESTDATA.case3_using_file_scenario1.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario1.expected_result),  # noqa
+            (TESTDATA.case3_using_file_scenario2.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario2.expected_result),  # noqa
+            (TESTDATA.case3_using_file_scenario3.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario3.expected_result),  # noqa
+
+            (TESTDATA.case4_using_file_scenario1.fmt % (json_output_filename), TESTDATA.case4_using_file_scenario1.expected_result),  # noqa
+            (TESTDATA.case4_using_file_scenario2.fmt % (json_output_filename), TESTDATA.case4_using_file_scenario2.expected_result),  # noqa
+
+            (TESTDATA.case5_using_file_scenario1.fmt % (text_output_filename, template_filename), TESTDATA.case5_using_file_scenario1.expected_result),  # noqa
+            (TESTDATA.case5_using_file_scenario2.fmt % (text_output_filename, template_filename), TESTDATA.case5_using_file_scenario2.expected_result),  # noqa
+
+            (TESTDATA.case6_using_file_scenario1.fmt % (text_output_filename, template_filename), TESTDATA.case6_using_file_scenario1.expected_result),  # noqa
+            (TESTDATA.case6_using_file_scenario2.fmt % (text_output_filename, template_filename), TESTDATA.case6_using_file_scenario2.expected_result),  # noqa
+            (TESTDATA.case6_using_file_scenario3.fmt % (text_output_filename, template_filename), TESTDATA.case6_using_file_scenario3.expected_result),  # noqa
+            (TESTDATA.case6_using_file_scenario4.fmt % (text_output_filename, template_filename), TESTDATA.case6_using_file_scenario4.expected_result),  # noqa
+
+            (TESTDATA.case7_using_file_scenario1.fmt % (text_output_filename, template_filename), TESTDATA.case7_using_file_scenario1.expected_result),  # noqa
+            (TESTDATA.case7_using_file_scenario2.fmt % (text_output_filename, template_filename), TESTDATA.case7_using_file_scenario2.expected_result),  # noqa
         ]
     )
     def test_or_verify(self, cmdline, expected_result):
         result = MiscOutput.execute_shell_command(cmdline)
         reformat_result = ReformatOutput(result.output)
         assert result.is_success
-        assert reformat_result == expected_result
+        assert reformat_result.strip() == expected_result
