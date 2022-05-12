@@ -614,8 +614,10 @@ class Misc:
         if not cls.is_dict(data):
             return data
 
+        substituted_data = DotObject(deepcopy(data))
+        substitute(substituted_data, {root_var_name: substituted_data})
         new_data = deepcopy(data)
-        variables = {root_var_name: DotObject(deepcopy(new_data))}
+        variables = {root_var_name: substituted_data}
         substitute(new_data, variables)
         return new_data
 
