@@ -2,9 +2,10 @@ import re
 
 
 class ReformatOutput:
-    def __init__(self, raw_data):
+    def __init__(self, raw_data, everything=False):
         self.device_name = ''
         self.raw_data = str(raw_data)
+        self.everything = everything
         self.output = ''
         self.process()
 
@@ -24,6 +25,13 @@ class ReformatOutput:
     def __str__(self):
         return self.output
 
+    def strip(self, characters=''):
+        if characters:
+            self.output = self.output.strip(characters)
+        else:
+            self.output = self.output.strip()
+        return self
+
     def process(self):
         if self.raw_data.strip() == '':
             return
@@ -39,11 +47,11 @@ class ReformatOutput:
         for line in lines:
             if re.match(excluded_txt_pat, line):
                 continue
-            elif re.search(service_stamp_pat, line):
+            elif self.everything and re.search(service_stamp_pat, line):
                 changed_txt = re.sub(replacing_service_stamp_pat,
                                      'mmm dd yyyy HH:MM:SS.###', line)
                 lst.append(changed_txt)
-            elif re.match(replacing_created_date_pat, line):
+            elif self.everything and re.match(replacing_created_date_pat, line):
                 changed_txt = re.sub(replacing_created_date_pat,
                                      r'\1 yyyy-mm-dd\3', line)
                 lst.append(changed_txt)
