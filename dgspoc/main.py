@@ -13,13 +13,7 @@ from dgspoc.constant import ECODE
 
 from dgspoc.usage import validate_usage
 
-from dgspoc.operation import do_show_info
-from dgspoc.operation import do_show_version
-from dgspoc.operation import do_show_global_usage
-from dgspoc.operation import do_clear_template
-from dgspoc.operation import do_build_template
-from dgspoc.operation import do_search_template
-from dgspoc.operation import do_testing
+from dgspoc.operation import OptionSelector
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -62,7 +56,6 @@ class Cli:
     commands = Data.console_supported_commands
 
     def __init__(self):
-        # parser = argparse.ArgumentParser(
         parser = ArgumentParser(
             prog=self.prog,
             usage='%(prog)s [options] command operands',
@@ -179,16 +172,8 @@ class Cli:
         """Take CLI arguments, parse it, and process."""
         self.validate_command()
 
-        do_show_version(self.options)
-        do_show_global_usage(self.options)
-        do_show_info(self.options)
-
-        # operation
-        do_clear_template(self.options)
-        do_build_template(self.options)
-        do_search_template(self.options)
-
-        do_testing(self.options)
+        node = OptionSelector(self.options, print_help=self.parser.print_help)
+        node.process()
 
 
 def execute():

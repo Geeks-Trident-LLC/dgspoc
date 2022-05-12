@@ -22,6 +22,8 @@ from dgspoc.utils import MiscArgs
 
 from dgspoc.constant import ECODE
 from dgspoc.constant import CONVTYPE
+from dgspoc.constant import COMMAND
+from dgspoc.constant import FEATURE
 
 from dgspoc.storage import TemplateStorage
 
@@ -45,8 +47,47 @@ from pprint import pprint
 from dlapp.collection import Tabular
 
 
+class OptionSelector:
+    def __init__(self, options, print_help=None):
+        self.options = options
+        self.print_help = print_help
+        self.method = None
+        self.prepare()
+
+    def prepare(self):
+        if self.options.template_id.strip():
+            self.method = do_clear_template
+        else:
+            if self.options.command == COMMAND.USAGE:
+                self.method = do_show_global_usage
+            elif self.options.command == COMMAND.INFO:
+                self.method = do_show_info
+            elif self.options.command == COMMAND.BUILD:
+                feature = ''.join(self.options.operands[:1]).lower()
+                if feature == FEATURE.TEMPLATE:
+                    self.method = do_build_template
+                elif feature == FEATURE.SCRIPT:
+                    raise Exception('TODO: Need to implement do_build_script')
+            elif self.options.command == COMMAND.SEARCH:
+                self.method = do_search_template
+            elif self.options.command == COMMAND.TEST:
+                self.method = do_testing
+            elif self.options.command == COMMAND.RUN:
+                raise Exception('TODO: Need to implement do_run_test_execution')
+
+    def process(self):
+        if callable(self.method):
+            self.method(self.options)
+        else:
+            if callable(self.print_help):
+                self.print_help()
+            else:
+                print('*** Something is not right.  Check with developer.')
+                sys.exit(ECODE.BAD)
+
+
 def do_show_global_usage(options):
-    if options.command == 'usage':
+    if options.command == COMMAND.USAGE:
         print(get_global_usage())
         sys.exit(ECODE.SUCCESS)
 
