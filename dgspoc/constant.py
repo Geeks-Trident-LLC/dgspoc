@@ -82,3 +82,10 @@ class COMMAND:
     TEST = ICSValue('test')
     VERSION = ICSValue('version')
     USAGE = ICSValue('usage')
+
+
+class FEATURE:
+    TEMPLATE = ICSValue('template')
+    SCRIPT = ICSValue(
+        'script', equality=r'(unittest|pytest|robotframework|rf)([_ -]?script)?$'
+    )
