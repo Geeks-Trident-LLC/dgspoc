@@ -1,7 +1,6 @@
 """Module containing the logic for describe-get-system proof of conception entry-points."""
 
 import sys
-import re
 import argparse
 
 from dgspoc import version
@@ -13,9 +12,8 @@ from dgspoc.utils import Text
 from dgspoc.constant import ECODE
 
 from dgspoc.usage import validate_usage
-# from dgspoc.usage import show_usage
-from dgspoc.usage import validate_example_usage
 
+from dgspoc.operation import do_show_info
 from dgspoc.operation import do_show_version
 from dgspoc.operation import do_show_global_usage
 from dgspoc.operation import do_clear_template
@@ -55,44 +53,6 @@ class ArgumentParser(argparse.ArgumentParser):
                     self.print_help()
                     sys.exit(ECODE.BAD)
         return options
-
-
-def show_info(options):
-    command, operands = options.command, options.operands
-    if command == 'info':
-        name = command
-        validate_usage(command, operands)
-        validate_example_usage(name, operands)
-
-        op_txt = ' '.join(operands).lower()
-
-        lst = []
-        default_lst = [
-            'Describe-Get-System Proof of Concept',
-            Data.get_app_info()
-        ]
-
-        is_showed_all = options.all or re.search('all', op_txt)
-        is_showed_dependency = options.dependency or re.search('depend', op_txt)
-        is_showed_storage = options.template_storage or re.search('template|storage', op_txt)
-
-        if is_showed_all:
-            lst.extend(default_lst)
-
-        if is_showed_all or is_showed_dependency:
-            lst and lst.append('--------------------')
-            lst.append('Packages:')
-            values = Data.get_dependency().values()
-            for pkg in sorted(values, key=lambda item: item.get('package')):
-                lst.append('  + Package: {0[package]}'.format(pkg))
-                lst.append('             {0[url]}'.format(pkg))
-
-        if is_showed_all or is_showed_storage:
-            lst and lst.append('--------------------', )
-            lst.append(Data.get_template_storage_info())
-
-        Printer.print(lst) if lst else Printer.print(default_lst)
-        sys.exit(ECODE.SUCCESS)
 
 
 class Cli:
@@ -221,7 +181,7 @@ class Cli:
 
         do_show_version(self.options)
         do_show_global_usage(self.options)
-        show_info(self.options)
+        do_show_info(self.options)
 
         # operation
         do_clear_template(self.options)
