@@ -24,6 +24,7 @@ from dgspoc.storage import TemplateStorage
 from dgspoc.usage import validate_usage
 from dgspoc.usage import validate_example_usage
 from dgspoc.usage import show_usage
+from dgspoc.usage import get_global_usage
 
 from dgspoc.adaptor import Adaptor
 
@@ -38,6 +39,12 @@ from dlapp import create_from_json_data
 
 from pprint import pprint
 from dlapp.collection import Tabular
+
+
+def do_show_global_usage(options):
+    if options.command == 'usage':
+        print(get_global_usage())
+        sys.exit(ECODE.SUCCESS)
 
 
 def do_build_template(options):

@@ -12,11 +12,11 @@ from dgspoc.utils import Text
 
 from dgspoc.constant import ECODE
 
-from dgspoc.usage import get_global_usage
 from dgspoc.usage import validate_usage
 # from dgspoc.usage import show_usage
 from dgspoc.usage import validate_example_usage
 
+from dgspoc.operation import do_show_global_usage
 from dgspoc.operation import do_clear_template
 from dgspoc.operation import do_build_template
 from dgspoc.operation import do_search_template
@@ -97,12 +97,6 @@ def show_info(options):
 def show_version(options):
     if options.command == 'version':
         print('{} v{}'.format(Cli.prog, version))
-        sys.exit(ECODE.SUCCESS)
-
-
-def show_global_usage(options):
-    if options.command == 'usage':
-        print(get_global_usage())
         sys.exit(ECODE.SUCCESS)
 
 
@@ -231,7 +225,7 @@ class Cli:
         self.validate_command()
 
         show_version(self.options)
-        show_global_usage(self.options)
+        do_show_global_usage(self.options)
         show_info(self.options)
 
         # operation
