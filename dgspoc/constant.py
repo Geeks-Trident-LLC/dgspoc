@@ -7,10 +7,10 @@ from enum import IntFlag
 class ICSValue:
     """Treating value as ignore case and ignore space during evaluating
     string equality"""
-    def __init__(self, value, equality='', is_strip=False):
+    def __init__(self, value, equality='', stripped=False):
         self.value = str(value)
         self.equality = equality
-        self.is_strip = is_strip
+        self.stripped = stripped
 
     def __eq__(self, other):
         value1 = self.value.lower()
@@ -23,7 +23,7 @@ class ICSValue:
         value1 = re.sub(' +', ' ', value1)
         value2 = re.sub(' +', ' ', value2)
 
-        if self.is_strip:
+        if self.stripped:
             value1 = value1.strip()
             value2 = value2.strip()
 
@@ -57,35 +57,42 @@ class ICSValue:
         return self.value
 
 
+class ICSStripValue(ICSValue):
+    """Treating value as ignore case, ignore space, and strip during evaluating
+    string equality"""
+    def __init__(self, value, equality=''):
+        super().__init__(value, equality=equality, stripped=True)
+
+
 class ECODE(IntFlag):
     SUCCESS = 0
     BAD = 1
 
 
 class FWTYPE:
-    UNITTEST = ICSValue('unittest')
-    PYTEST = ICSValue('pytest')
-    ROBOTFRAMEWORK = ICSValue('robotframework', equality=r'(rf|robotframework)$')
+    UNITTEST = ICSStripValue('unittest')
+    PYTEST = ICSStripValue('pytest')
+    ROBOTFRAMEWORK = ICSStripValue('robotframework', equality=r'(rf|robotframework)$')
 
 
 class CONVTYPE:
-    CSV = ICSValue('csv')
-    JSON = ICSValue('json')
-    TEMPLATE = ICSValue('template')
+    CSV = ICSStripValue('csv')
+    JSON = ICSStripValue('json')
+    TEMPLATE = ICSStripValue('template')
 
 
 class COMMAND:
-    BUILD = ICSValue('build')
-    INFO = ICSValue('info')
-    RUN = ICSValue('run')
-    SEARCH = ICSValue('search')
-    TEST = ICSValue('test')
-    VERSION = ICSValue('version')
-    USAGE = ICSValue('usage')
+    BUILD = ICSStripValue('build')
+    INFO = ICSStripValue('info')
+    RUN = ICSStripValue('run')
+    SEARCH = ICSStripValue('search')
+    TEST = ICSStripValue('test')
+    VERSION = ICSStripValue('version')
+    USAGE = ICSStripValue('usage')
 
 
 class FEATURE:
-    TEMPLATE = ICSValue('template')
-    SCRIPT = ICSValue(
+    TEMPLATE = ICSStripValue('template')
+    SCRIPT = ICSStripValue(
         'script', equality=r'(unittest|pytest|robotframework|rf)([_ -]?script)?$'
     )
