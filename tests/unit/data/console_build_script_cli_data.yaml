@@ -1,0 +1,13 @@
+author: user1
+email: user1@abc_xyz.com
+company: ABC XYZ Inc.
+
+fmt: 'dgs build %s %s --author="{self.author}" --email="{self.email}" --company="{self.company}"'
+
+unittest_script: |-
+
+pytest_script: |-
+
+robotframework_script: |-
+
+

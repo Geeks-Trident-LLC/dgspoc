@@ -1,0 +1,9 @@
+setup
+  connect device 1.1.1.1 as device1
+
+section: precondition
+   device1 execute show version using_template tmpl.show.version select version where version >= version(1.0.0) must be greater_than 1
+
+teardown
+  disconnect device1
+  release device device1
