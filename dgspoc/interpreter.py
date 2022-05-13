@@ -1475,7 +1475,8 @@ class VerificationStatement(Statement):
                     lst.append(stmt)
 
                 lst.append('${total_count}=  get length   ${result}')
-                lst.append('should be true   ${total_count} == %s' % result.expected_condition)
+                fmt = 'should be true   ${total_count} %s %s'
+                lst.append(fmt % (result.condition_symbol, result.expected_condition))
 
         else:
             for device_name in self.result.devices_names:
@@ -1504,10 +1505,11 @@ class VerificationStatement(Statement):
 
                 lst.append('total_count = len(result)')
                 if self.is_unittest and self.is_ancestor_section_statement:
-                    fmt = 'self.assertTrue(total_count == %s)'
-                    lst.append(fmt % result.expected_condition)
+                    fmt = 'self.assertTrue(total_count %s %s)'
+                    lst.append(fmt % (result.condition_symbol, result.expected_condition))
                 else:
-                    lst.append('assert total_count == %s' % result.expected_condition)
+                    fmt = 'assert total_count %s %s'
+                    lst.append(fmt % (result.condition_symbol, result.expected_condition))
 
         stmt = self.indent_data('\n'.join(lst), self.level)
         return stmt

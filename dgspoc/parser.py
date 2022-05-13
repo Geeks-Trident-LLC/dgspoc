@@ -144,6 +144,14 @@ class ParsedOperation:
         self.parse()
 
     @property
+    def condition_symbol(self):
+        tbl = {'eq': '==', 'ne': '!=', 'gt': '>',
+               'ge': '>=', 'lt': '<', 'le': '<='}
+
+        compare_symbol = tbl.get(self.condition, 'INVALID_COMPARISON_SYMBOL')
+        return compare_symbol
+
+    @property
     def is_parsed(self):
         return self.error == ''
 
