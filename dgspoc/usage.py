@@ -30,6 +30,7 @@ class FLAG(IntFlag):
     HELP = pow(2, 11)
 
     BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
+    BUILD_SCRIPT = AUTHOR | EMAIL | COMPANY | SAVE_TO | HELP
     SEARCH_TEMPLATE = HELP
     INFO_USAGE = ALL | DEPENDENCY | TEMPLATE_STORAGE | HELP
     TEST_USAGE = ADAPTOR | ACTION | HELP
@@ -156,12 +157,18 @@ class BuildTemplateUsage:
     example_usage = get_example_usage('build_template')
 
 
+class BuildScriptUsage:
+    usage = get_usage('build_script', flags=FLAG.BUILD_SCRIPT)
+    other_usage = get_usage('build_script', flags=FLAG.BUILD_SCRIPT)
+    example_usage = get_example_usage('build_script')
+
+
 class BuildUsage:
     usage = '\n'.join([
         Printer.get('build command has two features: template or script'),
         str(BuildTemplateUsage.usage),
         '',
-        # BuildScriptUsage.usage,
+        str(BuildScriptUsage.usage),
     ])
 
 
@@ -187,6 +194,7 @@ class Usage:
     info = InfoUsage
     build = BuildUsage
     build_template = BuildTemplateUsage
+    build_script = BuildScriptUsage
     search_template = SearchTemplateUsage
     test = TestUsage
 

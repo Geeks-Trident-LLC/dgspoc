@@ -183,6 +183,10 @@ class File:
     message = ''
 
     @classmethod
+    def clean(cls):
+        cls.message = ''
+
+    @classmethod
     def is_exist(cls, filename):
         """Check file existence
 
@@ -194,6 +198,7 @@ class File:
         -------
         bool: True if existed, otherwise False
         """
+        cls.clean()
         try:
             file_obj = Path(filename)
             return file_obj.exists()
@@ -214,6 +219,7 @@ class File:
         -------
         bool: True if created, otherwise False
         """
+        cls.clean()
         filename = cls.get_path(str(filename).strip())
         if cls.is_exist(filename):
             cls.message = 'File is already existed.'
@@ -284,6 +290,7 @@ class File:
         -------
         str: content of file
         """
+        cls.clean()
         filename = cls.get_path(file_path)
         try:
             with open(filename) as stream:
@@ -319,7 +326,7 @@ class File:
         -------
         object: YAML result
         """
-
+        cls.clean()
         yaml_result = default
 
         try:
@@ -365,6 +372,7 @@ class File:
         -------
         bool: True if successfully saved, otherwise, False
         """
+        cls.clean()
         try:
             if Misc.is_list(data):
                 content = '\n'.join(str(item) for item in data)
@@ -396,6 +404,7 @@ class File:
         -------
         bool: True if successfully deleted, otherwise, False
         """
+        cls.clean()
         try:
             filepath = File.get_path(filename)
             file_obj = Path(filepath)
@@ -614,8 +623,10 @@ class Misc:
         if not cls.is_dict(data):
             return data
 
+        substituted_data = DotObject(deepcopy(data))
+        substitute(substituted_data, {root_var_name: substituted_data})
         new_data = deepcopy(data)
-        variables = {root_var_name: DotObject(deepcopy(new_data))}
+        variables = {root_var_name: substituted_data}
         substitute(new_data, variables)
         return new_data
 

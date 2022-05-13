@@ -1,7 +1,6 @@
 """Module containing the logic for describe-get-system proof of conception entry-points."""
 
 import sys
-import re
 import argparse
 
 from dgspoc import version
@@ -11,16 +10,11 @@ from dgspoc.utils import Printer
 from dgspoc.utils import Text
 
 from dgspoc.constant import ECODE
+from dgspoc.constant import FEATURE
 
-from dgspoc.usage import get_global_usage
 from dgspoc.usage import validate_usage
-# from dgspoc.usage import show_usage
-from dgspoc.usage import validate_example_usage
 
-from dgspoc.operation import do_clear_template
-from dgspoc.operation import do_build_template
-from dgspoc.operation import do_search_template
-from dgspoc.operation import do_testing
+from dgspoc.operation import OptionSelector
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -48,7 +42,10 @@ class ArgumentParser(argparse.ArgumentParser):
                 if options.command in Cli.commands:
                     command = options.command
                     feature = options.operands[0].lower() if options.operands else ''
-                    name = '{}_{}'.format(command, feature) if feature else command
+                    if feature == FEATURE.SCRIPT:
+                        name = '{}_script'.format(command)
+                    else:
+                        name = '{}_{}'.format(command, feature) if feature else command
                     validate_usage(name, ['usage'])
                 else:
                     self.print_help()
@@ -56,64 +53,13 @@ class ArgumentParser(argparse.ArgumentParser):
         return options
 
 
-def show_info(options):
-    command, operands = options.command, options.operands
-    if command == 'info':
-        name = command
-        validate_usage(command, operands)
-        validate_example_usage(name, operands)
-
-        op_txt = ' '.join(operands).lower()
-
-        lst = []
-        default_lst = [
-            'Describe-Get-System Proof of Concept',
-            Data.get_app_info()
-        ]
-
-        is_showed_all = options.all or re.search('all', op_txt)
-        is_showed_dependency = options.dependency or re.search('depend', op_txt)
-        is_showed_storage = options.template_storage or re.search('template|storage', op_txt)
-
-        if is_showed_all:
-            lst.extend(default_lst)
-
-        if is_showed_all or is_showed_dependency:
-            lst and lst.append('--------------------')
-            lst.append('Packages:')
-            values = Data.get_dependency().values()
-            for pkg in sorted(values, key=lambda item: item.get('package')):
-                lst.append('  + Package: {0[package]}'.format(pkg))
-                lst.append('             {0[url]}'.format(pkg))
-
-        if is_showed_all or is_showed_storage:
-            lst and lst.append('--------------------', )
-            lst.append(Data.get_template_storage_info())
-
-        Printer.print(lst) if lst else Printer.print(default_lst)
-        sys.exit(ECODE.SUCCESS)
-
-
-def show_version(options):
-    if options.command == 'version':
-        print('{} v{}'.format(Cli.prog, version))
-        sys.exit(ECODE.SUCCESS)
-
-
-def show_global_usage(options):
-    if options.command == 'usage':
-        print(get_global_usage())
-        sys.exit(ECODE.SUCCESS)
-
-
 class Cli:
     """describe-get-system proof of concept console CLI application."""
-    prog = 'dgs'
-    prog_fn = 'describe-get-system'
-    commands = ['build', 'info', 'run', 'search', 'test', 'version', 'usage']
+    prog = Data.console_cli_name
+    prog_fn = Data.console_cli_fullname
+    commands = Data.console_supported_commands
 
     def __init__(self):
-        # parser = argparse.ArgumentParser(
         parser = ArgumentParser(
             prog=self.prog,
             usage='%(prog)s [options] command operands',
@@ -230,16 +176,8 @@ class Cli:
         """Take CLI arguments, parse it, and process."""
         self.validate_command()
 
-        show_version(self.options)
-        show_global_usage(self.options)
-        show_info(self.options)
-
-        # operation
-        do_clear_template(self.options)
-        do_build_template(self.options)
-        do_search_template(self.options)
-
-        do_testing(self.options)
+        node = OptionSelector(self.options, print_help=self.parser.print_help)
+        node.process()
 
 
 def execute():
