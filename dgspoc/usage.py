@@ -190,6 +190,12 @@ class TestUsage:
     example_usage = get_example_usage('test')
 
 
+class RunUsage:
+    usage = get_usage('run', flags=FLAG.HELP)
+    other_usage = get_usage('run', flags=FLAG.HELP)
+    example_usage = get_example_usage('run')
+
+
 class Usage:
     info = InfoUsage
     build = BuildUsage
@@ -197,6 +203,7 @@ class Usage:
     build_script = BuildScriptUsage
     search_template = SearchTemplateUsage
     test = TestUsage
+    run = RunUsage
 
 
 def validate_usage(name, operands):
