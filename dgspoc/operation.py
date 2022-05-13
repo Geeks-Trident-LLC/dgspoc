@@ -562,12 +562,12 @@ def do_build_test_script(options):
 
     if options.filename:
         File.save(options.filename, test_script)
-        if File.message:
+        if File.message and not File.message.startswith('Successfully saved data'):
             fmt = '*** Failed to save the generated test script to %s\n*** %s'
             Printer.print(fmt % (options.filename, File.message))
             sys.exit(ECODE.BAD)
         else:
-            fmt = '+++ Successfully save the generated test script to %s'
+            fmt = '+++ Successfully saved the generated test script to %s'
             Printer.print(fmt % options.filename)
             sys.exit(ECODE.SUCCESS)
     else:
