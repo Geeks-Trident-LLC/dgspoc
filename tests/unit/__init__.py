@@ -1,4 +1,29 @@
 import re
+import sys
+
+
+def check_python_version(major=-1, minor=-1, micro=-1):
+    if major == minor and major == micro and major == -1:
+        return False
+
+    vinfo = sys.version_info
+    lst = [
+        (major, sys.version_info.major),
+        (minor, sys.version_info.minor),
+        (micro, sys.version_info.micro)
+    ]
+    chk = True
+    for val, expected_val in lst:
+        if val >= 0:
+            chk &= val == expected_val
+    return chk
+
+
+def is_py36_or_py37():
+    chk1 = check_python_version(major=3, minor=6)
+    chk2 = check_python_version(major=3, minor=7)
+    chk = chk1 or chk2
+    return chk
 
 
 class ReformatOutput:

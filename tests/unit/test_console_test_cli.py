@@ -4,6 +4,7 @@ from dgspoc.utils import File
 from dgspoc.utils import MiscOutput
 
 from . import ReformatOutput
+from . import is_py36_or_py37
 
 TESTDATA = File.get_result_from_yaml_file(
     'data/console_test_cli_data.yaml',
@@ -89,12 +90,8 @@ class TestConsoleTestCommandLineUsingFile:
             (TESTDATA.case1_using_file_syntax4.fmt % text_output_filename, TESTDATA.case1_using_file_syntax4.expected_result),  # noqa
             (TESTDATA.case1_using_file_syntax5.fmt % text_output_filename, TESTDATA.case1_using_file_syntax5.expected_result),  # noqa
 
-            (TESTDATA.case2_using_file_scenario1.fmt % (text_output_filename, template_filename), TESTDATA.case2_using_file_scenario1.expected_result),  # noqa
-            (TESTDATA.case2_using_file_scenario2.fmt % (text_output_filename, template_filename), TESTDATA.case2_using_file_scenario2.expected_result),  # noqa
-            (TESTDATA.case2_using_file_scenario3.fmt % (text_output_filename, template_filename), TESTDATA.case2_using_file_scenario3.expected_result),  # noqa
-
-            (TESTDATA.case3_using_file_scenario1.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario1.expected_result),  # noqa
-            (TESTDATA.case3_using_file_scenario2.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario2.expected_result),  # noqa
+            (TESTDATA.case3_using_file_scenario1.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario1.expected_result_for_py36_py37 if is_py36_or_py37() else TESTDATA.case3_using_file_scenario1.expected_result),  # noqa
+            (TESTDATA.case3_using_file_scenario2.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario2.expected_result_for_py36_py37 if is_py36_or_py37() else TESTDATA.case3_using_file_scenario2.expected_result),  # noqa
             (TESTDATA.case3_using_file_scenario3.fmt % (csv_output_filename), TESTDATA.case3_using_file_scenario3.expected_result),  # noqa
 
             (TESTDATA.case4_using_file_scenario1.fmt % (json_output_filename), TESTDATA.case4_using_file_scenario1.expected_result),  # noqa
