@@ -1,9 +1,9 @@
 setup
-  connect device 1.1.1.1 as device1
+  connect device 1.1.1.1
 
 section: precondition
-   device1 execute show version using_template tmpl.show.version select version where version >= version(1.0.0) must be greater_than 1
+   1.1.1.1 EXECUTE show modules using_template show_modules_tmpl SELECT * WHERE version >= version(1.0.0) MUST BE >= 2
 
 teardown
-  disconnect device1
-  release device device1
+  disconnect 1.1.1.1
+  release device 1.1.1.1
