@@ -2,6 +2,8 @@ author: user1
 email: user1@abc_xyz.com
 company: ABC XYZ Inc.
 
+fmt_with_save_to: 'dgs build %s "%s" --save-to="%s"'
+
 unittest:
   fmt: 'dgs build unittest_script "%s" --author="{self.author}" --email="{self.email}" --company="{self.company}"'
   expected_result: |-
