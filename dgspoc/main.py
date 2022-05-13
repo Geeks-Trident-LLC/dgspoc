@@ -10,6 +10,7 @@ from dgspoc.utils import Printer
 from dgspoc.utils import Text
 
 from dgspoc.constant import ECODE
+from dgspoc.constant import FEATURE
 
 from dgspoc.usage import validate_usage
 
@@ -41,7 +42,10 @@ class ArgumentParser(argparse.ArgumentParser):
                 if options.command in Cli.commands:
                     command = options.command
                     feature = options.operands[0].lower() if options.operands else ''
-                    name = '{}_{}'.format(command, feature) if feature else command
+                    if feature == FEATURE.SCRIPT:
+                        name = '{}_script'.format(command)
+                    else:
+                        name = '{}_{}'.format(command, feature) if feature else command
                     validate_usage(name, ['usage'])
                 else:
                     self.print_help()

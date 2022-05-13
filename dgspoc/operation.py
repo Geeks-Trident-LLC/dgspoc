@@ -12,6 +12,8 @@ from dgspoc import version
 
 from dgspoc.config import Data
 
+from dgspoc.interpreter import ScriptBuilder
+
 from dgspoc.utils import File
 from dgspoc.utils import Printer
 from dgspoc.utils import Text
@@ -67,7 +69,7 @@ class OptionSelector:
                 if feature == FEATURE.TEMPLATE:
                     self.method = do_build_template
                 elif feature == FEATURE.SCRIPT:
-                    raise Exception('TODO: Need to implement do_build_script')
+                    self.method = do_build_test_script
                 else:
                     exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
                     show_usage(self.options.command, exit_code=exit_code)
@@ -519,4 +521,55 @@ def do_testing(options):
         Printer.print(lst)
         sys.exit(ECODE.BAD)
     else:
+        sys.exit(ECODE.SUCCESS)
+
+
+def do_build_test_script(options):
+    command, operands = options.command, list(options.operands)
+
+    feature = ''.join(operands[:1])
+    operands = operands[1:]
+    framework = 'unittest'
+    for node in [FEATURE.UNITTEST, FEATURE.PYTEST, FEATURE.ROBOTFRAMEWORK]:
+        if node == feature:
+            framework = str(node)
+            break
+
+    name = '{}_script'.format(command)
+    validate_usage(name, operands)
+    validate_example_usage(name, operands)
+
+    if len(operands) > 1:
+        Printer.print('*** Application only support single script snippet.')
+        show_usage(name, exit_code=ECODE.BAD)
+
+    snippet_filename = operands[0]
+    snippet_content = File.get_content(snippet_filename)
+    if File.message:
+        Printer.print('*** %s' % File.message)
+        sys.exit(ECODE.BAD)
+
+    node = ScriptBuilder(
+        snippet_content, framework=framework, is_logger=True,
+        username=options.author, email=options.email, company=options.company
+    )
+
+    test_script = node.testscript.strip()
+
+    if not test_script:
+        Printer.print('*** No script is generated for %r' % snippet_filename)
+        sys.exit(ECODE.BAD)
+
+    if options.filename:
+        File.save(options.filename, test_script)
+        if File.message:
+            fmt = '*** Failed to save the generated test script to %s\n*** %s'
+            Printer.print(fmt % (options.filename, File.message))
+            sys.exit(ECODE.BAD)
+        else:
+            fmt = '+++ Successfully save the generated test script to %s'
+            Printer.print(fmt % options.filename)
+            sys.exit(ECODE.SUCCESS)
+    else:
+        print(test_script)
         sys.exit(ECODE.SUCCESS)
