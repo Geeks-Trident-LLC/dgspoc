@@ -29,7 +29,7 @@ class TestConsoleBuildScriptCommandLineUsage:
             # 'dgs build pytest --help',
             # 'dgs build pytest_script --help',
             # 'dgs build robotframework --help',
-            # 'dgs build robotframework)script --help',
+            # 'dgs build robotframework_script --help',
         ]
     )
     def test_console_cli_help(self, cmdline):
@@ -48,16 +48,15 @@ class TestConsoleBuildScriptCommandLineUsage:
 
 class TestConsoleBuildTestScript:
     @pytest.mark.parametrize(
-        ('framework', 'filename', 'author', 'email', 'company'),
+        ('cmdline', 'expected_result'),
         [
-            ('unittest', snippet_filename, TESTDATA.author, TESTDATA.email, TESTDATA.company),
-            ('pytest', snippet_filename, TESTDATA.author, TESTDATA.email, TESTDATA.company),
-            ('robotframework', snippet_filename, TESTDATA.author, TESTDATA.email, TESTDATA.company),
+            (TESTDATA.unittest.fmt % snippet_filename, TESTDATA.unittest.expected_result),              # noqa
+            (TESTDATA.pytest.fmt % snippet_filename, TESTDATA.pytest.expected_result),                  # noqa
+            (TESTDATA.robotframework.fmt % snippet_filename, TESTDATA.robotframework.expected_result),  # noqa
         ]
     )
-    def test_building_test_script(self, framework, filename, author, email, company):
-        fmt = 'dgs build %s %s --author=%s --email=%s'
+    def test_building_test_script(self, cmdline, expected_result):
         result = MiscOutput.execute_shell_command(cmdline)
-        reformat_result = ReformatOutput(result.output)
+        reformat_result = ReformatOutput(result.output, everything=True)
         assert result.is_success
         assert reformat_result.strip() == expected_result
