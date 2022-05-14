@@ -155,6 +155,3 @@ robotframework:
         ...   select_statement=SELECT * WHERE version >= version(1.0.0)
         ${total_count}=  get length   ${result}
         should be true   ${total_count} >= 2
-
-
-
