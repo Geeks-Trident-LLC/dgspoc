@@ -73,22 +73,6 @@ class TestConsoleBuildTestScript:
         assert result.is_success
         assert reformat_result.strip() == expected_result
 
-
-class TestConsoleBuildTestScript:
-    @pytest.mark.parametrize(
-        ('cmdline', 'expected_result'),
-        [
-            (TESTDATA.unittest.fmt % snippet_filename, TESTDATA.unittest.expected_result),              # noqa
-            (TESTDATA.pytest.fmt % snippet_filename, TESTDATA.pytest.expected_result),                  # noqa
-            (TESTDATA.robotframework.fmt % snippet_filename, TESTDATA.robotframework.expected_result),  # noqa
-        ]
-    )
-    def test_building_test_script(self, cmdline, expected_result):
-        result = MiscOutput.execute_shell_command(cmdline)
-        reformat_result = ReformatOutput(result.output, everything=True)
-        assert result.is_success
-        assert reformat_result.strip() == expected_result
-
     @pytest.mark.parametrize(
         'cmdline',
         [
