@@ -271,3 +271,13 @@ class Dgs:
             query_node = DLQuery(rows)
             result = query_node.find(select=select_statement)
             return result
+
+
+connect_device = Dgs.connect_device
+disconnect_device = Dgs.disconnect_device
+release_device = Dgs.release_device
+destroy_device = Dgs.reload_device
+execute = Dgs.execute_cmdline
+configure = Dgs.configure_device
+reload = Dgs.reload_device
+convert_and_filter = Dgs.convert_and_filter
