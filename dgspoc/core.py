@@ -239,7 +239,9 @@ class Dgs:
             failure = 'Template reference CANT BE empty.'
             raise TemplateReferenceError(failure)
 
-        parsed_args_result = MiscArgs.get_parsed_result_as_data_or_file('--template-id')
+        parsed_args_result = MiscArgs.get_parsed_result_as_data_or_file(
+            '--template-id', data=tmpl_ref
+        )
 
         if not parsed_args_result.is_parsed:
             fmt = 'Invalid template reference format (Unexpected: %r)'
