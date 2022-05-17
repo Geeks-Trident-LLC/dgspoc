@@ -239,7 +239,9 @@ class Dgs:
             failure = 'Template reference CANT BE empty.'
             raise TemplateReferenceError(failure)
 
-        parsed_args_result = MiscArgs.get_parsed_result_as_data_or_file('--template-id')
+        parsed_args_result = MiscArgs.get_parsed_result_as_data_or_file(
+            '--template-id', data=tmpl_ref
+        )
 
         if not parsed_args_result.is_parsed:
             fmt = 'Invalid template reference format (Unexpected: %r)'
@@ -271,3 +273,15 @@ class Dgs:
             query_node = DLQuery(rows)
             result = query_node.find(select=select_statement)
             return result
+
+
+sleep = Dgs.wait_for
+wait_for = Dgs.wait_for
+connect_device = Dgs.connect_device
+disconnect_device = Dgs.disconnect_device
+release_device = Dgs.release_device
+destroy_device = Dgs.reload_device
+execute = Dgs.execute_cmdline
+configure = Dgs.configure_device
+reload = Dgs.reload_device
+convert_and_filter = Dgs.convert_and_filter

@@ -498,19 +498,48 @@ class Misc:
 
     @classmethod
     def is_integer(cls, obj):
-        return isinstance(obj, int)
+        if isinstance(obj, int):
+            return True
+        elif cls.is_string(obj):
+            chk = obj.strip().isdigit()
+            return chk
+        else:
+            return False
 
     @classmethod
     def is_boolean(cls, obj):
-        return isinstance(obj, bool)
+        if isinstance(obj, bool):
+            return True
+        elif cls.is_string(obj):
+            val = obj.strip().lower()
+            chk = val == 'true' or val == 'false'
+            return chk
+        elif cls.is_integer(obj):
+            chk = int(obj) == 0 or int(obj) == 1
+            return chk
+        elif cls.is_float(obj):
+            chk = float(obj) == 0 or float(obj) == 1
+            return chk
+        else:
+            return False
 
     @classmethod
     def is_float(cls, obj):
-        return isinstance(obj, float)
+        if isinstance(obj, (float, int)):
+            return True
+        elif cls.is_string(obj):
+            try:
+                float(obj)
+                return True
+            except Exception as ex:     # noqa
+                return False
+        else:
+            return False
 
     @classmethod
     def is_number(cls, obj):
         result = cls.is_boolean(obj)
+        result |= cls.is_integer(obj)
         result |= cls.is_float(obj)
         return result
 
@@ -663,20 +692,23 @@ class MiscArgs:
                 if re.match(pattern, flag) and val.strip():
                     result.is_file = True
                     result.filename = val.strip()
+                    return result
                 else:
-                    if flag != 'val1' or flag != 'val2':
-                        if val.strip():
+                    val_txt = ''.join(val) if Misc.is_list(val) else str(val)
+                    val_txt = val_txt.strip()
+                    if flag == 'val1' or flag == 'val2' and val_txt:
+                        result.is_data = True
+                        result.data = val_txt
+                        return result
+                    else:
+                        if val_txt:
                             result.is_data = True
-                            result.data = val.strip()
+                            result.data = val_txt
                             return result
 
-            if result.val1 or result.val2:
-                result.is_data = True
-                return result
-            else:
-                result.is_parsed = False
-                result.failure = 'Invalid data'
-                return result
+            result.is_parsed = False
+            result.failure = 'Invalid data'
+            return result
 
         except Exception as ex:
             result.failure = '{}: {}'.format(type(ex).__name__, ex)

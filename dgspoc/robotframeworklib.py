@@ -48,7 +48,7 @@ def release_device(connection, **kwargs):
     return result
 
 
-def execute_cmdline(connection, cmdline, **kwargs):
+def execute(connection, cmdline, **kwargs):
     """generic function to execute command for device
     | Parameters:
     |     connection (Adaptor): connection of device
@@ -61,7 +61,7 @@ def execute_cmdline(connection, cmdline, **kwargs):
     return result
 
 
-def configure_device(connection, cfg, **kwargs):
+def configure(connection, cfg, **kwargs):
     """generic function to configure device
     | Parameters:
     |     connection (Adaptor): connection of device
@@ -74,7 +74,7 @@ def configure_device(connection, cfg, **kwargs):
     return result
 
 
-def reload_device(connection, reload_command, **kwargs):
+def reload(connection, reload_command, **kwargs):
     """generic function to reload device
     | Parameters:
     |     connection (Adaptor): connection of device
