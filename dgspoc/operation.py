@@ -599,4 +599,4 @@ def do_delete_filepath(options):
     if are_deleted is None:
         sys.exit(ECODE.BAD)
     else:
-        sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
+        sys.exit(ECODE.SUCCESS if are_deleted else ECODE.BAD)
