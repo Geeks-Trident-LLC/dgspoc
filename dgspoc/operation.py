@@ -77,8 +77,6 @@ class OptionSelector:
                 self.method = do_search_template
             elif self.options.command == COMMAND.TEST:
                 self.method = do_testing
-            elif self.options.command == COMMAND.RUN:
-                self.method = do_run_test_execution
 
     def process(self):
         if callable(self.method):
@@ -574,13 +572,3 @@ def do_build_test_script(options):
         print(test_script)
         sys.exit(ECODE.SUCCESS)
 
-
-def do_run_test_execution(options):
-    command, operands = options.command, list(options.operands)
-
-    op_txt = ''.join(operands)
-
-    if op_txt == COMMAND.USAGE:
-        show_usage(command, exit_code=ECODE.SUCCESS)
-
-    raise Exception('TODO: Need to implement do_run_test_execution function')

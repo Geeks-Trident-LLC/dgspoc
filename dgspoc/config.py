@@ -28,7 +28,7 @@ class Data:
 
     console_cli_name = 'dgs'
     console_cli_fullname = 'describe-get-system'
-    console_supported_commands = ['build', 'info', 'run', 'search',
+    console_supported_commands = ['build', 'info', 'search',
                                   'test', 'version', 'usage']
 
     # app yaml files
