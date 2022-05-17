@@ -279,6 +279,35 @@ class File:
             return ''
 
     @classmethod
+    def get_filepath_timestamp_format1(cls, *args, prefix='', extension='',
+                                       is_full_path=False):
+        """Create a file path with timestamp format1
+
+        Parameters
+        ----------
+        args (tuple): a list of file items
+        prefix (str): a prefix for base name of file path.  Default is empty.
+        extension (str): an extension of file.  Default is empty.
+        is_full_path (bool): show absolute full path.  Default is False.
+
+        Returns
+        -------
+        str: a file path with timestamp format1.
+        """
+        lst = list(args)
+
+        basename = '{:%Y%B%d_%H%M%S}'.format(datetime.now())
+        if prefix.strip():
+            basename = '%s_%s' % (prefix.strip(), basename)
+
+        if extension.strip():
+            basename = '%s.%s' % (basename, extension.strip().strip('.'))
+
+        lst.append(basename)
+        file_path = cls.get_path(*lst) if is_full_path else str(Path(*lst))
+        return file_path
+
+    @classmethod
     def get_content(cls, file_path):
         """get content of file
 
