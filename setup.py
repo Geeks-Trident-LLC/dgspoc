@@ -25,7 +25,8 @@ setup(
         'dlapp',
         'regexapp',
         'templateapp',
-        'gtunrealdevice'
+        'gtunrealdevice',
+        'unittest-xml-reporting'
     ],
     url='https://github.com/Geeks-Trident-LLC/dgspoc',
     packages=find_packages(
