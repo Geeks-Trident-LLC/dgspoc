@@ -478,6 +478,29 @@ class File:
             chk = filecmp.cmp(file, source)
             return chk
 
+    @classmethod
+    def get_list_of_filenames(cls, top='.', pattern='', excluded_duplicate=True):
+        cls.clean()
+        try:
+            lst = []
+            for dir_path, _dir_names, file_names in os.walk(top):
+                for file_name in file_names:
+                    if pattern and not re.search(pattern, file_name):
+                        continue
+                    file_path = str(Path(dir_path, file_name))
+
+                    if excluded_duplicate:
+                        is_duplicated = cls.is_duplicate_file(file_path, lst)
+                        not is_duplicated and lst.append(file_path)
+                    else:
+                        lst.append(file_path)
+            return lst
+
+        except Exception as ex:
+            failure = Text(ex)
+            cls.message = failure
+            return []
+
 
 class Misc:
 
