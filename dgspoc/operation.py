@@ -4,6 +4,7 @@ import sys
 import re
 import argparse
 import operator
+import shlex
 
 from functools import partial
 from textwrap import wrap
@@ -59,6 +60,8 @@ class OptionSelector:
     def prepare(self):
         if self.options.template_id.strip():
             self.method = do_clear_template
+        elif self.options.filepath.strip():
+            self.method = do_delete_filepath
         else:
             if self.options.command == COMMAND.USAGE:
                 self.method = do_show_global_usage
@@ -77,8 +80,6 @@ class OptionSelector:
                 self.method = do_search_template
             elif self.options.command == COMMAND.TEST:
                 self.method = do_testing
-            elif self.options.command == COMMAND.RUN:
-                self.method = do_run_test_execution
 
     def process(self):
         if callable(self.method):
@@ -575,12 +576,27 @@ def do_build_test_script(options):
         sys.exit(ECODE.SUCCESS)
 
 
-def do_run_test_execution(options):
-    command, operands = options.command, list(options.operands)
+def do_delete_filepath(options):
+    filepath = options.filepath
 
-    op_txt = ''.join(operands)
+    if File.is_exist(filepath):
+        is_deleted = File.delete(filepath)
+        fmt = '+++ %s' if is_deleted else '*** %s'
+        print(fmt % File.message)
+        sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
 
-    if op_txt == COMMAND.USAGE:
-        show_usage(command, exit_code=ECODE.SUCCESS)
+    are_deleted = None
+    for file_path in shlex.split(filepath):
+        if file_path == ',':
+            continue
 
-    raise Exception('TODO: Need to implement do_run_test_execution function')
+        file_path = file_path.rstrip(',').strip('{').strip('}')
+        is_deleted = File.delete(file_path)
+        fmt = '+++ %s' if is_deleted else '*** %s'
+        print(fmt % File.message)
+        are_deleted = is_deleted if are_deleted is None else are_deleted and is_deleted
+
+    if are_deleted is None:
+        sys.exit(ECODE.BAD)
+    else:
+        sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)

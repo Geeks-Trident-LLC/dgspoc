@@ -17,6 +17,7 @@ unittest:
     
     import unittest
     import dgspoc as ta
+    from xmlrunner import XMLTestRunner
     
     
     def get_logger(name='TATestScript'):
@@ -62,7 +63,10 @@ unittest:
             self.assertTrue(total_count >= 2)
     
     if __name__ == '__main__':
-        unittest.main()
+        unittest.main(
+            testRunner=XMLTestRunner(output="report"),
+            failfast=False, buffer=False, catchbreak=False
+        )
 
 pytest:
   fmt: 'dgs build pytest_script "%s" --author="{self.author}" --email="{self.email}" --company="{self.company}"'

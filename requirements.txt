@@ -7,3 +7,4 @@ robotframework
 dlapp
 regexapp
 templateapp
+unittest-xml-reporting

@@ -10,6 +10,7 @@ import dlapp
 
 import pytest
 import robot
+import xmlrunner
 
 from dgspoc.utils import File
 from dgspoc.utils import Misc
@@ -27,7 +28,7 @@ class Data:
 
     console_cli_name = 'dgs'
     console_cli_fullname = 'describe-get-system'
-    console_supported_commands = ['build', 'info', 'run', 'search',
+    console_supported_commands = ['build', 'info', 'search',
                                   'test', 'version', 'usage']
 
     # app yaml files
@@ -111,6 +112,10 @@ class Data:
                 package='robotframework v{}'.format(robot.__version__),
                 url='https://pypi.org/project/robotframework/'
             ),
+            unittest_xml_reporting=dict(
+                package='unittest-xml-reporting v{}'.format(xmlrunner.__version__),
+                url='https://pypi.org/project/unittest-xml-reporting/'
+            )
         )
         obj.update(templateapp.config.Data.get_dependency())
         obj.update(regexapp.config.Data.get_dependency())

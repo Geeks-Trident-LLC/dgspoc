@@ -84,7 +84,6 @@ class CONVTYPE:
 class COMMAND:
     BUILD = ICSStripValue('build')
     INFO = ICSStripValue('info')
-    RUN = ICSStripValue('run')
     SEARCH = ICSStripValue('search')
     TEST = ICSStripValue('test')
     VERSION = ICSStripValue('version')

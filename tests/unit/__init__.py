@@ -1,12 +1,15 @@
 import re
 import sys
+import time
+
+from pathlib import Path
+from tempfile import gettempdir
 
 
 def check_python_version(major=-1, minor=-1, micro=-1):
     if major == minor and major == micro and major == -1:
         return False
 
-    vinfo = sys.version_info
     lst = [
         (major, sys.version_info.major),
         (minor, sys.version_info.minor),
@@ -24,6 +27,23 @@ def is_py36_or_py37():
     chk2 = check_python_version(major=3, minor=7)
     chk = chk1 or chk2
     return chk
+
+
+def get_tmp_file_path(is_folder=False, extension='txt'):
+    tmp_dir = gettempdir()
+    stamp = str(time.time()).replace('.', '_')
+    if is_folder:
+        file_path = str(Path(tmp_dir, 'tmp_folder_%s' % stamp))
+        return file_path
+
+    if extension:
+        fmt = 'tmp_file_%s.%s'
+        file_path = str(Path(tmp_dir, fmt % (stamp, extension.lstrip('.'))))
+        return file_path
+    else:
+        fmt = 'tmp_file_%s'
+        file_path = str(Path(tmp_dir, fmt % stamp))
+        return file_path
 
 
 class ReformatOutput:
