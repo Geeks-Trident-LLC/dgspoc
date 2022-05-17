@@ -1656,9 +1656,13 @@ class ScriptBuilder:
             script = '\n'.join(lst).strip()
 
             if self.framework == FWTYPE.UNITTEST:
+                spacer = ' ' * self.indentation
                 addition = '\n'.join([
                     "if __name__ == '__main__':",
-                    '%s%s' % (' ' * self.indentation, 'unittest.main()')
+                    '%s%s' % (spacer, 'unittest.main('),
+                    '%s%s' % (spacer * 2, 'testRunner=XMLTestRunner(output="report"),'),
+                    '%s%s' % (spacer * 2, 'failfast=False, buffer=False, catchbreak=False'),
+                    '%s%s' % (spacer, ')')
                 ])
                 script = '%s\n\n%s' % (script, addition)
 
@@ -1734,6 +1738,7 @@ class ScriptBuilder:
             inherit = '(unittest.TestCase)' if is_unittest else ''
             lst.append('import unittest' if is_unittest else '# import pytest')
             lst.append('import dgspoc as ta')
+            is_unittest and lst.append('from xmlrunner import XMLTestRunner')
             lst.append('\n')
             if self.is_logger:
                 lst.append(self.get_logger_function)
