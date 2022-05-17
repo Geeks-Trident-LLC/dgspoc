@@ -275,6 +275,8 @@ class Dgs:
             return result
 
 
+sleep = Dgs.wait_for
+wait_for = Dgs.wait_for
 connect_device = Dgs.connect_device
 disconnect_device = Dgs.disconnect_device
 release_device = Dgs.release_device

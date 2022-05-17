@@ -4,6 +4,8 @@
 """
 
 from dgspoc.core import Dgs
+from dgspoc.core import sleep
+from dgspoc.core import wait_for
 from dgspoc.core import connect_device
 from dgspoc.core import disconnect_device
 from dgspoc.core import release_device
@@ -17,8 +19,10 @@ from dgspoc.config import version
 
 __version__ = version
 
-__all__ = [
+__all__ = sorted([
     'Dgs',
+    'wait_for',
+    'sleep',
     'connect_device',
     'disconnect_device',
     'release_device',
@@ -28,4 +32,4 @@ __all__ = [
     'reload',
     'convert_and_filter',
     'version',
-]
+])
