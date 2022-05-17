@@ -410,9 +410,10 @@ class File:
             file_obj = Path(filepath)
             if file_obj.is_dir():
                 file_obj.rmdir()
+                cls.message = 'Successfully deleted "{}" folder'.format(filename)
             else:
                 file_obj.unlink()
-            cls.message = 'Successfully deleted "{}" file'.format(filename)
+                cls.message = 'Successfully deleted "{}" file'.format(filename)
             return True
         except Exception as ex:
             cls.message = Text(ex)

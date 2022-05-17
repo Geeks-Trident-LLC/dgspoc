@@ -138,6 +138,11 @@ class Cli:
         )
 
         parser.add_argument(
+            '--delete', dest='filepath', type=str, default='',
+            help="delete file or folder"
+        ),
+
+        parser.add_argument(
             'command', nargs='?', type=str, default='',
             help='command must be either build, '
                  'info, search, test, version, or usage'

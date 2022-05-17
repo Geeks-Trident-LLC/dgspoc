@@ -4,6 +4,7 @@ import sys
 import re
 import argparse
 import operator
+import shlex
 
 from functools import partial
 from textwrap import wrap
@@ -59,6 +60,8 @@ class OptionSelector:
     def prepare(self):
         if self.options.template_id.strip():
             self.method = do_clear_template
+        elif self.options.filepath.strip():
+            self.method = do_delete_filepath
         else:
             if self.options.command == COMMAND.USAGE:
                 self.method = do_show_global_usage
@@ -572,3 +575,28 @@ def do_build_test_script(options):
         print(test_script)
         sys.exit(ECODE.SUCCESS)
 
+
+def do_delete_filepath(options):
+    filepath = options.filepath
+
+    if File.is_exist(filepath):
+        is_deleted = File.delete(filepath)
+        fmt = '+++ %s' if is_deleted else '*** %s'
+        print(fmt % File.message)
+        sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
+
+    are_deleted = None
+    for file_path in shlex.split(filepath):
+        if file_path == ',':
+            continue
+
+        file_path = file_path.rstrip(',').strip('{').strip('}')
+        is_deleted = File.delete(file_path)
+        fmt = '+++ %s' if is_deleted else '*** %s'
+        print(fmt % File.message)
+        are_deleted = is_deleted if are_deleted is None else are_deleted and is_deleted
+
+    if are_deleted is None:
+        sys.exit(ECODE.BAD)
+    else:
+        sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
