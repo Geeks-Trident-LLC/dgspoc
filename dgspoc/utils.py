@@ -1,6 +1,8 @@
 """Module containing the logic for utilities."""
 
 import re
+import os
+import filecmp
 
 import subprocess
 from copy import deepcopy
@@ -463,6 +465,18 @@ class File:
             replaced = '${HOME}'
         new_name = filename.replace(home_dir, replaced)
         return new_name
+
+    @classmethod
+    def is_duplicate_file(cls, file, source):
+        if Misc.is_list(source):
+            for other_file in source:
+                chk = filecmp.cmp(file, other_file)
+                if chk:
+                    return True
+            return False
+        else:
+            chk = filecmp.cmp(file, source)
+            return chk
 
 
 class Misc:
