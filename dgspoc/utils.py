@@ -251,7 +251,7 @@ class File:
 
     @classmethod
     def copy_file(cls, src, dst):
-        """create a directory
+        """copy source file to destination
 
         Parameters
         ----------
@@ -269,6 +269,38 @@ class File:
         except Exception as ex:
             cls.message = Text(ex)
             return ''
+
+    @classmethod
+    def copy_files(cls, src, dst):
+        """copy source file(s) to destination
+
+        Parameters
+        ----------
+        src (str, list): a source of file or files
+        dst (str): a destination directory
+
+        Returns
+        -------
+        list: a list of a copied file if successfully copied, otherwise empty list
+        """
+        cls.clean()
+        cls.make_directory(dst, showed=False)
+
+        empty_list = []
+        if Misc.is_list(src):
+            copied_files = empty_list
+            for file in src:
+                copied_file = cls.copy_file(file, dst)
+                if cls.message:
+                    return copied_files
+                copied_files.append(copied_file)
+            return copied_files
+        else:
+            copied_file = cls.copy_file(src, dst)
+            if cls.message:
+                return empty_list
+            else:
+                return [copied_file]
 
     @classmethod
     def make_directory(cls, file_path, showed=True):
