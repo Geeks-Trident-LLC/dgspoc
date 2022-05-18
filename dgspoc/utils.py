@@ -189,6 +189,26 @@ class File:
         cls.message = ''
 
     @classmethod
+    def is_file(cls, filename):
+        """Check filename is a file
+
+        Parameters
+        ----------
+        filename (str): a file name
+
+        Returns
+        -------
+        bool: True if it is a file, otherwise False
+        """
+        cls.clean()
+        try:
+            file_obj = Path(filename)
+            return file_obj.is_file()
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    @classmethod
     def is_exist(cls, filename):
         """Check file existence
 
