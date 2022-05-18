@@ -521,6 +521,20 @@ class File:
     @classmethod
     def get_list_of_filenames(cls, top='.', pattern='', excluded_duplicate=True):
         cls.clean()
+
+        empty_list = []
+
+        if not cls.is_exist(top):
+            File.message = 'The provided path IS NOT existed.'
+            return empty_list
+
+        if cls.is_file(top):
+            if pattern:
+                result = [top] if re.search(pattern, top) else empty_list
+            else:
+                result = [top]
+            return result
+
         try:
             lst = []
             for dir_path, _dir_names, file_names in os.walk(top):
@@ -539,7 +553,7 @@ class File:
         except Exception as ex:
             failure = Text(ex)
             cls.message = failure
-            return []
+            return empty_list
 
     @classmethod
     def quicklook(cls, filename, lookup=''):
