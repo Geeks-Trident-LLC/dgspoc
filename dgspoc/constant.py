@@ -95,6 +95,7 @@ class FEATURE:
     SCRIPT = ICSStripValue(
         'script', equality=r'(unittest|pytest|robotframework|rf)([_ -]?script)?$'
     )
+    BATCH = ICSStripValue('batch')
     UNITTEST = ICSStripValue('unittest', equality=r'unittest([_ -]?script)?$')
     PYTEST = ICSStripValue('pytest', equality=r'pytest([_ -]?script)?$')
     ROBOTFRAMEWORK = ICSStripValue('robotframework', equality=r'(robotframework|rf)([_ -]?script)?$')
