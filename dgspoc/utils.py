@@ -209,6 +209,26 @@ class File:
             return False
 
     @classmethod
+    def is_dir(cls, file_path):
+        """Check file_path is a directory
+
+        Parameters
+        ----------
+        file_path (str): a location of file
+
+        Returns
+        -------
+        bool: True if it is a directory, otherwise False
+        """
+        cls.clean()
+        try:
+            file_obj = Path(file_path)
+            return file_obj.is_dir()
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    @classmethod
     def is_exist(cls, filename):
         """Check file existence
 
