@@ -412,7 +412,7 @@ class File:
 
     @classmethod
     def get_filepath_timestamp_format1(cls, *args, prefix='', extension='',
-                                       is_full_path=False):
+                                       is_full_path=False, ref_datetime=None):
         """Create a file path with timestamp format1
 
         Parameters
@@ -421,6 +421,7 @@ class File:
         prefix (str): a prefix for base name of file path.  Default is empty.
         extension (str): an extension of file.  Default is empty.
         is_full_path (bool): show absolute full path.  Default is False.
+        ref_datetime (datetime.datetime): a reference datetime instance.
 
         Returns
         -------
@@ -428,7 +429,9 @@ class File:
         """
         lst = list(args)
 
-        basename = '{:%Y%B%d_%H%M%S}'.format(datetime.now())
+        ref_datetime = ref_datetime if isinstance(ref_datetime, datetime) else datetime.now()
+
+        basename = '{:%Y%B%d_%H%M%S}'.format(ref_datetime)
         if prefix.strip():
             basename = '%s_%s' % (prefix.strip(), basename)
 
