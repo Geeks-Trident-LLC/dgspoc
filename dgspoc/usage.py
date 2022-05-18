@@ -163,12 +163,20 @@ class BuildScriptUsage:
     example_usage = get_example_usage('build_script')
 
 
+class BuildBatchUsage:
+    usage = get_usage('build_batch', flags=FLAG.SAVE_TO | FLAG.HELP)
+    other_usage = get_usage('build_batch', flags=FLAG.SAVE_TO | FLAG.HELP)
+    example_usage = get_example_usage('build_batch')
+
+
 class BuildUsage:
     usage = '\n'.join([
-        Printer.get('build command has two features: template or script'),
+        Printer.get('build command has three features: template, script, or batch'),
         str(BuildTemplateUsage.usage),
         '',
         str(BuildScriptUsage.usage),
+        '',
+        str(BuildBatchUsage.usage),
     ])
 
 
@@ -195,6 +203,7 @@ class Usage:
     build = BuildUsage
     build_template = BuildTemplateUsage
     build_script = BuildScriptUsage
+    build_batch = BuildBatchUsage
     search_template = SearchTemplateUsage
     test = TestUsage
 

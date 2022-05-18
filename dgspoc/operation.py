@@ -73,6 +73,8 @@ class OptionSelector:
                     self.method = do_build_template
                 elif feature == FEATURE.SCRIPT:
                     self.method = do_build_test_script
+                elif feature == FEATURE.BATCH:
+                    self.method = do_build_batch_script
                 else:
                     exit_code = ECODE.SUCCESS if feature == 'usage' else ECODE.BAD
                     show_usage(self.options.command, exit_code=exit_code)
@@ -576,6 +578,16 @@ def do_build_test_script(options):
         sys.exit(ECODE.SUCCESS)
 
 
+def do_build_batch_script(options):
+    command, operands = options.command, list(options.operands)
+
+    feature = ''.join(operands[:1])
+    operands = operands[1:]
+    name = '{}_batch'.format(command)
+    validate_usage(name, operands)
+    validate_example_usage(name, operands)
+
+
 def do_delete_filepath(options):
     filepath = options.filepath
 
@@ -599,4 +611,4 @@ def do_delete_filepath(options):
     if are_deleted is None:
         sys.exit(ECODE.BAD)
     else:
-        sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
+        sys.exit(ECODE.SUCCESS if are_deleted else ECODE.BAD)

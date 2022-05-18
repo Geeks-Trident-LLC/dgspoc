@@ -1,6 +1,8 @@
 """Module containing the logic for utilities."""
 
 import re
+import os
+import filecmp
 
 import subprocess
 from copy import deepcopy
@@ -279,6 +281,35 @@ class File:
             return ''
 
     @classmethod
+    def get_filepath_timestamp_format1(cls, *args, prefix='', extension='',
+                                       is_full_path=False):
+        """Create a file path with timestamp format1
+
+        Parameters
+        ----------
+        args (tuple): a list of file items
+        prefix (str): a prefix for base name of file path.  Default is empty.
+        extension (str): an extension of file.  Default is empty.
+        is_full_path (bool): show absolute full path.  Default is False.
+
+        Returns
+        -------
+        str: a file path with timestamp format1.
+        """
+        lst = list(args)
+
+        basename = '{:%Y%B%d_%H%M%S}'.format(datetime.now())
+        if prefix.strip():
+            basename = '%s_%s' % (prefix.strip(), basename)
+
+        if extension.strip():
+            basename = '%s.%s' % (basename, extension.strip().strip('.'))
+
+        lst.append(basename)
+        file_path = cls.get_path(*lst) if is_full_path else str(Path(*lst))
+        return file_path
+
+    @classmethod
     def get_content(cls, file_path):
         """get content of file
 
@@ -434,6 +465,71 @@ class File:
             replaced = '${HOME}'
         new_name = filename.replace(home_dir, replaced)
         return new_name
+
+    @classmethod
+    def is_duplicate_file(cls, file, source):
+        if Misc.is_list(source):
+            for other_file in source:
+                chk = filecmp.cmp(file, other_file)
+                if chk:
+                    return True
+            return False
+        else:
+            chk = filecmp.cmp(file, source)
+            return chk
+
+    @classmethod
+    def get_list_of_filenames(cls, top='.', pattern='', excluded_duplicate=True):
+        cls.clean()
+        try:
+            lst = []
+            for dir_path, _dir_names, file_names in os.walk(top):
+                for file_name in file_names:
+                    if pattern and not re.search(pattern, file_name):
+                        continue
+                    file_path = str(Path(dir_path, file_name))
+
+                    if excluded_duplicate:
+                        is_duplicated = cls.is_duplicate_file(file_path, lst)
+                        not is_duplicated and lst.append(file_path)
+                    else:
+                        lst.append(file_path)
+            return lst
+
+        except Exception as ex:
+            failure = Text(ex)
+            cls.message = failure
+            return []
+
+    @classmethod
+    def quicklook(cls, filename, lookup=''):
+        if not cls.is_exist(filename):
+            cls.message = '%r file is not existed.' % filename
+            return False
+
+        content = cls.get_content(filename)
+
+        if not content.strip():
+            if content.strip() == lookup.strip():
+                return True
+            else:
+                return False
+
+        if not lookup.strip():
+            return True
+
+        if cls.message:
+            return False
+
+        if lookup in content:
+            return True
+        else:
+            try:
+                match = re.search(lookup, content)
+                return bool(match)
+            except Exception as ex:     # noqa
+                cls.message = Text(ex)
+                return False
 
 
 class Misc:
