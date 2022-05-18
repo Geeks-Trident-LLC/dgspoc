@@ -3,6 +3,7 @@
 import re
 import os
 import filecmp
+import shutil
 
 import subprocess
 from copy import deepcopy
@@ -249,6 +250,42 @@ class File:
             return False
 
     @classmethod
+    def make_directory(cls, file_path, showed=True):
+        """create a directory
+
+        Parameters
+        ----------
+        file_path (str): a file location
+        showed (bool): showing the message of creating folder
+
+        Returns
+        -------
+        bool: True if created, otherwise False
+        """
+        cls.clean()
+
+        if cls.is_exist(file_path):
+            if cls.is_dir(file_path):
+                cls.message = '%r directory is already existed.' % file_path
+                return True
+            else:
+                cls.message = 'Existing %r IS NOT a directory.' % file_path
+                return False
+
+        try:
+            file_obj = Path(file_path)
+            file_obj.mkdir(parents=True, exist_ok=True)
+            fmt = '{:%Y-%m-%d %H:%M:%S.%f} - {} folder is created.'
+            showed and print(fmt.format(datetime.now(), file_path))
+            cls.message = '{} folder is created.'.format(file_path)
+            return True
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    make_dir = make_directory
+
+    @classmethod
     def create(cls, filename, showed=True):
         """Check file existence
 
@@ -480,7 +517,7 @@ class File:
             filepath = File.get_path(filename)
             file_obj = Path(filepath)
             if file_obj.is_dir():
-                file_obj.rmdir()
+                shutil.rmtree(filename)
                 cls.message = 'Successfully deleted "{}" folder'.format(filename)
             else:
                 file_obj.unlink()
