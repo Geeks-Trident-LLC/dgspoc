@@ -250,6 +250,27 @@ class File:
             return False
 
     @classmethod
+    def copy_file(cls, src, dst):
+        """create a directory
+
+        Parameters
+        ----------
+        src (str): a source of file
+        dst (str): a destination file or directory
+
+        Returns
+        -------
+        str: a copied file if successfully copied, otherwise empty string
+        """
+        cls.clean()
+        try:
+            copied_file = shutil.copy2(src, dst)
+            return copied_file
+        except Exception as ex:
+            cls.message = Text(ex)
+            return ''
+
+    @classmethod
     def make_directory(cls, file_path, showed=True):
         """create a directory
 
