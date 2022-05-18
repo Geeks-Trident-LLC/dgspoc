@@ -501,6 +501,36 @@ class File:
             cls.message = failure
             return []
 
+    @classmethod
+    def quicklook(cls, filename, lookup=''):
+        if not cls.is_exist(filename):
+            cls.message = '%r file is not existed.' % filename
+            return False
+
+        content = cls.get_content(filename)
+
+        if not content.strip():
+            if content.strip() == lookup.strip():
+                return True
+            else:
+                return False
+
+        if not lookup.strip():
+            return True
+
+        if cls.message:
+            return False
+
+        if lookup in content:
+            return True
+        else:
+            try:
+                match = re.search(lookup, content)
+                return bool(match)
+            except Exception as ex:     # noqa
+                cls.message = Text(ex)
+                return False
+
 
 class Misc:
 
