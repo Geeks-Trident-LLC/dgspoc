@@ -73,13 +73,13 @@ class BatchBuilder:
         # unittest execution
         kwargs.prefix = 'unittest_report'
         fn = method(**kwargs)
-        unittest_fmt = 'python -m xmlrunner discover test_script_files/unittest --output-file=%s'
+        unittest_fmt = 'python -m xmlrunner discover dgs_test_script_files/unittest --output-file=%s'
         self.unittest_execution_cmdline = unittest_fmt % fn
 
         # pytest execution cmdline
         kwargs.prefix = 'pytest_report'
         fn = method(**kwargs)
-        pyttest_fmt = 'python -m pytest --junitxml=%s test_script_files/pytest'
+        pyttest_fmt = 'python -m pytest --junitxml=%s dgs_test_script_files/pytest'
         self.pytest_execution_cmdline = pyttest_fmt % fn
 
         # robotframework execution cmdline
@@ -91,7 +91,7 @@ class BatchBuilder:
         kwargs.prefix = 'robotframework_report'
         report_fn = method(**kwargs)
         robot_fmt = ('python -m robot --output=%s --log=%s --report=%s '
-                     'test_script_files/robotframework')
+                     'dgs_test_script_files/robotframework')
         self.robotframework_execution_cmdline = robot_fmt % (output_fn, log_fn, report_fn)
 
     def get_test_script_files(self, directory, case=''):
@@ -122,6 +122,6 @@ class BatchBuilder:
         result = self.get_test_script_files(directory, case=case)
         if result.files:
             case = case or result.case
-            dst_dir = 'test_script_files/%s' % case
+            dst_dir = 'dgs_test_script_files/%s' % case
             copied_files = File.copy_files(result.files, dst_dir)
             table[case] = list(set(table[case] + copied_files))
