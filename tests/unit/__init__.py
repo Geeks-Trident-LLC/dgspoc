@@ -29,6 +29,11 @@ def is_py36_or_py37():
     return chk
 
 
+def get_tmp_dir():
+    tmp_dir = gettempdir()
+    return tmp_dir
+
+
 def get_tmp_file_path(prefix='', is_folder=False, extension='txt'):
     time.sleep(0.012345)
     tmp_dir = gettempdir()
