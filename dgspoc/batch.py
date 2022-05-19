@@ -29,7 +29,6 @@ class BatchBuilder:
 
         tbl = DotObject(unittest=[], pytest=[], robotframework=[])
         operands = self.options.operands[1:]
-
         if not len(operands):
             for case in tbl:
                 self.prepare_files('.', case=case, table=tbl)
@@ -49,7 +48,11 @@ class BatchBuilder:
                         self.prepare_files(directory, case=case, table=tbl)
                     else:
                         directory = item
-                        self.prepare_files(directory, table=tbl)
+                        if File.is_dir(directory):
+                            for case in tbl:
+                                self.prepare_files(directory, table=tbl, case=case)
+                        else:
+                            self.prepare_files(directory, table=tbl)
 
         lst = []
         for fw, files in tbl.items():
