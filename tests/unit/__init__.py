@@ -29,19 +29,21 @@ def is_py36_or_py37():
     return chk
 
 
-def get_tmp_file_path(is_folder=False, extension='txt'):
+def get_tmp_file_path(prefix='', is_folder=False, extension='txt'):
+    time.sleep(0.012345)
     tmp_dir = gettempdir()
     stamp = str(time.time()).replace('.', '_')
     if is_folder:
-        file_path = str(Path(tmp_dir, 'tmp_folder_%s' % stamp))
+        fmt = '%s_%%s' % (prefix or 'tmp_folder')
+        file_path = str(Path(tmp_dir, fmt % stamp))
         return file_path
 
     if extension:
-        fmt = 'tmp_file_%s.%s'
+        fmt = '%s_%%s.%%s' % (prefix or 'tmp_file')
         file_path = str(Path(tmp_dir, fmt % (stamp, extension.lstrip('.'))))
         return file_path
     else:
-        fmt = 'tmp_file_%s'
+        fmt = '%s_%%s' % (prefix or 'tmp_file')
         file_path = str(Path(tmp_dir, fmt % stamp))
         return file_path
 
