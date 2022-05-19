@@ -95,7 +95,7 @@ class ReformatOutput:
         replacing_service_stamp_pat = r'(?i)^[a-z]{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}[.]\d{3}'
         replacing_created_date_pat = r'(?i)^(# Created date:) (\d{4}-\d\d-\d\d)( *)$'
 
-        pat = (r'=(?i)(unittest|pytest|robotframework)_(report|output|log)_'
+        pat = (r'(?i)=(unittest|pytest|robotframework)_(report|output|log)_'
                r'([0-9]{4}[a-z]{3}[0-9]{2}_[0-9]{6})[.](xml|html)')
         replacing_report_filename_pat = pat
 
@@ -111,7 +111,7 @@ class ReformatOutput:
                 changed_txt = re.sub(replacing_created_date_pat,
                                      r'\1 yyyy-mm-dd\3', line)
                 lst.append(changed_txt)
-            elif self.everything and re.match(replacing_report_filename_pat, line):
+            elif self.everything and re.search(replacing_report_filename_pat, line):
                 changed_txt = re.sub(replacing_report_filename_pat,
                                      r'=\1_\2_yyyymmmdd_HHMMSS.\4', line)
                 lst.append(changed_txt)
