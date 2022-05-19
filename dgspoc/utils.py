@@ -3,6 +3,7 @@
 import re
 import os
 import filecmp
+import shutil
 
 import subprocess
 from copy import deepcopy
@@ -189,6 +190,46 @@ class File:
         cls.message = ''
 
     @classmethod
+    def is_file(cls, filename):
+        """Check filename is a file
+
+        Parameters
+        ----------
+        filename (str): a file name
+
+        Returns
+        -------
+        bool: True if it is a file, otherwise False
+        """
+        cls.clean()
+        try:
+            file_obj = Path(filename)
+            return file_obj.is_file()
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    @classmethod
+    def is_dir(cls, file_path):
+        """Check file_path is a directory
+
+        Parameters
+        ----------
+        file_path (str): a location of file
+
+        Returns
+        -------
+        bool: True if it is a directory, otherwise False
+        """
+        cls.clean()
+        try:
+            file_obj = Path(file_path)
+            return file_obj.is_dir()
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    @classmethod
     def is_exist(cls, filename):
         """Check file existence
 
@@ -207,6 +248,95 @@ class File:
         except Exception as ex:
             cls.message = Text(ex)
             return False
+
+    @classmethod
+    def copy_file(cls, src, dst):
+        """copy source file to destination
+
+        Parameters
+        ----------
+        src (str): a source of file
+        dst (str): a destination file or directory
+
+        Returns
+        -------
+        str: a copied file if successfully copied, otherwise empty string
+        """
+        cls.clean()
+        try:
+            copied_file = shutil.copy2(src, dst)
+            return copied_file
+        except Exception as ex:
+            cls.message = Text(ex)
+            return ''
+
+    @classmethod
+    def copy_files(cls, src, dst):
+        """copy source file(s) to destination
+
+        Parameters
+        ----------
+        src (str, list): a source of file or files
+        dst (str): a destination directory
+
+        Returns
+        -------
+        list: a list of a copied file if successfully copied, otherwise empty list
+        """
+        cls.clean()
+        cls.make_directory(dst, showed=False)
+
+        empty_list = []
+        if Misc.is_list(src):
+            copied_files = empty_list
+            for file in src:
+                copied_file = cls.copy_file(file, dst)
+                if cls.message:
+                    return copied_files
+                copied_files.append(copied_file)
+            return copied_files
+        else:
+            copied_file = cls.copy_file(src, dst)
+            if cls.message:
+                return empty_list
+            else:
+                return [copied_file]
+
+    @classmethod
+    def make_directory(cls, file_path, showed=True):
+        """create a directory
+
+        Parameters
+        ----------
+        file_path (str): a file location
+        showed (bool): showing the message of creating folder
+
+        Returns
+        -------
+        bool: True if created, otherwise False
+        """
+        cls.clean()
+
+        if cls.is_exist(file_path):
+            if cls.is_dir(file_path):
+                cls.message = '%r directory is already existed.' % file_path
+                return True
+            else:
+                cls.message = 'Existing %r IS NOT a directory.' % file_path
+                return False
+
+        try:
+            file_obj = Path(file_path)
+            file_obj.mkdir(parents=True, exist_ok=True)
+            fmt = '{:%Y-%m-%d %H:%M:%S.%f} - {} folder is created.'
+            showed and print(fmt.format(datetime.now(), file_path))
+            cls.message = '{} folder is created.'.format(file_path)
+            return True
+        except Exception as ex:
+            cls.message = Text(ex)
+            return False
+
+    make_dir = make_directory
 
     @classmethod
     def create(cls, filename, showed=True):
@@ -282,7 +412,7 @@ class File:
 
     @classmethod
     def get_filepath_timestamp_format1(cls, *args, prefix='', extension='',
-                                       is_full_path=False):
+                                       is_full_path=False, ref_datetime=None):
         """Create a file path with timestamp format1
 
         Parameters
@@ -291,6 +421,7 @@ class File:
         prefix (str): a prefix for base name of file path.  Default is empty.
         extension (str): an extension of file.  Default is empty.
         is_full_path (bool): show absolute full path.  Default is False.
+        ref_datetime (datetime.datetime): a reference datetime instance.
 
         Returns
         -------
@@ -298,7 +429,9 @@ class File:
         """
         lst = list(args)
 
-        basename = '{:%Y%B%d_%H%M%S}'.format(datetime.now())
+        ref_datetime = ref_datetime if isinstance(ref_datetime, datetime) else datetime.now()
+
+        basename = '{:%Y%B%d_%H%M%S}'.format(ref_datetime)
         if prefix.strip():
             basename = '%s_%s' % (prefix.strip(), basename)
 
@@ -440,7 +573,7 @@ class File:
             filepath = File.get_path(filename)
             file_obj = Path(filepath)
             if file_obj.is_dir():
-                file_obj.rmdir()
+                shutil.rmtree(filename)
                 cls.message = 'Successfully deleted "{}" folder'.format(filename)
             else:
                 file_obj.unlink()
@@ -481,6 +614,20 @@ class File:
     @classmethod
     def get_list_of_filenames(cls, top='.', pattern='', excluded_duplicate=True):
         cls.clean()
+
+        empty_list = []
+
+        if not cls.is_exist(top):
+            File.message = 'The provided path IS NOT existed.'
+            return empty_list
+
+        if cls.is_file(top):
+            if pattern:
+                result = [top] if re.search(pattern, top) else empty_list
+            else:
+                result = [top]
+            return result
+
         try:
             lst = []
             for dir_path, _dir_names, file_names in os.walk(top):
@@ -499,7 +646,7 @@ class File:
         except Exception as ex:
             failure = Text(ex)
             cls.message = failure
-            return []
+            return empty_list
 
     @classmethod
     def quicklook(cls, filename, lookup=''):

@@ -40,6 +40,9 @@ from dgspoc.adaptor import Adaptor
 from dgspoc.parser import ParsedOperation
 from dgspoc.parser import CheckStatement
 
+from dgspoc.batch import BatchBuilder
+
+
 from templateapp import TemplateBuilder
 
 from dlapp import DLQuery
@@ -581,11 +584,33 @@ def do_build_test_script(options):
 def do_build_batch_script(options):
     command, operands = options.command, list(options.operands)
 
-    feature = ''.join(operands[:1])
+    # feature = ''.join(operands[:1])
     operands = operands[1:]
     name = '{}_batch'.format(command)
     validate_usage(name, operands)
     validate_example_usage(name, operands)
+
+    builder = BatchBuilder(options)
+    batch_script = builder.script
+    if batch_script:
+        batch_script += '\ndgs report'
+        batch_script += '\ndgs --delete=dgs_test_script_files --quiet'
+        if options.filename:
+            is_saved = File.save(options.filename, batch_script)
+            if is_saved:
+                print('+++ Successfully saved %r batch file.' % options.filename)
+                sys.exit(ECODE.SUCCESS)
+            else:
+                print('*** Failed to save %r batch file.' % options.filename)
+                print('*** %s' % File.message)
+                sys.exit(ECODE.BAD)
+        else:
+            print(batch_script)
+            sys.exit(ECODE.SUCCESS)
+    else:
+        msg = '*** Failed to generate batch content because no test file is found.'
+        print(msg)
+        sys.exit(ECODE.BAD)
 
 
 def do_delete_filepath(options):
