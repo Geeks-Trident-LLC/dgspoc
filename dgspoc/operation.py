@@ -593,6 +593,8 @@ def do_build_batch_script(options):
     builder = BatchBuilder(options)
     batch_script = builder.script
     if batch_script:
+        batch_script += '\ndgs report'
+        batch_script += '\ndgs --delete=dgs_test_script_files --quiet'
         if options.filename:
             is_saved = File.save(options.filename, batch_script)
             if is_saved:
