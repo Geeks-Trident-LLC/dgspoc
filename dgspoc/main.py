@@ -143,6 +143,11 @@ class Cli:
         ),
 
         parser.add_argument(
+            '--quiet', action='store_true',
+            help='silent success or fail info'
+        )
+
+        parser.add_argument(
             'command', nargs='?', type=str, default='',
             help='command must be either build, '
                  'info, search, test, version, or usage'

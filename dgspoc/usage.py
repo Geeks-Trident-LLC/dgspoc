@@ -27,7 +27,8 @@ class FLAG(IntFlag):
     ALL = pow(2, 8)
     DEPENDENCY = pow(2, 9)
     TEMPLATE_STORAGE = pow(2, 10)
-    HELP = pow(2, 11)
+    QUIET = pow(2, 11)
+    HELP = pow(2, 12)
 
     BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
     BUILD_SCRIPT = AUTHOR | EMAIL | COMPANY | SAVE_TO | HELP
@@ -109,6 +110,7 @@ def get_usage_header(name, flags=0):
         '  --all                   showing all information',
         '  --dependency            showing package dependencies',
         '  --template-storage      showing template storage information',
+        '  --quiet                 silent success or fail info',
         '  -h, --help              show this help message and exit',
     ]
     if flags:

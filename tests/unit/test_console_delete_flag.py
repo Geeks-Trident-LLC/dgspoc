@@ -36,9 +36,31 @@ class TestConsoleDeleteFlag:
             'dgs --delete="{%s,  %s}"' % (file1, file2),
             'dgs --delete="%s"' % folder1,
             'dgs --delete="%s %s"' % (file1, folder1),
-            'dgs --delete="%s, %s, %s, %s"' % (file1, file1, folder1, folder2),
+            'dgs --delete="%s, %s, %s, %s"' % (file1, file2, folder1, folder2),
         ]
     )
     def test_console_delete_flag(self, cmdline):
         result = MiscOutput.execute_shell_command(cmdline)
         assert result.is_success
+
+        for line in result.output.splitlines():
+            if line.strip():
+                assert 'Successfully deleted ' in line
+
+    @pytest.mark.parametrize(
+        'cmdline',
+        [
+            'dgs --delete="%s"  --quiet' % file1,
+            'dgs --delete="%s %s" --quiet' % (file1, file2),
+            'dgs --delete="%s, %s" --quiet' % (file1, file2),
+            'dgs --delete="%s  ,  %s" --quiet' % (file1, file2),
+            'dgs --delete="{%s,  %s}" --quiet' % (file1, file2),
+            'dgs --delete="%s" --quiet' % folder1,
+            'dgs --delete="%s %s" --quiet' % (file1, folder1),
+            'dgs --delete="%s, %s, %s, %s" --quiet' % (file1, file2, folder1, folder2),
+        ]
+    )
+    def test_console_delete_and_quiet_flags(self, cmdline):
+        result = MiscOutput.execute_shell_command(cmdline)
+        assert result.is_success
+        assert result.output.strip() == ''
