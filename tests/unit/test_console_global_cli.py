@@ -57,7 +57,8 @@ class TestConsoleHelpFlag:
             ' --action ACTION ',
             ' --replaced ',
             ' --dependency ',
-            ' --template-storage '
+            ' --template-storage ',
+            ' --quiet'
         ]
     )
     def test_position_command_flag(self, positional_argument):
@@ -134,6 +135,7 @@ class TestConsoleInfoCommand:
         assert ' Package: robotframework ' in result.output
         assert ' Package: templateapp ' in result.output
         assert ' Package: textfsm ' in result.output
+        assert ' Package: unittest-xml-reporting ' in result.output
 
     @pytest.mark.parametrize(
         'cmdline',
@@ -179,6 +181,7 @@ class TestConsoleInfoCommand:
         assert ' Package: robotframework ' in result.output
         assert ' Package: templateapp ' in result.output
         assert ' Package: textfsm ' in result.output
+        assert ' Package: unittest-xml-reporting ' in result.output
 
         assert ' Template Storage Info: ' in result.output
         assert '   - Location: ' in result.output

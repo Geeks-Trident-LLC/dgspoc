@@ -211,7 +211,7 @@ def do_build_template(options):
             sys.exit(ECODE.SUCCESS)
 
     except Exception as ex:
-        print(Text(ex))
+        not options.quiet and print(Text(ex))
         sys.exit(ECODE.BAD)
 
 
@@ -246,14 +246,14 @@ def do_clear_template(options):
     if re.match(r'(?i) *([*]|_+all_+) *$', template_id):
         fmt = ('*** Failed to clear %r template reference because '
                'Describe-Get-System prohibits multiple clearing')
-        print(fmt % template_id)
+        not options.quiet and print(fmt % template_id)
         sys.exit(ECODE.BAD)
 
     if template_id:
         result = MiscArgs.get_parsed_result_as_data_or_file(data=template_id)
         if result.is_file:
             is_deleted = File.delete(result.filename)
-            print('%s %s' % ('+++' if is_deleted else '***', File.message))
+            not options.quiet and print('%s %s' % ('+++' if is_deleted else '***', File.message))
             sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
         else:
             is_cleared = TemplateStorage.clear(template_id)
@@ -262,7 +262,7 @@ def do_clear_template(options):
                 message = fmt % template_id
             else:
                 message = '*** %s' % TemplateStorage.message
-            print(message)
+            not options.quiet and print(message)
             sys.exit(ECODE.SUCCESS if is_cleared else ECODE.BAD)
 
 
@@ -319,7 +319,7 @@ def get_test_from_adaptor(options):
         return test_data
     except Exception as ex:
         failure = 'AdaptorInquiryError - ({})'.format(Text(ex))
-        Printer.print(failure)
+        not options.quiet and Printer.print(failure)
         sys.exit(ECODE.BAD)
 
 
@@ -354,7 +354,7 @@ def do_testing(options):
         File.message = ''
         output = File.get_content(test_data_file)
         if File.message:
-            print('*** %s' % File.message)
+            not options.quiet and print('*** %s' % File.message)
             sys.exit(ECODE.BAD)
         print(output)
         result = DotObject(test_data=output, template='', records=[], records_count=0)
@@ -377,7 +377,7 @@ def do_testing(options):
                     result.records = records
                     result.records_count = len(records)
                 except Exception as ex:
-                    print('*** %s' % Text(ex))
+                    not options.quiet and print('*** %s' % Text(ex))
                     sys.exit(ECODE.BAD)
             else:
                 pfunc = partial(parse_template_result, test_file=test_data_file)
@@ -400,7 +400,7 @@ def do_testing(options):
                             sys.exit(ECODE.BAD)
                 except Exception as ex:
                     failure = '*** %s' % ex
-                    print(failure)
+                    not options.quiet and print(failure)
                     sys.exit(ECODE.BAD)
         else:
             sys.exit(ECODE.SUCCESS)
@@ -449,7 +449,7 @@ def do_testing(options):
                     records=records, records_count=len(records)
                 )
             except Exception as ex:
-                print('*** %s' % Text(ex))
+                not options.quiet and print('*** %s' % Text(ex))
                 sys.exit(ECODE.BAD)
         elif node.is_template:
             pfunc = partial(parse_template_result, test_data=output)
@@ -468,7 +468,7 @@ def do_testing(options):
                         sys.exit(ECODE.BAD)
             except Exception as ex:
                 failure = '*** %s' % ex
-                print(failure)
+                not options.quiet and print(failure)
                 sys.exit(ECODE.BAD)
         else:
             if not node.has_select_statement:
@@ -524,7 +524,7 @@ def do_testing(options):
 
     if node.error:
         lst = ['Error:', '------', '\n'.join(wrap(node.error, width=76)), '']
-        Printer.print(lst)
+        not options.quiet and Printer.print(lst)
         sys.exit(ECODE.BAD)
     else:
         sys.exit(ECODE.SUCCESS)
@@ -552,7 +552,7 @@ def do_build_test_script(options):
     snippet_filename = operands[0]
     snippet_content = File.get_content(snippet_filename)
     if File.message:
-        Printer.print('*** %s' % File.message)
+        not options.quiet and Printer.print('*** %s' % File.message)
         sys.exit(ECODE.BAD)
 
     node = ScriptBuilder(
@@ -563,7 +563,8 @@ def do_build_test_script(options):
     test_script = node.testscript.strip()
 
     if not test_script:
-        Printer.print('*** No script is generated for %r' % snippet_filename)
+        fmt = '*** No script is generated for %r'
+        Printer.print(fmt % snippet_filename)
         sys.exit(ECODE.BAD)
 
     if options.filename:
@@ -598,18 +599,20 @@ def do_build_batch_script(options):
         if options.filename:
             is_saved = File.save(options.filename, batch_script)
             if is_saved:
-                print('+++ Successfully saved %r batch file.' % options.filename)
+                fmt = '+++ Successfully saved %r batch file.'
+                not options.quiet and print(fmt % options.filename)
                 sys.exit(ECODE.SUCCESS)
             else:
-                print('*** Failed to save %r batch file.' % options.filename)
-                print('*** %s' % File.message)
+                fmt = '*** Failed to save %r batch file.'
+                not options.quiet and print(fmt % options.filename)
+                not options.quiet and print('*** %s' % File.message)
                 sys.exit(ECODE.BAD)
         else:
             print(batch_script)
             sys.exit(ECODE.SUCCESS)
     else:
         msg = '*** Failed to generate batch content because no test file is found.'
-        print(msg)
+        not options.quiet and print(msg)
         sys.exit(ECODE.BAD)
 
 
@@ -619,7 +622,7 @@ def do_delete_filepath(options):
     if File.is_exist(filepath):
         is_deleted = File.delete(filepath)
         fmt = '+++ %s' if is_deleted else '*** %s'
-        print(fmt % File.message)
+        not options.quiet and print(fmt % File.message)
         sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
 
     are_deleted = None
@@ -630,7 +633,7 @@ def do_delete_filepath(options):
         file_path = file_path.rstrip(',').strip('{').strip('}')
         is_deleted = File.delete(file_path)
         fmt = '+++ %s' if is_deleted else '*** %s'
-        print(fmt % File.message)
+        not options.quiet and print(fmt % File.message)
         are_deleted = is_deleted if are_deleted is None else are_deleted and is_deleted
 
     if are_deleted is None:
