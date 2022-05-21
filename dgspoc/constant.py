@@ -84,6 +84,7 @@ class CONVTYPE:
 class COMMAND:
     BUILD = ICSStripValue('build')
     INFO = ICSStripValue('info')
+    REPORT = ICSStripValue('report')
     SEARCH = ICSStripValue('search')
     TEST = ICSStripValue('test')
     VERSION = ICSStripValue('version')
@@ -98,4 +99,6 @@ class FEATURE:
     BATCH = ICSStripValue('batch')
     UNITTEST = ICSStripValue('unittest', equality=r'unittest([_ -]?script)?$')
     PYTEST = ICSStripValue('pytest', equality=r'pytest([_ -]?script)?$')
-    ROBOTFRAMEWORK = ICSStripValue('robotframework', equality=r'(robotframework|rf)([_ -]?script)?$')
+    ROBOTFRAMEWORK = ICSStripValue(
+        'robotframework', equality=r'(robotframework|rf)([_ -]?script)?$'
+    )

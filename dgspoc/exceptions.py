@@ -67,3 +67,7 @@ class TemplateReferenceError(InterpreterError):
 
 class UtilsParsedTemplateError(InterpreterError):
     """Use to capture error for parsing template in utils"""
+
+
+class ReportError(DGSError):
+    """Use to capture error for report generation in report.py"""
