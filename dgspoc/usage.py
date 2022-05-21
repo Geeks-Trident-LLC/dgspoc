@@ -200,6 +200,12 @@ class TestUsage:
     example_usage = get_example_usage('test')
 
 
+class ReportUsage:
+    usage = get_usage('report', flags=FLAG.HELP)
+    other_usage = get_usage('report', flags=FLAG.HELP)
+    example_usage = get_example_usage('report')
+
+
 class Usage:
     info = InfoUsage
     build = BuildUsage
@@ -208,6 +214,7 @@ class Usage:
     build_batch = BuildBatchUsage
     search_template = SearchTemplateUsage
     test = TestUsage
+    report = ReportUsage
 
 
 def validate_usage(name, operands):

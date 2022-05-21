@@ -85,6 +85,8 @@ class OptionSelector:
                 self.method = do_search_template
             elif self.options.command == COMMAND.TEST:
                 self.method = do_testing
+            elif self.options.command == COMMAND.REPORT:
+                self.method = do_reporting
 
     def process(self):
         if callable(self.method):
@@ -640,3 +642,12 @@ def do_delete_filepath(options):
         sys.exit(ECODE.BAD)
     else:
         sys.exit(ECODE.SUCCESS if are_deleted else ECODE.BAD)
+
+
+def do_reporting(options):
+    command, operands = options.command, list(options.operands)
+    # feature = ''.join(operands[:1])
+    # operands = operands[1:]
+    name = command
+    validate_usage(name, operands)
+    validate_example_usage(name, operands)

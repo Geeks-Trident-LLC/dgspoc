@@ -150,7 +150,7 @@ class Cli:
         parser.add_argument(
             'command', nargs='?', type=str, default='',
             help='command must be either build, '
-                 'info, search, test, version, or usage'
+                 'info, report, search, test, version, or usage'
         )
         parser.add_argument(
             'operands', nargs='*', type=str,
@@ -169,7 +169,7 @@ class Cli:
         Returns
         -------
         bool: show ``self.parser.print_help()`` and call ``sys.exit(ECODE.BAD)`` if
-        command is neither build, info, search,
+        command is neither build, info, report, search,
         test, version, nor usage otherwise, return True
         """
         self.options.command = self.options.command.lower()
