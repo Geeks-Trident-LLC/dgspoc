@@ -1,5 +1,105 @@
 """Module containing the logic for report of test execution"""
 
+from os import path
+from glob import glob
+
+from datetime import datetime
+
+
+from dgspoc.exceptions import ReportError
+
+from xml.etree import ElementTree
+
 
 class Report:
-    """Need to implement Report class"""
+    def __init__(self, *report_files, detail=False):
+        if not report_files:
+            raise ReportError('CANT find report file.')
+
+        self.report_files = report_files
+        self.detail = detail
+
+    def generate(self):
+        lst = []
+        for report_file in self.report_files:
+            if 'unittest' in report_file:
+                report_content = self.generate_unittest_report(report_file)
+            elif 'pytest' in report_file:
+                report_content = self.generate_pytest_report(report_file)
+            else:
+                report_content = self.generate_robotframework_report(report_file)
+
+            if report_content.strip():
+                lst and lst.append('')
+                lst.append(report_content)
+
+        all_reports = '\n'.join(lst)
+        return all_reports
+
+    def generate_unittest_report(self, file_name):
+        tree = ElementTree.parse(file_name)
+        root = tree.getroot()
+        return ''
+
+    def generate_pytest_report(self, file_name):
+        tree = ElementTree.parse(file_name)
+        root = tree.getroot()
+        return ''
+
+    def generate_robotframework_report(self, file_name):
+        tree = ElementTree.parse(file_name)
+        root = tree.getroot()
+
+        suite_node = root.find('suite')
+        statistics_node = root.find('statistics')
+        errors_node = root.find('errors')
+
+        lst = ['Robotframework Report', '-' * 21]
+
+        return ''
+
+    @classmethod
+    def get_report_files(cls, directory=''):
+
+        report_files = []
+        lookups = ['unittest_report_*_*.xml',
+                   'pytest_report_*_*.xml',
+                   'robotframework_output_*_*.xml']
+        for lookup in lookups:
+            report_file = cls.get_report_file_by(lookup, directory=directory)
+            report_file and report_files.append(report_file)
+
+        return report_files
+
+    @classmethod
+    def get_report_file_by(cls, lookup, directory=''):
+        directory = directory.strip()
+        file_path = path.join(directory, lookup)
+        lst = glob(file_path)
+        if not lst:
+            return ''
+
+        base_dt = datetime(1900, 1, 1)
+        fmt1 = 'unittest_report_%Y%b%d_%H%M%S.xml'
+        fmt2 = 'pytest_report_%Y%b%d_%H%M%S.xml'
+        fmt3 = 'robotframework_output_%Y%b%d_%H%M%S.xml'
+        report_file = ''
+
+        for file_name in lst:
+            if file_name.startswith('unittest_report_'):
+                fmt = fmt1
+            else:
+                fmt = fmt2 if file_name.startswith('pytest_report_') else fmt3
+            dt = datetime.strptime(file_name, fmt)
+            if dt > base_dt:
+                report_file = file_name
+                base_dt = dt
+        return report_file
+
+    @classmethod
+    def generate_report(cls, directory=''):
+        report_files = cls.get_report_files(directory=directory)
+        report = Report(*report_files)
+
+        report_content = report.generate()
+        return report_content
