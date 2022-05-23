@@ -1,20 +1,21 @@
 """Module containing the logic for report of test execution"""
 
+import re
 from os import path
 from glob import glob
 
 from datetime import datetime
 
-
+from dgspoc.constant import FWTYPE
 from dgspoc.exceptions import ReportError
 
 from xml.etree import ElementTree
 
 
-class Report:
+class DGSReport:
     def __init__(self, *report_files, detail=False):
         if not report_files:
-            raise ReportError('CANT find report file.')
+            raise ReportError('CANT generate report without report file.')
 
         self.report_files = report_files
         self.detail = detail
@@ -59,6 +60,54 @@ class Report:
         return ''
 
     @classmethod
+    def generate_report(cls, directory=''):
+        report_files = DGSReportFile.get_report_files(directory=directory)
+        report = cls(*report_files)
+
+        report_content = report.generate()
+        return report_content
+
+    
+class DGSReportFile:
+    def __init__(self, filename):
+        self.filename = str(filename).strip()
+        self.basename = path.basename(self.filename)
+    
+    @property
+    def is_report_file(self):
+        chk = self.is_unittest
+        chk &= self.is_pytest
+        chk &= self.is_robotframework
+        return chk
+    
+    @property
+    def is_unittest(self):
+        chk = self.check_report_file(FWTYPE.UNITTEST)
+        return chk
+    
+    @property
+    def is_pytest(self):
+        chk = self.check_report_file(FWTYPE.PYTEST)
+        return chk
+    
+    @property
+    def is_robotframework(self):
+        chk = self.check_report_file(FWTYPE.ROBOTFRAMEWORK)
+        return chk
+    
+    def get_prefix(self, framework):    # noqa
+        other = 'output' if framework == FWTYPE.ROBOTFRAMEWORK else 'report'
+        prefix = '%s_%s' % (framework, other)
+        return prefix
+
+    def check_report_file(self, framework):
+        prefix = self.get_prefix(framework)
+        fmt = '%s_[0-9]{4}[a-z]{3}[0-9]{2}_[0-9]{6}[.]xml'
+        pattern = fmt % prefix
+        match = re.match(pattern, self.basename)
+        return bool(match)
+
+    @classmethod
     def get_report_files(cls, directory=''):
 
         report_files = []
@@ -86,6 +135,14 @@ class Report:
         report_file = ''
 
         for file_name in lst:
+            file_obj = cls(file_name)
+            if file_obj.is_unittest:
+                pass
+            elif file_obj.is_pytest:
+                pass
+            elif file_obj.is_robotframework:
+                pass
+
             if file_name.startswith('unittest_report_'):
                 fmt = fmt1
             else:
@@ -95,11 +152,3 @@ class Report:
                 report_file = file_name
                 base_dt = dt
         return report_file
-
-    @classmethod
-    def generate_report(cls, directory=''):
-        report_files = cls.get_report_files(directory=directory)
-        report = Report(*report_files)
-
-        report_content = report.generate()
-        return report_content
