@@ -81,19 +81,19 @@ class TestReportGeneration:
         assert reformat_report == expected_result
 
 
-# class TestRetrievingReportFilesAndGeneratingReport:
-#
-#     @pytest.mark.parametrize(
-#         ('directory', 'detail', 'expected_result'),
-#         [
-#             (
-#                 get_test_data_file(TESTDATA.case_a.directory),
-#                 TESTDATA.case_a.detail, TESTDATA.case_a.expected_result),
-#         ]
-#     )
-#     def test_generating_report_per_file(self, directory, detail, expected_result):
-#         report_files = DGSReportFile.get_report_files(directory)
-#         dgs_report = DGSReport(*report_files, detail=detail)
-#         import pdb; pdb.set_trace()
-#         report = dgs_report.generate()
-#         assert report == expected_result
+class TestRetrievingReportFilesAndGeneratingReport:
+
+    @pytest.mark.parametrize(
+        ('directory', 'detail', 'expected_result'),
+        [
+            (
+                get_test_data_file(TESTDATA.case_a.directory),
+                TESTDATA.case_a.detail, TESTDATA.case_a.expected_result),
+        ]
+    )
+    def test_generating_report_per_directory(self, directory, detail, expected_result):
+        report_files = DGSReportFile.get_report_files(directory)
+        dgs_report = DGSReport(*report_files, detail=detail)
+        report = dgs_report.generate()
+        reformat_report = ReformatOutput(report, everything=True)
+        assert reformat_report.strip() == expected_result
