@@ -30,6 +30,7 @@ class TestConsoleBuildBatchCommandLineUsage:
         assert result.is_success
         assert 'dgs build batch usage' in result.output
         assert ' --save-to FILENAME ' in result.output
+        assert ' --detail ' in result.output
         assert ' -h, --help ' in result.output
         assert 'dgs build batch operands [options]' in result.output
         assert 'dgs build batch example ' in result.output
@@ -68,7 +69,7 @@ class TestConsoleBuildBatchScript:
     )
     def test_building_batch_script_and_save_to_file(self, cmdline, batch_filename):
         result = MiscOutput.execute_shell_command(cmdline)
-        reformat_result = ReformatOutput(result.output, everything=True)
+        # reformat_result = ReformatOutput(result.output, everything=True)
         assert result.is_success
         assert '+++ Successfully saved ' in result.output
         File.delete(batch_filename)

@@ -45,29 +45,21 @@ case1:
     python -m xmlrunner discover dgs_test_script_files/unittest --output-file=unittest_report_yyyymmmdd_HHMMSS.xml
     python -m pytest --junitxml=pytest_report_yyyymmmdd_HHMMSS.xml dgs_test_script_files/pytest
     python -m robot --output=robotframework_output_yyyymmmdd_HHMMSS.xml --log=robotframework_log_yyyymmmdd_HHMMSS.html --report=robotframework_report_yyyymmmdd_HHMMSS.html dgs_test_script_files/robotframework
-    dgs report
-    dgs --delete=dgs_test_script_files --quiet
 
 case2:
   cmdline: dgs build batch unittest=sample_scripts
   expected_result: |-
     python -m xmlrunner discover dgs_test_script_files/unittest --output-file=unittest_report_yyyymmmdd_HHMMSS.xml
-    dgs report
-    dgs --delete=dgs_test_script_files --quiet
 
 case3:
   cmdline: dgs build batch pytest=sample_scripts
   expected_result: |-
     python -m pytest --junitxml=pytest_report_yyyymmmdd_HHMMSS.xml dgs_test_script_files/pytest
-    dgs report
-    dgs --delete=dgs_test_script_files --quiet
 
 case4:
   cmdline: dgs build batch robotframework=sample_scripts
   expected_result: |-
     python -m robot --output=robotframework_output_yyyymmmdd_HHMMSS.xml --log=robotframework_log_yyyymmmdd_HHMMSS.html --report=robotframework_report_yyyymmmdd_HHMMSS.html dgs_test_script_files/robotframework
-    dgs report
-    dgs --delete=dgs_test_script_files --quiet
 
 case5:
   batch_filename: execution_batch_script

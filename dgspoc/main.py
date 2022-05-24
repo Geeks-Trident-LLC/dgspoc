@@ -143,6 +143,11 @@ class Cli:
         ),
 
         parser.add_argument(
+            '--detail', action='store_true',
+            help='generate detail test execution script or report'
+        )
+
+        parser.add_argument(
             '--quiet', action='store_true',
             help='silent success or fail info'
         )

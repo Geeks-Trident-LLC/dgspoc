@@ -596,17 +596,20 @@ def do_build_batch_script(options):
     builder = BatchBuilder(options)
     batch_script = builder.script
     if batch_script:
-        batch_script += '\ndgs report'
-        batch_script += '\ndgs --delete=dgs_test_script_files --quiet'
         if options.filename:
-            is_saved = File.save(options.filename, batch_script)
+            filename = options.filename
+
+            batch_script += '\ndgs report --detail' if options.detail else '\ndgs report'
+            batch_script += '\ndgs --delete=dgs_test_script_files --quiet'
+
+            is_saved = File.save(filename, batch_script)
             if is_saved:
                 fmt = '+++ Successfully saved %r batch file.'
-                not options.quiet and print(fmt % options.filename)
+                not options.quiet and print(fmt % filename)
                 sys.exit(ECODE.SUCCESS)
             else:
                 fmt = '*** Failed to save %r batch file.'
-                not options.quiet and print(fmt % options.filename)
+                not options.quiet and print(fmt % filename)
                 not options.quiet and print('*** %s' % File.message)
                 sys.exit(ECODE.BAD)
         else:
