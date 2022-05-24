@@ -106,8 +106,11 @@ class ReformatOutput:
                r'([0-9]{4}[a-z]{3}[0-9]{2}_[0-9]{6})[.](xml|html)')
         replacing_report_filename_pat = pat
 
+        report_pat = (r'(?i)(unittest|pytest|robotframework) (report - \w+) '
+                      r'([0-9.]+) (- Python) ([0-9.]+) on (\w+)')
+
         device_name_pat = r'(?i)(?P<name>\S+) +is +(successfully +)?((dis)?connected)[.]'
-        for line in lines:
+        for index, line in enumerate(lines):
             if re.match(excluded_txt_pat, line):
                 continue
             elif self.everything and re.search(service_stamp_pat, line):
@@ -122,6 +125,12 @@ class ReformatOutput:
                 changed_txt = re.sub(replacing_report_filename_pat,
                                      r'=\1_\2_yyyymmmdd_HHMMSS.\4', line)
                 lst.append(changed_txt)
+            elif self.everything and re.match(report_pat, line.strip('| ')):
+                line = line.strip('| ')
+                changed_txt = re.sub(report_pat, r'\1 \2 #.#.# \4 #.#.# on O.S', line)
+                lst.append('| %s |' % changed_txt.ljust(76))
+                next_changed_txt = '-' * len(changed_txt)
+                lines[index + 1] = '| %s |' % next_changed_txt.ljust(76)
             else:
                 lst.append(line)
                 match = re.match(device_name_pat, line)
