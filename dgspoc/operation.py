@@ -42,6 +42,8 @@ from dgspoc.parser import CheckStatement
 
 from dgspoc.batch import BatchBuilder
 
+from dgspoc.report import DGSReportFile
+from dgspoc.report import DGSReport
 
 from templateapp import TemplateBuilder
 
@@ -654,3 +656,10 @@ def do_reporting(options):
     name = command
     validate_usage(name, operands)
     validate_example_usage(name, operands)
+
+    directory = operands[0] if operands else '.'
+    report_files = DGSReportFile.get_report_files(directory)
+    reporter = DGSReport(*report_files, detail=options.detail)
+    report = reporter.generate()
+    print(report)
+    sys.exit(reporter.exit_code)
