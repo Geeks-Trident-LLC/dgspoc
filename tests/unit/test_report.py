@@ -6,6 +6,7 @@ from dgspoc.report import DGSReportFile
 from dgspoc.utils import File
 
 from . import get_test_data_file
+from . import ReformatOutput
 
 
 TESTDATA = File.get_result_from_yaml_file(
@@ -73,26 +74,26 @@ class TestReportGeneration:
         ]
     )
     def test_generating_report_per_file(self, report_file, detail, expected_exit_code, expected_result):
-        # report_file = get_test_data_file(filename)
         dgs_report = DGSReport(report_file, detail=detail)
         report = dgs_report.generate()
+        reformat_report = ReformatOutput(report, everything=True)
         assert dgs_report.exit_code == expected_exit_code
-        assert report == expected_result
+        assert reformat_report == expected_result
 
 
-# class TestRetrievingReportFilesAndGeneratingReport:
-#
-#     @pytest.mark.parametrize(
-#         ('directory', 'detail', 'expected_result'),
-#         [
-#             (
-#                 get_test_data_file(TESTDATA.case_a.directory),
-#                 TESTDATA.case_a.detail, TESTDATA.case_a.expected_result),
-#         ]
-#     )
-#     def test_generating_report_per_file(self, directory, detail, expected_result):
-#         report_files = DGSReportFile.get_report_files(directory)
-#         dgs_report = DGSReport(*report_files, detail=detail)
-#         import pdb; pdb.set_trace()
-#         report = dgs_report.generate()
-#         assert report == expected_result
+class TestRetrievingReportFilesAndGeneratingReport:
+
+    @pytest.mark.parametrize(
+        ('directory', 'detail', 'expected_result'),
+        [
+            (
+                get_test_data_file(TESTDATA.case_a.directory),
+                TESTDATA.case_a.detail, TESTDATA.case_a.expected_result),
+        ]
+    )
+    def test_generating_report_per_directory(self, directory, detail, expected_result):
+        report_files = DGSReportFile.get_report_files(directory)
+        dgs_report = DGSReport(*report_files, detail=detail)
+        report = dgs_report.generate()
+        reformat_report = ReformatOutput(report, everything=True)
+        assert reformat_report.strip() == expected_result

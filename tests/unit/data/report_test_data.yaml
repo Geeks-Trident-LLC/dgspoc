@@ -5,8 +5,8 @@ case1:
   exit_code: 0
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Unittest Report - Unittest 3.9.6 - Python 3.9.6 on Darwin                    |
-    | ---------------------------------------------------------                    |
+    | Unittest Report - Unittest #.#.# - Python #.#.# on O.S                       |
+    | ------------------------------------------------------                       |
     | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
     +------------------------------------------------------------------------------+
 
@@ -16,8 +16,8 @@ case2:
   exit_code: 0
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Unittest Report - Unittest 3.9.6 - Python 3.9.6 on Darwin                    |
-    | ---------------------------------------------------------                    |
+    | Unittest Report - Unittest #.#.# - Python #.#.# on O.S                       |
+    | ------------------------------------------------------                       |
     | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
     +------------------------------------------------------------------------------+
       - Test case: dgs_test_script_files/unittest/test_unittest_sample1.py (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
@@ -30,8 +30,8 @@ case3:
   exit_code: 1
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Unittest Report - Unittest 3.9.6 - Python 3.9.6 on Darwin                    |
-    | ---------------------------------------------------------                    |
+    | Unittest Report - Unittest #.#.# - Python #.#.# on O.S                       |
+    | ------------------------------------------------------                       |
     | Total Test Cases: 3 / Passed: 1 / Failed: 2                                  |
     +------------------------------------------------------------------------------+
 
@@ -41,8 +41,8 @@ case4:
   exit_code: 1
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Unittest Report - Unittest 3.9.6 - Python 3.9.6 on Darwin                    |
-    | ---------------------------------------------------------                    |
+    | Unittest Report - Unittest #.#.# - Python #.#.# on O.S                       |
+    | ------------------------------------------------------                       |
     | Total Test Cases: 3 / Passed: 1 / Failed: 2                                  |
     +------------------------------------------------------------------------------+
       - Test case: dgs_test_script_files/unittest/test_unittest_sample1.py (Total: 2 / Passed: 1 / Failed: 1 / Skipped: 0)
@@ -55,8 +55,8 @@ case5:
   exit_code: 0
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Pytest Report - Pytest 6.2.4 - Python 3.9.6 on Darwin                        |
-    | -----------------------------------------------------                        |
+    | Pytest Report - Pytest #.#.# - Python #.#.# on O.S                           |
+    | --------------------------------------------------                           |
     | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
     +------------------------------------------------------------------------------+
 
@@ -66,8 +66,8 @@ case6:
   exit_code: 0
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Pytest Report - Pytest 6.2.4 - Python 3.9.6 on Darwin                        |
-    | -----------------------------------------------------                        |
+    | Pytest Report - Pytest #.#.# - Python #.#.# on O.S                           |
+    | --------------------------------------------------                           |
     | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
     +------------------------------------------------------------------------------+
       - Test case: dgs_test_script_files.pytest.test_pytest_sample1 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
@@ -80,8 +80,8 @@ case7:
   exit_code: 1
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Pytest Report - Pytest 6.2.4 - Python 3.9.6 on Darwin                        |
-    | -----------------------------------------------------                        |
+    | Pytest Report - Pytest #.#.# - Python #.#.# on O.S                           |
+    | --------------------------------------------------                           |
     | Total Test Cases: 3 / Passed: 2 / Failed: 1                                  |
     +------------------------------------------------------------------------------+
 
@@ -91,8 +91,8 @@ case8:
   exit_code: 1
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Pytest Report - Pytest 6.2.4 - Python 3.9.6 on Darwin                        |
-    | -----------------------------------------------------                        |
+    | Pytest Report - Pytest #.#.# - Python #.#.# on O.S                           |
+    | --------------------------------------------------                           |
     | Total Test Cases: 3 / Passed: 2 / Failed: 1                                  |
     +------------------------------------------------------------------------------+
       - Test case: dgs_test_script_files.pytest.test_pytest_sample1 (Total: 2 / Passed: 1 / Failed: 1 / Skipped: 0)
@@ -105,8 +105,8 @@ case9:
   exit_code: 0
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Robotframework Report - Robot 4.1.3 - Python 3.9.6 on Darwin                 |
-    | ------------------------------------------------------------                 |
+    | Robotframework Report - Robot #.#.# - Python #.#.# on O.S                    |
+    | ---------------------------------------------------------                    |
     | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
     +------------------------------------------------------------------------------+
 
@@ -116,8 +116,8 @@ case10:
   exit_code: 0
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Robotframework Report - Robot 4.1.3 - Python 3.9.6 on Darwin                 |
-    | ------------------------------------------------------------                 |
+    | Robotframework Report - Robot #.#.# - Python #.#.# on O.S                    |
+    | ---------------------------------------------------------                    |
     | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
     +------------------------------------------------------------------------------+
       - Test case: Robotframework.Test Robotframework Sample1 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
@@ -130,8 +130,8 @@ case11:
   exit_code: 1
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Robotframework Report - Robot 4.1.3 - Python 3.9.6 on Darwin                 |
-    | ------------------------------------------------------------                 |
+    | Robotframework Report - Robot #.#.# - Python #.#.# on O.S                    |
+    | ---------------------------------------------------------                    |
     | Total Test Cases: 3 / Passed: 2 / Failed: 1                                  |
     +------------------------------------------------------------------------------+
 
@@ -141,8 +141,8 @@ case12:
   exit_code: 1
   expected_result: |-
     +------------------------------------------------------------------------------+
-    | Robotframework Report - Robot 4.1.3 - Python 3.9.6 on Darwin                 |
-    | ------------------------------------------------------------                 |
+    | Robotframework Report - Robot #.#.# - Python #.#.# on O.S                    |
+    | ---------------------------------------------------------                    |
     | Total Test Cases: 3 / Passed: 2 / Failed: 1                                  |
     +------------------------------------------------------------------------------+
       - Test case: Robotframework.Test Robotframework Sample1 (Total: 2 / Passed: 1 / Failed: 1 / Skipped: 0)
@@ -153,3 +153,29 @@ case_a:
   directory: "."
   detail: True
   expected_result: |-
+    +------------------------------------------------------------------------------+
+    | Unittest Report - Unittest #.#.# - Python #.#.# on O.S                       |
+    | ------------------------------------------------------                       |
+    | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+      - Test case: dgs_test_script_files/unittest/test_unittest_sample1.py (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+      - Test case: dgs_test_script_files/unittest/test_unittest_sample2.py (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+      - Test case: dgs_test_script_files/unittest/test_unittest_sample3.py (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+    
+    +------------------------------------------------------------------------------+
+    | Pytest Report - Pytest #.#.# - Python #.#.# on O.S                           |
+    | --------------------------------------------------                           |
+    | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+      - Test case: dgs_test_script_files.pytest.test_pytest_sample1 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+      - Test case: dgs_test_script_files.pytest.test_pytest_sample2 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+      - Test case: dgs_test_script_files.pytest.test_pytest_sample3 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+    
+    +------------------------------------------------------------------------------+
+    | Robotframework Report - Robot #.#.# - Python #.#.# on O.S                    |
+    | ---------------------------------------------------------                    |
+    | Total Test Cases: 3 / Passed: 3 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+      - Test case: Robotframework.Test Robotframework Sample1 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+      - Test case: Robotframework.Test Robotframework Sample2 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)
+      - Test case: Robotframework.Test Robotframework Sample3 (Total: 2 / Passed: 2 / Failed: 0 / Skipped: 0)

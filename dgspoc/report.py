@@ -294,7 +294,6 @@ class DGSReportFile:
         for lookup in lookups:
             file_path = path.join(directory, lookup)
             file_names += glob(file_path)
-
         report_files = cls.get_latest_report_files(file_names)
 
         return report_files
@@ -327,4 +326,18 @@ class DGSReportFile:
             latest_file = cls.get_latest_report_file(base_file, file_name)
             if latest_file and latest_file not in lst:
                 lst.append(latest_file)
-        return lst
+
+        if len(lst) > 1:
+            latest_dt = cls(lst[0]).mark_time
+            for file_name in lst:
+                mark_time = cls(file_name).mark_time
+                if mark_time >= latest_dt:
+                    latest_dt = mark_time
+
+            latest_report_files = []
+            for file_name in lst:
+                if cls(file_name).mark_time == latest_dt:
+                    latest_report_files.append(file_name)
+            return latest_report_files
+        else:
+            return lst
