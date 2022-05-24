@@ -67,6 +67,8 @@ class ICSStripValue(ICSValue):
 class ECODE(IntFlag):
     SUCCESS = 0
     BAD = 1
+    PASSED = SUCCESS
+    FAILED = BAD
 
 
 class FWTYPE:
