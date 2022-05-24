@@ -1,6 +1,7 @@
 import re
 import sys
 import time
+from os import path
 
 from pathlib import Path
 from tempfile import gettempdir
@@ -51,6 +52,12 @@ def get_tmp_file_path(prefix='', is_folder=False, extension='txt'):
         fmt = '%s_%%s' % (prefix or 'tmp_file')
         file_path = str(Path(tmp_dir, fmt % stamp))
         return file_path
+
+
+def get_test_data_file(filename):
+    base_dir = path.dirname(__file__)
+    fullpath = path.join(base_dir, 'data', filename)
+    return fullpath
 
 
 class ReformatOutput:

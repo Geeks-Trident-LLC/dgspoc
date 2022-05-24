@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="6" time="0.244" timestamp="2022-05-23T16:15:43.711094" hostname="Tuyens-MacBook-Pro.local"><testcase classname="dgs_test_script_files.pytest.test_pytest_sample1.TestClass" name="test_001_precondition" time="0.001"><failure message="assert False">self = &lt;test_pytest_sample1.TestClass object at 0x7f9886cd7bb0&gt;
+
+    def test_001_precondition(self):
+        """precondition"""
+&gt;       assert False
+E       assert False
+
+dgs_test_script_files/pytest/test_pytest_sample1.py:44: AssertionError</failure></testcase><testcase classname="dgs_test_script_files.pytest.test_pytest_sample1.TestClass" name="test_002_scenario1" time="0.000" /><testcase classname="dgs_test_script_files.pytest.test_pytest_sample2.TestClass" name="test_001_precondition" time="0.000" /><testcase classname="dgs_test_script_files.pytest.test_pytest_sample2.TestClass" name="test_002_scenario1" time="0.000" /><testcase classname="dgs_test_script_files.pytest.test_pytest_sample3.TestClass" name="test_001_precondition" time="0.000" /><testcase classname="dgs_test_script_files.pytest.test_pytest_sample3.TestClass" name="test_002_scenario1" time="0.000"><failure message="NameError: name 'a' is not defined">self = &lt;test_pytest_sample3.TestClass object at 0x7f9886cf4a30&gt;
+
+    def test_002_scenario1(self):
+        """scenario1"""
+&gt;       c = a / 2
+E       NameError: name 'a' is not defined
+
+dgs_test_script_files/pytest/test_pytest_sample3.py:48: NameError</failure></testcase></testsuite></testsuites>
