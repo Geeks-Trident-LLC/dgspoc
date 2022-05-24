@@ -4,6 +4,7 @@ import re
 import os
 import filecmp
 import shutil
+import platform
 
 import subprocess
 from copy import deepcopy
@@ -902,6 +903,26 @@ class Misc:
         variables = {root_var_name: substituted_data}
         substitute(new_data, variables)
         return new_data
+
+    @classmethod
+    def is_window_os(cls):
+        chk = platform.system().lower() == 'windows'
+        return chk
+
+    @classmethod
+    def is_mac_os(cls):
+        chk = platform.system().lower() == 'darwin'
+        return chk
+
+    @classmethod
+    def is_linux_os(cls):
+        chk = platform.system().lower() == 'linux'
+        return chk
+
+    @classmethod
+    def is_nix_os(cls):
+        chk = cls.is_linux_os() or cls.is_mac_os()
+        return chk
 
 
 class MiscArgs:

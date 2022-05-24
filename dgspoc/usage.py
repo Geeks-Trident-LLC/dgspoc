@@ -28,7 +28,8 @@ class FLAG(IntFlag):
     DEPENDENCY = pow(2, 9)
     TEMPLATE_STORAGE = pow(2, 10)
     QUIET = pow(2, 11)
-    HELP = pow(2, 12)
+    DETAIL = pow(2, 12)
+    HELP = pow(2, 13)
 
     BUILD_TEMPLATE = AUTHOR | EMAIL | COMPANY | SAVE_TO | TEMPLATE_ID | REPLACED | HELP
     BUILD_SCRIPT = AUTHOR | EMAIL | COMPANY | SAVE_TO | HELP
@@ -111,6 +112,7 @@ def get_usage_header(name, flags=0):
         '  --dependency            showing package dependencies',
         '  --template-storage      showing template storage information',
         '  --quiet                 silent success or fail info',
+        '  --detail                generate detail test execution script or report',
         '  -h, --help              show this help message and exit',
     ]
     if flags:
@@ -166,8 +168,8 @@ class BuildScriptUsage:
 
 
 class BuildBatchUsage:
-    usage = get_usage('build_batch', flags=FLAG.SAVE_TO | FLAG.HELP)
-    other_usage = get_usage('build_batch', flags=FLAG.SAVE_TO | FLAG.HELP)
+    usage = get_usage('build_batch', flags=FLAG.SAVE_TO | FLAG.DETAIL | FLAG.HELP)
+    other_usage = get_usage('build_batch', flags=FLAG.SAVE_TO | FLAG.DETAIL | FLAG.HELP)
     example_usage = get_example_usage('build_batch')
 
 
@@ -201,8 +203,8 @@ class TestUsage:
 
 
 class ReportUsage:
-    usage = get_usage('report', flags=FLAG.HELP)
-    other_usage = get_usage('report', flags=FLAG.HELP)
+    usage = get_usage('report', flags=FLAG.DETAIL | FLAG.HELP)
+    other_usage = get_usage('report', flags=FLAG.DETAIL | FLAG.HELP)
     example_usage = get_example_usage('report')
 
 

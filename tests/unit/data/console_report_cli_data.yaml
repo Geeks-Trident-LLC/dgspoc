@@ -1,0 +1,117 @@
+template_id: "unreal.device.os.show.modules.tmpl"
+user_data: |-
+  digits(var_module)  words(var_name)  mixed_word(var_model)  version(var_version)  word(var_status) end(space) -> record
+
+host: "1.1.1.1"
+
+snippet_content: |-
+  setup
+    connect device {self.host}
+  section: precondition
+    {self.host} EXECUTE show version
+  section: verify active modules
+    {self.host} EXECUTE show module USING_TEMPLATE {self.template_id} SELECT * WHERE status eq Running MUST BE EQUAL_TO 4
+  section: verify off module
+    {self.host} EXECUTE show module USING_TEMPLATE {self.template_id} SELECT * WHERE name == Misc Fan && status eq Off MUST BE True
+  teardown
+    disconnect 1.1.1.1
+    release device 1.1.1.1
+
+user_folder: user_files
+batch_folder: dgs_test_script_files
+
+snippet_file: "{self.user_folder}/snippet_for_script_builder.txt"
+unittest_script_file: "{self.user_folder}/test_sample_unittest.py"
+pytest_script_file: "{self.user_folder}/test_sample_pytest.py"
+robotframework_script_file: "{self.user_folder}/test_sample_robotframework.robot"
+
+batch_file: "test_execution_batch_file.bat"
+shell_cmdline: "bash {self.batch_file}"
+dos_cmdline: "{self.window_batch_file}"
+
+case1:
+  fmt: |-
+    dgs build template "{self.user_data}" --template-id="{self.template_id}" --replaced
+    dgs build unittest_script "{self.snippet_file}" --save-to="{self.unittest_script_file}"
+    dgs build batch {self.user_folder} --save-to="{self.batch_file}"
+    %s
+
+  expected_result: |-
+    +------------------------------------------------------------------------------+
+    | Unittest Report - Unittest #.#.# - Python #.#.# on O.S                       |
+    | ------------------------------------------------------                       |
+    | Total Test Cases: 1 / Passed: 1 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+
+case2:
+  fmt: |-
+    dgs build template "{self.user_data}" --template-id="{self.template_id}" --replaced
+    dgs build unittest_script "{self.snippet_file}" --save-to="{self.unittest_script_file}"
+    dgs build batch {self.user_folder} --save-to="{self.batch_file}" --detail
+    %s
+
+  expected_result: |-
+    +------------------------------------------------------------------------------+
+    | Unittest Report - Unittest #.#.# - Python #.#.# on O.S                       |
+    | ------------------------------------------------------                       |
+    | Total Test Cases: 1 / Passed: 1 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+      - Test case: dgs_test_script_files/unittest/test_sample_unittest.py (Total: 3 / Passed: 3 / Failed: 0 / Skipped: 0)
+
+case3:
+  fmt: |-
+    dgs build template "{self.user_data}" --template-id="{self.template_id}" --replaced
+    dgs build pytest_script "{self.snippet_file}" --save-to="{self.pytest_script_file}"
+    dgs build batch {self.user_folder} --save-to="{self.batch_file}"
+    %s
+
+  expected_result: |-
+    +------------------------------------------------------------------------------+
+    | Pytest Report - Pytest #.#.# - Python #.#.# on O.S                           |
+    | --------------------------------------------------                           |
+    | Total Test Cases: 1 / Passed: 1 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+
+case4:
+  fmt: |-
+    dgs build template "{self.user_data}" --template-id="{self.template_id}" --replaced
+    dgs build pytest_script "{self.snippet_file}" --save-to="{self.pytest_script_file}"
+    dgs build batch {self.user_folder} --save-to="{self.batch_file}" --detail
+    %s
+
+  expected_result: |-
+    +------------------------------------------------------------------------------+
+    | Pytest Report - Pytest #.#.# - Python #.#.# on O.S                           |
+    | --------------------------------------------------                           |
+    | Total Test Cases: 1 / Passed: 1 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+      - Test case: dgs_test_script_files.pytest.test_sample_pytest (Total: 3 / Passed: 3 / Failed: 0 / Skipped: 0)
+
+case5:
+  fmt: |-
+    dgs build template "{self.user_data}" --template-id="{self.template_id}" --replaced
+    dgs build robotframework_script "{self.snippet_file}" --save-to="{self.robotframework_script_file}"
+    dgs build batch {self.user_folder} --save-to="{self.batch_file}"
+    %s
+
+  expected_result: |-
+    +------------------------------------------------------------------------------+
+    | Robotframework Report - Robot #.#.# - Python #.#.# on O.S                    |
+    | ---------------------------------------------------------                    |
+    | Total Test Cases: 1 / Passed: 1 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+
+case6:
+  fmt: |-
+    dgs build template "{self.user_data}" --template-id="{self.template_id}" --replaced
+    dgs build robotframework_script "{self.snippet_file}" --save-to="{self.robotframework_script_file}"
+    dgs build batch {self.user_folder} --save-to="{self.batch_file}" --detail
+    %s
+
+  expected_result: |-
+    +------------------------------------------------------------------------------+
+    | Robotframework Report - Robot #.#.# - Python #.#.# on O.S                    |
+    | ---------------------------------------------------------                    |
+    | Total Test Cases: 1 / Passed: 1 / Failed: 0                                  |
+    +------------------------------------------------------------------------------+
+      - Test case: Robotframework.Test Sample Robotframework (Total: 3 / Passed: 3 / Failed: 0 / Skipped: 0)
