@@ -633,7 +633,8 @@ def do_delete_filepath(options):
         sys.exit(ECODE.SUCCESS if is_deleted else ECODE.BAD)
 
     are_deleted = None
-    for file_path in shlex.split(filepath):
+    posix = False if Misc.is_window_os() else True
+    for file_path in shlex.split(filepath, posix=posix):
         if file_path == ',':
             continue
 
