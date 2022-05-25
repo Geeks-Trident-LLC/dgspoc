@@ -57,6 +57,38 @@ class Text(str):
             else:
                 return str.__new__(cls, obj)
 
+    @classmethod
+    def format(cls, *args, **kwargs):
+        if not args:
+            text = ''
+            return text
+        else:
+            if kwargs:
+                fmt = args[0]
+                try:
+                    text = str(fmt).format(args[1:], **kwargs)
+                    return text
+                except Exception as ex:
+                    text = cls(ex)
+                    return text
+            else:
+                if len(args) == 1:
+                    text = cls(args[0])
+                    return text
+                else:
+                    fmt = args[0]
+                    t_args = tuple(args[1:])
+                    try:
+                        text = str(fmt) % t_args
+                        return text
+                    except Exception as ex1:
+                        try:
+                            text = str(fmt).format(*t_args)
+                            return text
+                        except Exception as ex2:
+                            text = '%s\n%s' % (cls(ex1), cls(ex2))
+                            return text
+
 
 class Printer:
     """A printer class.
@@ -98,20 +130,20 @@ class Printer:
         if width >= width_limit:
             length = right_bound if right_bound > length else length
 
-        result.append('+-{}-+'.format('-' * length))
+        result.append(Text.format('+-{}-+', '-' * length))
         if header:
             for item in headers:
-                result.append('| {} |'.format(item.ljust(length)))
-            result.append('+-{}-+'.format('-' * length))
+                result.append(Text.format('| {} |', item.ljust(length)))
+            result.append(Text.format('+-{}-+', '-' * length))
 
         for item in lst:
-            result.append('| {} |'.format(item.ljust(length)))
-        result.append('+-{}-+'.format('-' * length))
+            result.append(Text.format('| {} |', item.ljust(length)))
+        result.append(Text.format('+-{}-+', '-' * length))
 
         if footer:
             for item in footers:
-                result.append('| {} |'.format(item.ljust(length)))
-            result.append('+-{}-+'.format('-' * length))
+                result.append(Text.format('| {} |', item.ljust(length)))
+            result.append(Text.format('+-{}-+', '-' * length))
 
         if failure_msg:
             result.append(failure_msg)
@@ -320,10 +352,10 @@ class File:
 
         if cls.is_exist(file_path):
             if cls.is_dir(file_path):
-                cls.message = '%r directory is already existed.' % file_path
+                cls.message = Text.format('%r directory is already existed.', file_path)
                 return True
             else:
-                cls.message = 'Existing %r IS NOT a directory.' % file_path
+                cls.message = Text.format('Existing %r IS NOT a directory.', file_path)
                 return False
 
         try:
@@ -331,7 +363,7 @@ class File:
             file_obj.mkdir(parents=True, exist_ok=True)
             fmt = '{:%Y-%m-%d %H:%M:%S.%f} - {} folder is created.'
             showed and print(fmt.format(datetime.now(), file_path))
-            cls.message = '{} folder is created.'.format(file_path)
+            cls.message = Text.format('{} folder is created.', file_path)
             return True
         except Exception as ex:
             cls.message = Text(ex)
@@ -365,7 +397,7 @@ class File:
             file_obj.touch()
             fmt = '{:%Y-%m-%d %H:%M:%S.%f} - {} file is created.'
             showed and print(fmt.format(datetime.now(), filename))
-            cls.message = '{} file is created.'.format(filename)
+            cls.message = Text.format('{} file is created.', filename)
             return True
         except Exception as ex:
             cls.message = Text(ex)
@@ -408,7 +440,7 @@ class File:
             return str(file_obj.parent)
         else:
             fmt = 'FileNotFoundError: No such file or directory "{}"'
-            cls.message = fmt.format(file_path)
+            cls.message = Text.format(fmt, file_path)
             return ''
 
     @classmethod
@@ -507,9 +539,9 @@ class File:
 
                 if content:
                     yaml_result = yaml.safe_load(content)
-                    cls.message = 'loaded {}'.format(filename)
+                    cls.message = Text.format('loaded {}', filename)
                 else:
-                    cls.message = '"{}" file is empty.'.format(filename)
+                    cls.message = Text.format('"{}" file is empty.', filename)
 
         except Exception as ex:
             cls.message = Text(ex)
@@ -551,7 +583,7 @@ class File:
             file_obj = Path(filename)
             file_obj.touch()
             file_obj.write_text(content)
-            cls.message = 'Successfully saved data to "{}" file'.format(filename)
+            cls.message = Text.format('Successfully saved data to "{}" file', filename)
             return True
         except Exception as ex:
             cls.message = Text(ex)
@@ -575,10 +607,10 @@ class File:
             file_obj = Path(filepath)
             if file_obj.is_dir():
                 shutil.rmtree(filename)
-                cls.message = 'Successfully deleted "{}" folder'.format(filename)
+                cls.message = Text.format('Successfully deleted "{}" folder', filename)
             else:
                 file_obj.unlink()
-                cls.message = 'Successfully deleted "{}" file'.format(filename)
+                cls.message = Text.format('Successfully deleted "{}" file', filename)
             return True
         except Exception as ex:
             cls.message = Text(ex)
@@ -645,14 +677,13 @@ class File:
             return lst
 
         except Exception as ex:
-            failure = Text(ex)
-            cls.message = failure
+            cls.message = Text(ex)
             return empty_list
 
     @classmethod
     def quicklook(cls, filename, lookup=''):
         if not cls.is_exist(filename):
-            cls.message = '%r file is not existed.' % filename
+            cls.message = Text.format('%r file is not existed.', filename)
             return False
 
         content = cls.get_content(filename)
@@ -738,7 +769,7 @@ class Misc:
 
             if not is_number:
                 txt = obj if cls.is_class(obj) else type(obj)
-                cls.message = 'Expecting number type, but got {}'.format(txt)
+                cls.message = Text.format('Expecting number type, but got {}', txt)
             return is_number, num
 
     @classmethod
@@ -976,7 +1007,7 @@ class MiscArgs:
             return result
 
         except Exception as ex:
-            result.failure = '{}: {}'.format(type(ex).__name__, ex)
+            result.failure = Text(ex)
             result.is_parsed = False
             return result
 
@@ -1063,5 +1094,5 @@ def parse_template_result(test_data='', test_file='',
         )
         return result
     except Exception as ex:
-        failure = 'BAD-TEMPLATE ({})'.format(Text(ex))
+        failure = Text.format('BAD-TEMPLATE ({})', ex)
         raise UtilsParsedTemplateError(failure)
