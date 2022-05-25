@@ -27,7 +27,7 @@ robotframework_script_file: "{self.user_folder}/test_sample_robotframework.robot
 
 batch_file: "test_execution_batch_file.bat"
 shell_cmdline: "bash {self.batch_file}"
-dos_cmdline: "{self.window_batch_file}"
+dos_cmdline: "{self.batch_file}"
 
 case1:
   fmt: |-

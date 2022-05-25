@@ -109,6 +109,10 @@ class ReformatOutput:
         report_pat = (r'(?i)(unittest|pytest|robotframework) (report - \w+) '
                       r'([0-9.]+) (- Python) ([0-9.]+) on (\w+)')
 
+        report_testcase_pat = (r'(?i)  - Test case: .+ [(]Total: '
+                               r'[0-9]+ / Passed: [0-9]+ / Failed: '
+                               r'[0-9]+ / Skipped: [0-9]+[)] *$')
+
         device_name_pat = r'(?i)(?P<name>\S+) +is +(successfully +)?((dis)?connected)[.]'
         for index, line in enumerate(lines):
             if re.match(excluded_txt_pat, line):
@@ -131,6 +135,9 @@ class ReformatOutput:
                 lst.append('| %s |' % changed_txt.ljust(76))
                 next_changed_txt = '-' * len(changed_txt)
                 lines[index + 1] = '| %s |' % next_changed_txt.ljust(76)
+            elif self.everything and re.match(report_testcase_pat, line):
+                changed_txt = line.replace('\\', '/')
+                lst.append(changed_txt)
             else:
                 lst.append(line)
                 match = re.match(device_name_pat, line)
