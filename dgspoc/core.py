@@ -196,7 +196,7 @@ class Dgs:
         """
 
         query_obj = create_from_csv_data(text)
-        result = query_obj.find(select_statement=select_statement)
+        result = query_obj.find(select=select_statement)
         return result
 
     @classmethod
@@ -214,7 +214,7 @@ class Dgs:
         list: the list of records
         """
         query_obj = create_from_json_data(text)
-        result = query_obj.find(select_statement=select_statement)
+        result = query_obj.find(select=select_statement)
         return result
 
     @classmethod
