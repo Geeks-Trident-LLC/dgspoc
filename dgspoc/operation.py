@@ -436,7 +436,7 @@ def do_testing(options):
 
         if node.is_csv or node.is_json:
             try:
-                lines = output.test_data.splitlines()
+                lines = output.splitlines()
                 index = 0
                 pat = (r'(?i)\w{3} +\d\d? +\d{4} '
                        r'\d\d:\d\d:\d\d[.]\d\d\d for "\S+" - '
