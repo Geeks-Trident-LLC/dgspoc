@@ -336,7 +336,7 @@ class ExecuteOperation:
 
         data = self._remaining_data.strip()
 
-        pattern = r'(?i) +(?P<sel_stmt>select +([*]|_+all_+|[a-z].+) where +.+)'
+        pattern = r'(?i) +(?P<sel_stmt>select +([*]|_+all_+|[a-z].+)( where +.+)?)'
         match = re.search(pattern, data)
         if not match:
             return
