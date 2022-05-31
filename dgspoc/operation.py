@@ -368,14 +368,16 @@ def do_testing(options):
                 try:
                     lines = result.test_data.splitlines()
                     index = 0
+                    is_matched = False
                     pat = (r'(?i)\w{3} +\d\d? +\d{4} '
                            r'\d\d:\d\d:\d\d[.]\d\d\d for "\S+" - '
                            r'UNREAL-DEVICE-\w+-SERVICE-TIMESTAMP')
                     for i, line in enumerate(lines):
                         if re.match(pat, line):
+                            is_matched = True
                             index = i
                             break
-                    test_data = '\n'.join(lines[index+1:])
+                    test_data = '\n'.join(lines[index+1:]) if is_matched else result.test_data
                     method = create_from_json_data if node.is_json else create_from_csv_data
                     records = method(test_data).data
                     result.records = records
@@ -438,14 +440,16 @@ def do_testing(options):
             try:
                 lines = output.splitlines()
                 index = 0
+                is_matched = False
                 pat = (r'(?i)\w{3} +\d\d? +\d{4} '
                        r'\d\d:\d\d:\d\d[.]\d\d\d for "\S+" - '
                        r'UNREAL-DEVICE-\w+-SERVICE-TIMESTAMP')
                 for i, line in enumerate(lines):
                     if re.match(pat, line):
+                        is_matched = True
                         index = i
                         break
-                test_data = '\n'.join(lines[index + 1:])
+                test_data = '\n'.join(lines[index + 1:]) if is_matched else output
                 method = create_from_json_data if node.is_json else create_from_csv_data
                 records = method(test_data).data
                 result = DotObject(

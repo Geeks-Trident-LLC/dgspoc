@@ -1,6 +1,8 @@
 """Module containing logic for describe-get-system proof of concept."""
 
 import time
+import re
+
 from io import StringIO
 
 from textfsm import TextFSM
@@ -181,6 +183,23 @@ class Dgs:
             raise ConvertorTypeError(fmt % convertor)
 
     @classmethod
+    def clean_unreal_device_timestamp(cls, text):
+        lines = text.splitlines()
+        index = 0
+        is_matched = False
+        pat = (r'(?i)\w{3} +\d\d? +\d{4} '
+               r'\d\d:\d\d:\d\d[.]\d\d\d for "\S+" - '
+               r'UNREAL-DEVICE-\w+-SERVICE-TIMESTAMP')
+        for i, line in enumerate(lines):
+            if re.match(pat, line):
+                is_matched = True
+                index = i
+                break
+
+        new_text = '\n'.join(lines[index + 1:]) if is_matched else text
+        return new_text
+
+    @classmethod
     def do_filter_csv(cls, text, select_statement=''):
         """generic method to convert csv text to list of dict and filter
         per select_statement
@@ -194,8 +213,8 @@ class Dgs:
         -------
         list: the list of records
         """
-
-        query_obj = create_from_csv_data(text)
+        new_text = cls.clean_unreal_device_timestamp(text)
+        query_obj = create_from_csv_data(new_text)
         result = query_obj.find(select=select_statement)
         return result
 
@@ -213,7 +232,8 @@ class Dgs:
         -------
         list: the list of records
         """
-        query_obj = create_from_json_data(text)
+        new_text = cls.clean_unreal_device_timestamp(text)
+        query_obj = create_from_json_data(new_text)
         result = query_obj.find(select=select_statement)
         return result
 
@@ -265,7 +285,8 @@ class Dgs:
                 stream = StringIO(template)
                 template_parser = TextFSM(stream)
 
-        rows = template_parser.ParseTextToDicts(text)
+        new_text = cls.clean_unreal_device_timestamp(text)
+        rows = template_parser.ParseTextToDicts(new_text)
 
         if not select_statement:
             return rows
