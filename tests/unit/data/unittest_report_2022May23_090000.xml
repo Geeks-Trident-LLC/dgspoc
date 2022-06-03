@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite name="test_unittest_sample1.TestSample1-20220523152549" tests="2" file="test_unittest_sample1.py" time="0.004" timestamp="2022-05-23T15:25:50" failures="1" errors="0" skipped="0">
+		<testcase classname="test_unittest_sample1.TestSample1" name="test_002_case_a" time="0.000" timestamp="2022-05-23T15:25:50" file="dgs_test_script_files/unittest/test_unittest_sample1.py" line="49">
+			<!--case a-->
+		</testcase>
+		<testcase classname="test_unittest_sample1.TestSample1" name="test_001_precondition" time="0.004" timestamp="2022-05-23T15:25:50" file="dgs_test_script_files/unittest/test_unittest_sample1.py" line="45">
+			<!--precondition-->
+			<failure type="AssertionError" message="False is not true"><![CDATA[Traceback (most recent call last):
+  File "/Users/test/workspace/geekstrident/dgspoc/dgs_test_script_files/unittest/test_unittest_sample1.py", line 47, in test_001_precondition
+    self.assertTrue(False)
+AssertionError: False is not true
+]]></failure>
+		</testcase>
+	</testsuite>
+	<testsuite name="test_unittest_sample2.TestSample2-20220523152549" tests="2" file="test_unittest_sample2.py" time="0.000" timestamp="2022-05-23T15:25:50" failures="0" errors="0" skipped="0">
+		<testcase classname="test_unittest_sample2.TestSample2" name="test_001_precondition" time="0.000" timestamp="2022-05-23T15:25:50" file="dgs_test_script_files/unittest/test_unittest_sample2.py" line="45">
+			<!--precondition-->
+		</testcase>
+		<testcase classname="test_unittest_sample2.TestSample2" name="test_002_case_a" time="0.000" timestamp="2022-05-23T15:25:50" file="dgs_test_script_files/unittest/test_unittest_sample2.py" line="49">
+			<!--case a-->
+		</testcase>
+	</testsuite>
+	<testsuite name="test_unittest_sample3.TestSample3-20220523152549" tests="2" file="test_unittest_sample3.py" time="0.001" timestamp="2022-05-23T15:25:50" failures="0" errors="1" skipped="0">
+		<testcase classname="test_unittest_sample3.TestSample3" name="test_001_precondition" time="0.000" timestamp="2022-05-23T15:25:50" file="dgs_test_script_files/unittest/test_unittest_sample3.py" line="45">
+			<!--precondition-->
+		</testcase>
+		<testcase classname="test_unittest_sample3.TestSample3" name="test_002_case_a" time="0.000" timestamp="2022-05-23T15:25:50" file="dgs_test_script_files/unittest/test_unittest_sample3.py" line="49">
+			<!--case a-->
+			<error type="NameError" message="name 'a' is not defined"><![CDATA[Traceback (most recent call last):
+  File "/Users/test/workspace/geekstrident/dgspoc/dgs_test_script_files/unittest/test_unittest_sample3.py", line 51, in test_002_case_a
+    c = a / 2
+NameError: name 'a' is not defined
+]]></error>
+		</testcase>
+	</testsuite>
+</testsuites>

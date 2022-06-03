@@ -1,0 +1,9 @@
+setup
+  connect device 1.1.1.1
+
+section: precondition
+   1.1.1.1 EXECUTE show modules using_template show_modules_tmpl SELECT * WHERE version >= version(1.0.0) MUST BE >= 2
+
+teardown
+  disconnect 1.1.1.1
+  release device 1.1.1.1

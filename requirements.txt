@@ -1,0 +1,10 @@
+pyyaml
+textfsm
+python-dateutil
+compare_versions
+pytest
+robotframework
+dlapp
+regexapp
+templateapp
+unittest-xml-reporting
